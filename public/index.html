@@ -10,26 +10,45 @@
         h1 { color: #0052cc; margin-bottom: 10px; }
         p { color: #666; margin-bottom: 25px; }
         input, select { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
-        button { width: 100%; padding: 12px; background-color: #0052cc; color: white; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; transition: 0.3s; }
-        button:hover { background-color: #003d99; }
+        button { width: 100%; padding: 12px; background-color: #25D366; color: white; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        button:hover { background-color: #128C7E; }
     </style>
 </head>
 <body>
     <div class="card">
         <h1>MatchMe Work 💼</h1>
         <p>השאירו פרטים ונמצא לכם את העבודה הבאה!</p>
-        <form>
-            <input type="text" placeholder="שם מלא" required>
-            <input type="tel" placeholder="מספר טלפון" required>
-            <select required>
+        <form id="workForm">
+            <input type="text" id="name" placeholder="שם מלא" required>
+            <input type="tel" id="phone" placeholder="מספר טלפון" required>
+            <select id="job" required>
                 <option value="" disabled selected>מה התחום שלך?</option>
-                <option value="delivery">שליחויות</option>
-                <option value="security">אבטחה</option>
-                <option value="general">עבודות כלליות</option>
-                <option value="other">אחר</option>
+                <option value="שליחויות">שליחויות</option>
+                <option value="אבטחה">אבטחה</option>
+                <option value="עבודות כלליות">עבודות כלליות</option>
+                <option value="אחר">אחר</option>
             </select>
-            <button type="button" onclick="alert('הפרטים נשמרו! נחזור אליך בקרוב.')">שלח פרטים</button>
+            <button type="button" onclick="sendToWhatsApp()">שלח פרטים בוואטסאפ</button>
         </form>
     </div>
+
+    <script>
+        function sendToWhatsApp() {
+            // החלף את המספר למטה במספר הטלפון שלך (בלי ה-0 בהתחלה, עם 972)
+            const myNumber = "972500000000"; 
+            
+            const name = document.getElementById('name').value;
+            const phone = document.getElementById('phone').value;
+            const job = document.getElementById('job').value;
+
+            if(!name || !phone || !job) {
+                alert("אנא מלא את כל השדות");
+                return;
+            }
+
+            const text = `היי, אני מעוניין בעבודה!%0Aשם: ${name}%0Aטלפון: ${phone}%0Aתחום: ${job}`;
+            window.open(`https://wa.me/${myNumber}?text=${text}`, '_blank');
+        }
+    </script>
 </body>
 </html>
