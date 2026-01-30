@@ -3,113 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MatchMe | הגרסה המלאה והמתוקנת</title>
+    <title>MatchMe Pro | הכל כלול</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Assistant', sans-serif; background-color: #0b0f1a; color: #f8fafc; }
+        body { font-family: 'Assistant', sans-serif; background: #0f172a; color: #f1f5f9; margin: 0; }
         .section { display: none; opacity: 0; }
-        .section.active { display: block; opacity: 1; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .card { background: #161e2d; border: 1px solid #2d3748; border-radius: 20px; transition: 0.3s; }
-        .btn-blue { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; border-radius: 12px; font-weight: 800; }
-        input, textarea { background: #161e2d !important; border: 1px solid #2d3748 !important; color: white !important; border-radius: 10px !important; width: 100%; padding: 12px; }
-        .loader-overlay { background: rgba(11, 15, 26, 0.98); z-index: 9999; }
-        .spinner { width: 40px; height: 40px; border: 4px solid #1e293b; border-top-color: #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; }
+        .section.active { display: block; opacity: 1; animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .card { background: #1e293b; border: 1px solid #334155; border-radius: 20px; transition: 0.2s; }
+        .btn-blue { background: linear-gradient(135deg, #3b82f6, #1d4ed8); border-radius: 12px; font-weight: 800; color: white; }
+        input, textarea { background: #1e293b !important; border: 1px solid #475569 !important; color: white !important; border-radius: 12px !important; padding: 12px; width: 100%; }
+        .loader { background: rgba(15, 23, 42, 0.95); z-index: 9999; }
+        .spinner { width: 45px; height: 45px; border: 5px solid #334155; border-top-color: #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
+        .tab-btn { padding: 10px; border-bottom: 3px solid transparent; font-weight: bold; color: #94a3b8; }
+        .tab-btn.active { color: #3b82f6; border-bottom-color: #3b82f6; }
     </style>
 </head>
-<body class="pb-20">
+<body class="pb-24">
 
-    <nav class="sticky top-0 bg-[#0b0f1a]/90 backdrop-blur-lg p-4 flex justify-between items-center border-b border-gray-800 z-50">
+    <nav class="sticky top-0 bg-[#0f172a]/90 backdrop-blur-lg p-4 flex justify-between items-center border-b border-slate-800 z-50">
         <div onclick="Nav.to('feed')" class="flex items-center gap-2 cursor-pointer">
-            <div class="w-9 h-9 btn-blue flex items-center justify-center italic shadow-lg font-black">M</div>
-            <span class="text-xl font-black italic tracking-tighter">MatchMe</span>
+            <div class="w-10 h-10 btn-blue flex items-center justify-center italic text-xl shadow-lg">M</div>
+            <span class="text-2xl font-black italic">MatchMe</span>
         </div>
-        <div id="navActions" class="flex items-center gap-3"></div>
+        <div id="navUser" class="flex items-center gap-3"></div>
     </nav>
 
     <main class="max-w-md mx-auto p-4">
 
         <div id="sec-feed" class="section active">
-            <h2 class="text-3xl font-black mb-6 italic">משרות בשבילך</h2>
+            <h2 class="text-3xl font-black mb-4">מצא עבודה ⚡</h2>
+            <div class="space-y-3 mb-6">
+                <input type="text" id="searchName" onkeyup="UI.filter()" placeholder="חפש תפקיד או חברה...">
+                <input type="text" id="searchCity" onkeyup="UI.filter()" placeholder="סינון לפי עיר..." class="text-sm">
+            </div>
             <div id="feedList" class="space-y-4"></div>
         </div>
 
-        <div id="sec-view-job" class="section">
-            <button onclick="Nav.to('feed')" class="text-blue-500 mb-4 font-bold">➔ חזרה ללוח</button>
-            <div id="jobDetailsCard" class="card p-6"></div>
-        </div>
-
         <div id="sec-profile" class="section">
-            <h2 class="text-2xl font-black mb-6 italic">אזור אישי</h2>
-            
-            <div class="space-y-8">
-                <div>
-                    <h3 class="text-blue-400 font-black text-sm mb-3 uppercase tracking-widest">ניהול מעסיק (משרות שפרסמתי)</h3>
-                    <div id="employerJobs" class="space-y-3"></div>
-                </div>
-                
-                <div>
-                    <h3 class="text-blue-400 font-black text-sm mb-3 uppercase tracking-widest">לידים (מועמדים שהגישו אצלי)</h3>
-                    <div id="employerLeads" class="space-y-3"></div>
-                </div>
-
-                <hr class="border-gray-800">
-
-                <div>
-                    <h3 class="text-gray-500 font-black text-sm mb-3 uppercase tracking-widest">היסטוריית הגשות שלי (כעובד)</h3>
-                    <div id="workerHistory" class="space-y-3"></div>
-                </div>
-                
-                <button onclick="auth.signOut()" class="w-full p-4 border border-red-500/30 text-red-500 rounded-xl font-bold">התנתק מהחשבון</button>
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-black">האזור שלי</h2>
+                <button onclick="auth.signOut()" class="text-red-400 text-xs font-bold">התנתק</button>
             </div>
+            
+            <div class="flex border-b border-slate-800 mb-6">
+                <button id="tab-emp" onclick="UI.setTab('emp')" class="tab-btn flex-1 active">אני מעסיק</button>
+                <button id="tab-work" onclick="UI.setTab('work')" class="tab-btn flex-1">הגשות שלי</button>
+            </div>
+
+            <div id="profileContent">
+                </div>
         </div>
 
         <div id="sec-post" class="section card p-6">
-            <h2 class="text-xl font-black mb-4">פרסם משרה</h2>
-            <div class="space-y-3">
+            <h2 class="text-2xl font-black mb-6">פרסם משרה</h2>
+            <div class="space-y-4">
                 <input type="text" id="p-title" placeholder="שם המשרה">
                 <input type="text" id="p-company" placeholder="שם העסק">
-                <div class="grid grid-cols-2 gap-2">
+                <div class="grid grid-cols-2 gap-3">
                     <input type="text" id="p-city" placeholder="עיר">
-                    <input type="text" id="p-salary" placeholder="שכר שעתי">
+                    <input type="text" id="p-salary" placeholder="שכר (למשל: 60₪)">
                 </div>
-                <input type="tel" id="p-phone" placeholder="וואטסאפ (05...)">
-                <textarea id="p-desc" placeholder="תיאור המשרה..." class="h-24"></textarea>
-                <div id="qWrap" class="space-y-2 p-3 bg-gray-900/50 rounded-xl">
-                    <p class="text-[10px] font-bold text-blue-400 mb-2 uppercase">שאלות סינון (כן/לא):</p>
-                    <input type="text" class="q-in" placeholder="שאלה 1">
+                <input type="tel" id="p-phone" placeholder="מספר וואטסאפ לקבלת פניות">
+                <textarea id="p-desc" placeholder="תיאור המשרה (מה עושים, דרישות...)" class="h-32"></textarea>
+                
+                <div class="bg-slate-900/50 p-4 rounded-xl border border-dashed border-slate-700">
+                    <p class="text-xs font-bold text-blue-400 mb-3 uppercase tracking-tighter">שאלות סינון (כן/לא):</p>
+                    <div id="qWrap" class="space-y-2">
+                        <input type="text" class="q-in" placeholder="למשל: יש לך ניסיון קודם?">
+                    </div>
+                    <button onclick="UI.addQ()" class="text-blue-500 text-xs mt-2 font-bold">+ הוסף שאלה</button>
                 </div>
-                <button onclick="UI.addQ()" class="text-blue-500 text-xs">+ הוסף שאלה</button>
-                <button onclick="Data.saveJob()" class="btn-blue w-full py-4 text-lg mt-4">פרסם עכשיו</button>
+                
+                <button onclick="Data.saveJob()" class="btn-blue w-full py-5 text-xl">פרסם בלוח</button>
+            </div>
+        </div>
+
+        <div id="jobModal" class="fixed inset-0 loader hidden flex items-end sm:items-center justify-center z-[100] p-4">
+            <div class="card w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto">
+                <div id="modalBody"></div>
+                <div class="flex gap-3 mt-6">
+                    <button onclick="App.preApply()" class="btn-blue flex-1 py-4">הגש מועמדות</button>
+                    <button onclick="UI.closeModal()" class="flex-1 bg-slate-700 rounded-xl">סגור</button>
+                </div>
             </div>
         </div>
 
         <div id="sec-interview" class="section text-center py-10">
-            <div class="w-full bg-gray-800 h-1.5 rounded-full mb-10 overflow-hidden">
+            <div class="w-full bg-slate-800 h-2 rounded-full mb-12">
                 <div id="pBar" class="bg-blue-600 h-full w-0 transition-all duration-500"></div>
             </div>
-            <h3 id="qDisplay" class="text-3xl font-black mb-12"></h3>
-            <div class="grid grid-cols-2 gap-4">
-                <button onclick="App.ans(true)" class="btn-blue p-10 text-3xl">כן</button>
-                <button onclick="App.ans(false)" class="bg-gray-800 p-10 text-3xl rounded-2xl">לא</button>
+            <h3 id="qDisplay" class="text-4xl font-black mb-16 leading-tight"></h3>
+            <div class="grid grid-cols-2 gap-6">
+                <button onclick="App.ans(true)" class="btn-blue p-12 text-4xl">כן</button>
+                <button onclick="App.ans(false)" class="bg-slate-800 p-12 text-4xl rounded-2xl">לא</button>
             </div>
         </div>
 
     </main>
 
-    <div id="nameModal" class="fixed inset-0 loader-overlay hidden flex items-center justify-center p-4">
-        <div class="card w-full max-w-sm p-8 text-center">
-            <h3 class="text-2xl font-black mb-4">איך קוראים לך?</h3>
-            <input type="text" id="applicantName" placeholder="שם מלא" class="text-center text-xl font-bold mb-6">
-            <button onclick="App.startQuestions()" class="btn-blue w-full py-4 text-lg">בוא נתחיל</button>
-        </div>
-    </div>
-
-    <div id="loader" class="fixed inset-0 loader-overlay hidden flex flex-col items-center justify-center">
+    <div id="globalLoader" class="fixed inset-0 loader hidden flex flex-col items-center justify-center">
         <div class="spinner mb-4"></div>
-        <p class="text-blue-400 font-bold animate-pulse">MatchMe מעבד נתונים...</p>
+        <p class="text-blue-400 font-bold animate-pulse">רק רגע...</p>
     </div>
 
 <script type="module">
@@ -122,7 +119,7 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    const State = { user: null, guestId: localStorage.getItem('mm_id') || 'g_'+Math.random().toString(36).substr(2,9), jobs: [], cur: {} };
+    const State = { user: null, guestId: localStorage.getItem('mm_id') || 'g_'+Math.random().toString(36).substr(2,9), jobs: [], curJob: null, curTab: 'emp' };
     if(!localStorage.getItem('mm_id')) localStorage.setItem('mm_id', State.guestId);
 
     const Nav = {
@@ -130,7 +127,7 @@
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.getElementById(`sec-${id}`).classList.add('active');
             if(id === 'feed') Data.getJobs();
-            if(id === 'profile') Data.getPersonalArea();
+            if(id === 'profile') UI.renderProfile();
         }
     };
 
@@ -138,7 +135,7 @@
         async saveJob() {
             UI.load(true);
             try {
-                const ownerId = State.user ? State.user.uid : State.guestId;
+                const owner = State.user ? State.user.uid : State.guestId;
                 await addDoc(collection(db, "jobs"), {
                     title: document.getElementById('p-title').value,
                     company: document.getElementById('p-company').value,
@@ -147,7 +144,7 @@
                     phone: document.getElementById('p-phone').value.replace(/\D/g,''),
                     desc: document.getElementById('p-desc').value,
                     questions: Array.from(document.getElementsByClassName('q-in')).map(i=>i.value).filter(v=>v),
-                    owner: ownerId,
+                    owner: owner,
                     createdAt: serverTimestamp()
                 });
                 Nav.to('feed');
@@ -156,54 +153,83 @@
         async getJobs() {
             const s = await getDocs(query(collection(db, "jobs"), orderBy("createdAt", "desc")));
             State.jobs = s.docs.map(d => ({id: d.id, ...d.data()}));
-            UI.renderFeed();
-        },
-        async getPersonalArea() {
-            const id = State.user ? State.user.uid : State.guestId;
-            // משיכת משרות שלי
-            const sJ = await getDocs(query(collection(db, "jobs"), where("owner", "==", id)));
-            UI.renderEmployerJobs(sJ.docs.map(d => ({id: d.id, ...d.data()})));
-            // משיכת לידים שקיבלתי
-            const sL = await getDocs(query(collection(db, "leads"), where("boss", "==", id)));
-            UI.renderEmployerLeads(sL.docs.map(d => d.data()));
-            // משיכת הגשות שלי
-            const sH = await getDocs(query(collection(db, "leads"), where("worker", "==", id)));
-            UI.renderWorkerHistory(sH.docs.map(d => d.data()));
+            UI.renderFeed(State.jobs);
         }
     };
 
     const UI = {
-        load(s) { document.getElementById('loader').classList.toggle('hidden', !s); },
-        renderFeed() {
-            document.getElementById('feedList').innerHTML = State.jobs.map(j => `
-                <div onclick="UI.showJobDetails('${j.id}')" class="card p-5 cursor-pointer">
-                    <div class="flex justify-between items-start">
-                        <h4 class="text-xl font-black text-blue-400">${j.title}</h4>
-                        <span class="text-xs bg-blue-500/10 text-blue-400 px-2 py-1 rounded-lg">${j.salary || 'גמיש'}</span>
+        load(s) { document.getElementById('globalLoader').classList.toggle('hidden', !s); },
+        filter() {
+            const n = document.getElementById('searchName').value.toLowerCase();
+            const c = document.getElementById('searchCity').value.toLowerCase();
+            const filtered = State.jobs.filter(j => 
+                (j.title.toLowerCase().includes(n) || j.company.toLowerCase().includes(n)) &&
+                (j.city.toLowerCase().includes(c))
+            );
+            UI.renderFeed(filtered);
+        },
+        renderFeed(list) {
+            document.getElementById('feedList').innerHTML = list.map(j => `
+                <div onclick="UI.openJob('${j.id}')" class="card p-5 cursor-pointer hover:border-blue-500">
+                    <div class="flex justify-between items-start mb-2">
+                        <h4 class="text-xl font-bold text-blue-400">${j.title}</h4>
+                        <span class="text-xs font-black bg-blue-500/10 px-2 py-1 rounded-md">${j.salary}</span>
                     </div>
-                    <p class="text-xs text-gray-500 mt-1">📍 ${j.city} | ${j.company}</p>
+                    <p class="text-sm opacity-60 italic">${j.company} | 📍 ${j.city}</p>
                 </div>
             `).join('');
         },
-        showJobDetails(id) {
-            const j = State.jobs.find(x => x.id === id);
-            State.curJobId = id;
-            document.getElementById('jobDetailsCard').innerHTML = `
-                <h2 class="text-2xl font-black text-blue-400 mb-2">${j.title}</h2>
-                <p class="text-sm font-bold text-gray-400 mb-4">${j.company} | ${j.city}</p>
-                <div class="bg-gray-900/50 p-4 rounded-xl mb-6 text-sm leading-relaxed">${j.desc || 'אין תיאור נוסף'}</div>
-                <button onclick="document.getElementById('nameModal').classList.remove('hidden')" class="btn-blue w-full py-4 text-lg">הגש מועמדות עכשיו 🚀</button>
+        openJob(id) {
+            State.curJob = State.jobs.find(x => x.id === id);
+            document.getElementById('modalBody').innerHTML = `
+                <h3 class="text-2xl font-black text-blue-400 mb-2">${State.curJob.title}</h3>
+                <p class="text-sm font-bold opacity-60 mb-4">${State.curJob.company} | ${State.curJob.city}</p>
+                <div class="bg-slate-900/50 p-4 rounded-xl text-sm leading-relaxed">${State.curJob.desc || 'אין תיאור מפורט'}</div>
             `;
-            Nav.to('view-job');
+            document.getElementById('jobModal').classList.remove('hidden');
         },
-        renderEmployerJobs(jobs) {
-            document.getElementById('employerJobs').innerHTML = jobs.map(j => `<div class="card p-3 flex justify-between text-sm"><span>${j.title}</span><button onclick="App.delJob('${j.id}')" class="text-red-500">מחק</button></div>`).join('') || '<p class="text-xs opacity-50">אין משרות פעילות</p>';
+        closeModal() { document.getElementById('jobModal').classList.add('hidden'); },
+        setTab(t) {
+            State.curTab = t;
+            document.getElementById('tab-emp').classList.toggle('active', t==='emp');
+            document.getElementById('tab-work').classList.toggle('active', t==='work');
+            UI.renderProfile();
         },
-        renderEmployerLeads(leads) {
-            document.getElementById('employerLeads').innerHTML = leads.map(l => `<div class="card p-3 border-r-4 border-blue-500 text-sm"><div class="flex justify-between"><b>${l.name}</b><span>${l.score}% התאמה</span></div><p class="text-[10px] opacity-50">${l.jobTitle}</p></div>`).join('') || '<p class="text-xs opacity-50">טרם התקבלו לידים</p>';
-        },
-        renderWorkerHistory(leads) {
-            document.getElementById('workerHistory').innerHTML = leads.map(l => `<div class="card p-3 flex justify-between text-sm"><span>${l.jobTitle}</span><span class="font-black text-blue-500">${l.score}%</span></div>`).join('') || '<p class="text-xs opacity-50">טרם הגשת מועמדות</p>';
+        async renderProfile() {
+            const id = State.user ? State.user.uid : State.guestId;
+            const wrap = document.getElementById('profileContent');
+            wrap.innerHTML = '<div class="spinner mx-auto my-10"></div>';
+
+            if(State.curTab === 'emp') {
+                const sJ = await getDocs(query(collection(db, "jobs"), where("owner", "==", id)));
+                const sL = await getDocs(query(collection(db, "leads"), where("boss", "==", id)));
+                const leads = sL.docs.map(d => d.data());
+                
+                wrap.innerHTML = `
+                    <div class="space-y-6">
+                        <div class="bg-blue-500/5 p-4 rounded-xl border border-blue-500/20">
+                            <h4 class="text-xs font-black uppercase text-blue-400 mb-3">משרות שפרסמת</h4>
+                            ${sJ.docs.map(d => `<div class="flex justify-between text-sm py-2 border-b border-slate-800"><span>${d.data().title}</span><button onclick="App.del('${d.id}')" class="text-red-500">מחק</button></div>`).join('') || 'אין משרות'}
+                        </div>
+                        <h4 class="text-xs font-black uppercase text-slate-500">מועמדים שהגישו</h4>
+                        ${leads.map(l => `
+                            <div class="card p-4 border-r-4 border-blue-500">
+                                <div class="flex justify-between items-center">
+                                    <div><b class="text-lg">${l.name}</b> <span class="text-blue-500 mr-2">${l.score}%</span></div>
+                                    <a href="https://wa.me/${l.phone}" class="bg-green-600 p-2 rounded-lg text-xs font-bold">וואטסאפ ✉️</a>
+                                </div>
+                                <p class="text-[10px] opacity-40 mt-1 uppercase italic">${l.jobTitle}</p>
+                            </div>
+                        `).join('') || 'טרם הוגשו מועמדויות'}
+                    </div>`;
+            } else {
+                const sH = await getDocs(query(collection(db, "leads"), where("worker", "==", id)));
+                wrap.innerHTML = sH.docs.map(d => `
+                    <div class="card p-4 flex justify-between">
+                        <span>${d.data().jobTitle}</span>
+                        <span class="font-black text-blue-500">${d.data().score}% התאמה</span>
+                    </div>`).join('') || 'טרם הגשת מועמדויות';
+            }
         },
         addQ() {
             const i = document.createElement('input'); i.className = "q-in mt-2"; i.placeholder = "שאלה נוספת...";
@@ -212,49 +238,50 @@
     };
 
     const App = {
-        startQuestions() {
-            const name = document.getElementById('applicantName').value;
-            if(!name) return alert("הכנס שם מלא");
-            document.getElementById('nameModal').classList.add('hidden');
-            const j = State.jobs.find(x => x.id === State.curJobId);
-            State.cur = { j, qIdx: 0, score: 0, n: name };
-            if(j.questions?.length) { Nav.to('interview'); this.showQ(); }
-            else this.finish(100);
+        preApply() {
+            const name = prompt("הכנס שם מלא:");
+            const phone = prompt("הכנס טלפון ליצירת קשר:");
+            if(!name || !phone) return;
+            UI.closeModal();
+            State.curApply = { name, phone, qIdx: 0, score: 0 };
+            if(State.curJob.questions?.length) { Nav.to('interview'); App.showQ(); }
+            else App.finish(100);
         },
         showQ() {
-            document.getElementById('qDisplay').innerText = State.cur.j.questions[State.cur.qIdx];
-            document.getElementById('pBar').style.width = ((State.cur.qIdx / State.cur.j.questions.length) * 100) + '%';
+            document.getElementById('qDisplay').innerText = State.curJob.questions[State.curApply.qIdx];
+            document.getElementById('pBar').style.width = ((State.curApply.qIdx / State.curJob.questions.length) * 100) + '%';
         },
         ans(v) {
-            if(v) State.cur.score += (100 / State.cur.j.questions.length);
-            State.cur.qIdx++;
-            if(State.cur.qIdx < State.cur.j.questions.length) this.showQ();
-            else this.finish(Math.round(State.cur.score));
+            if(v) State.curApply.score += (100 / State.curJob.questions.length);
+            State.curApply.qIdx++;
+            if(State.curApply.qIdx < State.curJob.questions.length) App.showQ();
+            else App.finish(Math.round(State.curApply.score));
         },
         async finish(score) {
             UI.load(true);
             try {
-                const { j, n } = State.cur;
                 await addDoc(collection(db, "leads"), {
-                    jobId: j.id, boss: j.owner || "unknown", jobTitle: j.title, 
-                    name: n, worker: State.user ? State.user.uid : State.guestId,
+                    boss: State.curJob.owner, worker: State.user ? State.user.uid : State.guestId,
+                    jobTitle: State.curJob.title, name: State.curApply.name, phone: State.curApply.phone,
                     score, createdAt: serverTimestamp()
                 });
-                window.open(`https://wa.me/972${j.phone.substring(1)}?text=היי, אני ${n}, קיבלתי ${score}% התאמה למשרת ${j.title} דרך MatchMe!`);
+                window.open(`https://wa.me/972${State.curJob.phone.substring(1)}?text=היי, אני ${State.curApply.name}, קיבלתי ${score}% התאמה למשרת ${State.curJob.title}!`);
                 Nav.to('feed');
-            } catch(e) { alert("שגיאה בסיום"); } finally { UI.load(false); }
+            } catch(e) { alert("שגיאה בשמירה"); } finally { UI.load(false); }
         },
-        async delJob(id) { if(confirm("למחוק?")) { await deleteDoc(doc(db, "jobs", id)); Nav.to('profile'); } }
+        async del(id) { if(confirm("למחוק?")) { await deleteDoc(doc(db, "jobs", id)); UI.renderProfile(); } }
     };
 
     onAuthStateChanged(auth, u => {
         State.user = u;
-        const nav = document.getElementById('navActions');
+        const nav = document.getElementById('navUser');
         if(u) {
-            nav.innerHTML = `<button onclick="Nav.to('post')" class="text-blue-500 font-bold text-xs">פרסם</button>
-                             <div onclick="Nav.to('profile')" class="w-8 h-8 rounded-full border border-blue-500 cursor-pointer overflow-hidden"><img src="${u.photoURL}" class="w-full h-full"></div>`;
+            nav.innerHTML = `
+                <button onclick="Nav.to('post')" class="text-blue-500 font-bold text-xs">פרסם</button>
+                <img onclick="Nav.to('profile')" src="${u.photoURL}" class="w-9 h-9 rounded-full border-2 border-blue-500 cursor-pointer">
+            `;
         } else {
-            nav.innerHTML = `<button onclick="signInWithPopup(auth, new GoogleAuthProvider())" class="btn-blue px-3 py-1.5 text-xs">התחבר</button>`;
+            nav.innerHTML = `<button onclick="signInWithPopup(auth, new GoogleAuthProvider())" class="btn-blue px-4 py-1.5 text-xs">כניסה</button>`;
         }
         Data.getJobs();
     });
