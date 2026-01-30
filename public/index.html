@@ -3,28 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MatchMe Work | חיבור בין עובדים למעסיקים</title>
+    <title>MatchMe Work | לוח דרושים חכם</title>
     <style>
         body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
         .container { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 500px; text-align: center; }
-        h1 { color: #0052cc; }
-        .main-buttons { display: flex; gap: 10px; margin-bottom: 20px; }
+        h1 { color: #0052cc; margin-bottom: 5px; }
+        .main-buttons { display: flex; gap: 10px; margin: 20px 0; }
         .btn { flex: 1; padding: 15px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.3s; }
         .btn-worker { background: #0052cc; color: white; }
         .btn-employer { background: #34495e; color: white; }
-        
         .section { display: none; margin-top: 20px; text-align: right; }
-        input, select, textarea { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
-        
-        .job-card { background: #f9f9f9; border-right: 5px solid #0052cc; padding: 15px; margin-top: 10px; border-radius: 8px; }
-        .apply-btn { background: #25D366; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; width: 100%; margin-top: 10px; }
+        input, textarea { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
+        .job-card { background: #fff; border-right: 5px solid #25D366; padding: 15px; margin-top: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .job-card strong { font-size: 18px; color: #333; }
+        .apply-btn { background: #25D366; color: white; border: none; padding: 10px; border-radius: 5px; width: 100%; margin-top: 10px; cursor: pointer; font-weight: bold; }
+        .no-jobs { text-align: center; color: #999; margin-top: 20px; }
     </style>
 </head>
 <body>
 
     <div class="container">
         <h1>MatchMe Work 💼</h1>
-        <p>הפלטפורמה שלך לחיבור מהיר</p>
+        <p>חיבור ישיר בין מעסיקים לעובדים</p>
         
         <div class="main-buttons">
             <button class="btn btn-worker" onclick="showSection('workerSection')">אני מחפש עבודה</button>
@@ -32,51 +32,80 @@
         </div>
 
         <div id="workerSection" class="section">
-            <h3>משרות פנויות בשבילך:</h3>
-            <select id="categorySelect" onchange="filterJobs()">
-                <option value="all">כל התחומים</option>
-                <option value="security">אבטחה</option>
-                <option value="delivery">שליחויות</option>
-            </select>
-            <div class="job-card">
-                <strong>מאבטח בקניון</strong><br>
-                נתניה | 42 ש"ח לשעה
-                <button class="apply-btn" onclick="contact('מעוניין במשרת מאבטח בקניון')">שלח מועמדות</button>
-            </div>
+            <h3>משרות שפורסמו לאחרונה:</h3>
+            <div id="jobsContainer">
+                </div>
         </div>
 
         <div id="employerSection" class="section">
-            <h3>פרסום משרה חדשה</h3>
-            <p>מלאו את פרטי המשרה ואנחנו נדאג למצוא לכם עובד:</p>
-            <input type="text" id="empName" placeholder="שם העסק / המעסיק">
-            <input type="text" id="jobTitle" placeholder="מה התפקיד?">
-            <textarea id="jobDesc" placeholder="תיאור קצר של המשרה והשכר"></textarea>
-            <button class="btn btn-employer" style="width:100%" onclick="sendJobRequest()">פרסם משרה עכשיו</button>
+            <h3>פרסם משרה באתר</h3>
+            <input type="text" id="bizName" placeholder="שם העסק">
+            <input type="text" id="title" placeholder="תפקיד (למשל: שליח)">
+            <input type="text" id="location" placeholder="עיר/מיקום">
+            <textarea id="desc" placeholder="תיאור קצר ושכר..."></textarea>
+            <button class="btn btn-employer" style="width:100%" onclick="saveJob()">פרסם עכשיו באתר</button>
         </div>
     </div>
 
     <script>
-        const myNumber = "972500000000"; // <--- שנה למספר שלך!
+        const myNumber = "972500000000"; // שנה למספר שלך!
 
+        // פונקציה להצגת המדורים
         function showSection(id) {
             document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
             document.getElementById(id).style.display = 'block';
+            if(id === 'workerSection') loadJobs();
         }
 
-        function contact(msg) {
-            window.open(`https://wa.me/${myNumber}?text=${encodeURIComponent(msg)}`, '_blank');
+        // פונקציה לשמירת משרה ב"זיכרון" של האתר
+        function saveJob() {
+            const biz = document.getElementById('bizName').value;
+            const title = document.getElementById('title').value;
+            const loc = document.getElementById('location').value;
+            const desc = document.getElementById('desc').value;
+
+            if(!biz || !title) { alert("מלאו שם עסק ותפקיד"); return; }
+
+            const newJob = { biz, title, loc, desc };
+            
+            // שומרים ברשימה הקיימת
+            let jobs = JSON.parse(localStorage.getItem('myJobs')) || [];
+            jobs.push(newJob);
+            localStorage.setItem('myJobs', JSON.stringify(jobs));
+
+            alert("המשרה פורסמה בהצלחה!");
+            showSection('workerSection'); // מעביר לראות את המשרות
         }
 
-        function sendJobRequest() {
-            const name = document.getElementById('empName').value;
-            const title = document.getElementById('jobTitle').value;
-            const desc = document.getElementById('jobDesc').value;
+        // פונקציה שטוענת את המשרות ומציגה אותן לעובד
+        function loadJobs() {
+            const container = document.getElementById('jobsContainer');
+            const jobs = JSON.parse(localStorage.getItem('myJobs')) || [];
             
-            if(!name || !title) { alert("אנא מלאו פרטים בסיסיים"); return; }
-            
-            const msg = `שלום, אני מעסיק בשם ${name}.%0Aאני רוצה לפרסם משרה: ${title}.%0Aפרטים: ${desc}`;
-            window.open(`https://wa.me/${myNumber}?text=${msg}`, '_blank');
+            if(jobs.length === 0) {
+                container.innerHTML = '<p class="no-jobs">עדיין אין משרות באתר. תהיה הראשון לפרסם!</p>';
+                return;
+            }
+
+            container.innerHTML = '';
+            jobs.reverse().forEach(job => {
+                container.innerHTML += `
+                    <div class="job-card">
+                        <strong>${job.title}</strong><br>
+                        <span>📍 ${job.loc} | 🏢 ${job.biz}</span>
+                        <p>${job.desc}</p>
+                        <button class="apply-btn" onclick="apply('${job.title}')">הגש מועמדות בוואטסאפ</button>
+                    </div>
+                `;
+            });
         }
+
+        function apply(jobTitle) {
+            window.open(`https://wa.me/${myNumber}?text=היי, אני מעוניין במשרה של ${jobTitle}`, '_blank');
+        }
+
+        // טעינה ראשונית
+        loadJobs();
     </script>
 </body>
 </html>
