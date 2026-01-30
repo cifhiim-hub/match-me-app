@@ -3,70 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MatchMe Work | מציאת עבודה</title>
+    <title>MatchMe Work | חיבור בין עובדים למעסיקים</title>
     <style>
         body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .container { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 500px; }
-        h1 { color: #0052cc; text-align: center; }
-        select, input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
-        .job-card { background: #f9f9f9; border: 1px solid #eee; border-right: 5px solid #0052cc; padding: 15px; margin-top: 15px; border-radius: 8px; display: none; }
-        .job-title { font-weight: bold; color: #333; font-size: 18px; }
-        .job-details { color: #666; font-size: 14px; margin: 5px 0; }
-        .apply-btn { background: #25D366; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .container { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 500px; text-align: center; }
+        h1 { color: #0052cc; }
+        .main-buttons { display: flex; gap: 10px; margin-bottom: 20px; }
+        .btn { flex: 1; padding: 15px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.3s; }
+        .btn-worker { background: #0052cc; color: white; }
+        .btn-employer { background: #34495e; color: white; }
+        
+        .section { display: none; margin-top: 20px; text-align: right; }
+        input, select, textarea { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
+        
+        .job-card { background: #f9f9f9; border-right: 5px solid #0052cc; padding: 15px; margin-top: 10px; border-radius: 8px; }
+        .apply-btn { background: #25D366; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; width: 100%; margin-top: 10px; }
     </style>
 </head>
 <body>
 
     <div class="container">
         <h1>MatchMe Work 💼</h1>
-        <p style="text-align:center;">בחר תחום וקבל משרות מתאימות מיד:</p>
+        <p>הפלטפורמה שלך לחיבור מהיר</p>
         
-        <select id="jobCategory" onchange="filterJobs()">
-            <option value="">-- בחר תחום עבודה --</option>
-            <option value="delivery">שליחויות</option>
-            <option value="security">אבטחה</option>
-            <option value="general">עבודות כלליות</option>
-        </select>
+        <div class="main-buttons">
+            <button class="btn btn-worker" onclick="showSection('workerSection')">אני מחפש עבודה</button>
+            <button class="btn btn-employer" onclick="showSection('employerSection')">אני מעסיק</button>
+        </div>
 
-        <div id="jobsList">
-            <div class="job-card security">
-                <div class="job-title">מאבטח למוסד חינוכי</div>
-                <div class="job-details">מיקום: תל אביב | שכר: 45 ש"ח לשעה</div>
-                <button class="apply-btn" onclick="apply('מאבטח למוסד חינוכי')">הגש מועמדות</button>
+        <div id="workerSection" class="section">
+            <h3>משרות פנויות בשבילך:</h3>
+            <select id="categorySelect" onchange="filterJobs()">
+                <option value="all">כל התחומים</option>
+                <option value="security">אבטחה</option>
+                <option value="delivery">שליחויות</option>
+            </select>
+            <div class="job-card">
+                <strong>מאבטח בקניון</strong><br>
+                נתניה | 42 ש"ח לשעה
+                <button class="apply-btn" onclick="contact('מעוניין במשרת מאבטח בקניון')">שלח מועמדות</button>
             </div>
+        </div>
 
-            <div class="job-card delivery">
-                <div class="job-title">שליח על קטנוע / אופניים</div>
-                <div class="job-details">מיקום: מרכז | שכר: 60-80 ש"ח לשעה (כולל טיפים)</div>
-                <button class="apply-btn" onclick="apply('שליח')">הגש מועמדות</button>
-            </div>
-
-            <div class="job-card general">
-                <div class="job-title">עובד כללי למחסן לוגיסטי</div>
-                <div class="job-details">מיקום: חולון | שכר: 35-40 ש"ח לשעה</div>
-                <button class="apply-btn" onclick="apply('עובד מחסן')">הגש מועמדות</button>
-            </div>
+        <div id="employerSection" class="section">
+            <h3>פרסום משרה חדשה</h3>
+            <p>מלאו את פרטי המשרה ואנחנו נדאג למצוא לכם עובד:</p>
+            <input type="text" id="empName" placeholder="שם העסק / המעסיק">
+            <input type="text" id="jobTitle" placeholder="מה התפקיד?">
+            <textarea id="jobDesc" placeholder="תיאור קצר של המשרה והשכר"></textarea>
+            <button class="btn btn-employer" style="width:100%" onclick="sendJobRequest()">פרסם משרה עכשיו</button>
         </div>
     </div>
 
     <script>
-        function filterJobs() {
-            const category = document.getElementById('jobCategory').value;
-            const cards = document.querySelectorAll('.job-card');
-            
-            cards.forEach(card => {
-                if (card.classList.contains(category)) {
-                    card.style.display = 'block';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
+        const myNumber = "972500000000"; // <--- שנה למספר שלך!
+
+        function showSection(id) {
+            document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
+            document.getElementById(id).style.display = 'block';
         }
 
-        function apply(jobName) {
-            const myNumber = "972500000000"; // שנה למספר שלך!
-            const text = `היי, ראיתי באתר משרה של ${jobName} ואני מעוניין לשמוע פרטים.`;
-            window.open(`https://wa.me/${myNumber}?text=${text}`, '_blank');
+        function contact(msg) {
+            window.open(`https://wa.me/${myNumber}?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        function sendJobRequest() {
+            const name = document.getElementById('empName').value;
+            const title = document.getElementById('jobTitle').value;
+            const desc = document.getElementById('jobDesc').value;
+            
+            if(!name || !title) { alert("אנא מלאו פרטים בסיסיים"); return; }
+            
+            const msg = `שלום, אני מעסיק בשם ${name}.%0Aאני רוצה לפרסם משרה: ${title}.%0Aפרטים: ${desc}`;
+            window.open(`https://wa.me/${myNumber}?text=${msg}`, '_blank');
         }
     </script>
 </body>
