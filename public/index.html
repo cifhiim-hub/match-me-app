@@ -3,24 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MatchMe | הגרסה המלאה</title>
+    <title>MatchMe | Open & Secure</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
         :root { --p: #3b82f6; --bg: #0b1120; --card: #161e2d; }
         body { font-family: 'Assistant', sans-serif; background: var(--bg); color: #f8fafc; margin: 0; -webkit-tap-highlight-color: transparent; }
-        .page { display: none; opacity: 0; min-height: 100vh; }
-        .page.active { display: block; opacity: 1; animation: slideUp 0.4s ease; }
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .page { display: none; min-height: 100vh; }
+        .page.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .glass { background: rgba(22, 30, 45, 0.8); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); }
-        .btn-blue { background: linear-gradient(135deg, #3b82f6, #1d4ed8); border-radius: 16px; font-weight: 800; color: white; transition: 0.2s; shadow: 0 10px 20px -5px rgba(59, 130, 246, 0.4); }
-        .btn-blue:active { transform: scale(0.97); }
+        .btn-blue { background: linear-gradient(135deg, #3b82f6, #1d4ed8); border-radius: 16px; font-weight: 800; color: white; transition: 0.2s; box-shadow: 0 8px 20px -5px rgba(59, 130, 246, 0.4); }
         .input-box { background: #1c2535 !important; border: 1px solid #2d3748 !important; color: white !important; border-radius: 14px !important; padding: 14px; width: 100%; }
         .card { background: var(--card); border-radius: 24px; border: 1px solid rgba(255,255,255,0.05); }
-        .nav-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 75px; z-index: 1000; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); }
-        .nav-btn { display: flex; flex-direction: column; align-items: center; font-size: 11px; font-weight: 700; color: #64748b; }
+        .nav-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 70px; z-index: 1000; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); background: rgba(11, 17, 32, 0.9); }
+        .nav-btn { display: flex; flex-direction: column; align-items: center; font-size: 11px; font-weight: 700; color: #64748b; cursor: pointer; }
         .nav-btn.active { color: var(--p); }
-        .spinner { border: 4px solid rgba(255,255,255,0.1); border-top-color: var(--p); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        .spinner { border: 3px solid rgba(255,255,255,0.1); border-top-color: var(--p); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
@@ -28,102 +27,82 @@
 
     <div id="loader" class="fixed inset-0 bg-[#0b1120] z-[10000] hidden flex flex-col items-center justify-center">
         <div class="spinner mb-4"></div>
-        <p class="text-blue-500 font-bold animate-pulse">מעבד נתונים...</p>
+        <p class="text-blue-500 font-bold animate-pulse text-sm">MatchMe טוען...</p>
     </div>
 
-    <div id="page-auth" class="page active p-6 flex items-center justify-center">
-        <div class="w-full max-w-sm text-center">
-            <div class="w-20 h-20 btn-blue flex items-center justify-center rounded-[24px] text-4xl font-black mx-auto mb-8 italic">M</div>
-            <h1 class="text-4xl font-black mb-10 italic">MatchMe</h1>
-            <div id="auth-form" class="space-y-4">
-                <input type="email" id="email" placeholder="אימייל" class="input-box">
-                <input type="password" id="pass" placeholder="סיסמה" class="input-box">
-                <button onclick="Auth.login()" class="btn-blue w-full py-4 text-lg">התחברות</button>
-                <button onclick="Auth.signup()" class="text-slate-500 font-bold text-sm mt-4">אין חשבון? הירשם עכשיו</button>
-                <div class="flex items-center gap-4 py-4"><div class="h-px bg-slate-800 flex-1"></div><span class="text-xs text-slate-600">OR</span><div class="h-px bg-slate-800 flex-1"></div></div>
-                <button onclick="Auth.google()" class="w-full bg-white text-black py-4 rounded-2xl font-black flex items-center justify-center gap-2">
-                    <img src="https://www.gstatic.com/images/branding/product/1x/googleg_48dp.png" class="w-5"> Google
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <div id="page-feed" class="page p-4">
+    <div id="page-feed" class="page active p-4">
         <header class="flex justify-between items-center mb-8 pt-4 px-2">
-            <div>
-                <h2 class="text-3xl font-black italic">הזדמנויות</h2>
-                <p class="text-slate-500 text-sm font-bold">מצא את הג'וב הבא שלך</p>
-            </div>
-            <div id="userHead" onclick="Nav.to('profile')" class="w-12 h-12 rounded-2xl border border-slate-700 overflow-hidden cursor-pointer"></div>
+            <h2 class="text-3xl font-black italic">Match<span class="text-blue-500">Me</span></h2>
+            <div id="userBtn" onclick="Nav.to('profile')" class="w-10 h-10 rounded-xl border border-slate-700 flex items-center justify-center text-xl bg-slate-800">👤</div>
         </header>
-        <div class="space-y-3 mb-8">
-            <input type="text" id="searchT" onkeyup="UI.filter()" placeholder="מה התפקיד?" class="input-box">
-            <input type="text" id="searchC" onkeyup="UI.filter()" placeholder="באיזו עיר?" class="input-box text-sm py-3">
-        </div>
+        <div class="mb-6"><input type="text" id="search" onkeyup="UI.filter()" placeholder="חפש תפקיד או עיר..." class="input-box"></div>
         <div id="jobsList" class="space-y-4"></div>
     </div>
 
     <div id="page-view" class="page p-6">
-        <button onclick="Nav.to('feed')" class="text-blue-500 font-bold mb-8">➔ חזרה ללוח</button>
-        <div id="jobDetails" class="space-y-6"></div>
+        <button onclick="Nav.to('feed')" class="text-blue-500 font-bold mb-6">➔ חזרה</button>
+        <div id="jobDetails"></div>
     </div>
 
     <div id="page-interview" class="page p-6 text-center flex flex-col justify-center">
-        <div class="w-full bg-slate-800 h-2 rounded-full mb-12 overflow-hidden">
-            <div id="pBar" class="bg-blue-600 h-full w-0 transition-all duration-500"></div>
+        <div class="w-full bg-slate-800 h-1.5 rounded-full mb-12 overflow-hidden">
+            <div id="pBar" class="bg-blue-600 h-full w-0 transition-all"></div>
         </div>
-        <h3 id="qText" class="text-4xl font-black mb-20 leading-tight"></h3>
-        <div class="grid grid-cols-2 gap-6">
-            <button onclick="App.ans(true)" class="btn-blue p-12 text-4xl">כן</button>
-            <button onclick="App.ans(false)" class="bg-slate-800 p-12 text-4xl rounded-[32px] font-bold">לא</button>
-        </div>
-    </div>
-
-    <div id="page-post" class="page p-6">
-        <h2 class="text-3xl font-black mb-8 italic text-blue-500">פרסם משרה</h2>
-        <div class="space-y-4">
-            <input type="text" id="p-title" placeholder="שם המשרה" class="input-box">
-            <input type="text" id="p-company" placeholder="שם העסק" class="input-box">
-            <div class="grid grid-cols-2 gap-3">
-                <input type="text" id="p-city" placeholder="עיר" class="input-box">
-                <input type="text" id="p-salary" placeholder="שכר" class="input-box">
-            </div>
-            <input type="tel" id="p-wa" placeholder="וואטסאפ (05...)" class="input-box">
-            <textarea id="p-desc" placeholder="תיאור מפורט..." class="input-box h-32"></textarea>
-            <div id="qWrap" class="p-4 bg-slate-900/50 rounded-2xl border border-dashed border-slate-700">
-                <p class="text-xs font-black text-blue-400 mb-3 uppercase">שאלון התאמה:</p>
-                <div id="qList" class="space-y-2">
-                    <input type="text" class="q-in input-box py-2" placeholder="שאלה 1">
-                </div>
-                <button onclick="UI.addQ()" class="text-blue-500 text-xs mt-3 font-bold">+ הוסף שאלה</button>
-            </div>
-            <button onclick="Data.saveJob()" class="btn-blue w-full py-5 text-xl mt-4">פרסם עכשיו 🚀</button>
+        <h3 id="qText" class="text-3xl font-black mb-16 leading-tight"></h3>
+        <div class="grid grid-cols-2 gap-4">
+            <button onclick="App.ans(true)" class="btn-blue py-8 text-3xl">כן</button>
+            <button onclick="App.ans(false)" class="bg-slate-800 py-8 text-3xl rounded-2xl font-bold">לא</button>
         </div>
     </div>
 
     <div id="page-profile" class="page p-6">
-        <div class="flex justify-between items-center mb-10">
-            <h2 class="text-3xl font-black italic">האזור שלי</h2>
-            <button onclick="Auth.logout()" class="text-red-500 text-xs font-bold px-3 py-1 border border-red-500/20 rounded-lg">התנתק</button>
-        </div>
-        
-        <div class="flex gap-2 mb-8 bg-slate-900/50 p-1.5 rounded-2xl">
-            <button id="t-emp" onclick="UI.dashTab('emp')" class="flex-1 py-3 rounded-xl font-bold transition-all">מעסיק</button>
-            <button id="t-work" onclick="UI.dashTab('work')" class="flex-1 py-3 rounded-xl font-bold transition-all">הגשות</button>
+        <div id="auth-wall" class="hidden text-center py-10">
+            <div class="text-5xl mb-6">🔐</div>
+            <h2 class="text-2xl font-black mb-2">אזור אישי מאובטח</h2>
+            <p class="text-slate-400 mb-8 text-sm px-6">כדי לנהל משרות ולראות פניות ממועמדים, עליך להתחבר למערכת.</p>
+            <div class="space-y-3">
+                <input type="email" id="log-email" placeholder="אימייל" class="input-box">
+                <input type="password" id="log-pass" placeholder="סיסמה" class="input-box">
+                <button onclick="Auth.handle('login')" class="btn-blue w-full py-4">התחברות</button>
+                <button onclick="Auth.handle('signup')" class="w-full py-4 text-xs font-bold text-slate-500">יצירת חשבון חדש</button>
+            </div>
         </div>
 
-        <div id="dashList" class="space-y-6"></div>
+        <div id="dash-content" class="hidden">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-2xl font-black">הניהול שלי</h2>
+                <button onclick="Auth.logout()" class="text-red-500 text-xs font-bold">התנתק</button>
+            </div>
+            <div id="dashList" class="space-y-6"></div>
+        </div>
     </div>
 
-    <nav id="nav" class="nav-bar glass hidden">
-        <div onclick="Nav.to('feed')" class="nav-btn" id="n-feed">🏠<span>לוח</span></div>
+    <div id="page-post" class="page p-6">
+        <h2 class="text-2xl font-black mb-6 italic text-blue-500">פרסום משרה מהיר</h2>
+        <div class="space-y-4">
+            <input type="text" id="p-title" placeholder="שם המשרה" class="input-box">
+            <input type="text" id="p-company" placeholder="שם העסק" class="input-box">
+            <div class="grid grid-cols-2 gap-3">
+                <input type="text" id="p-city" placeholder="עיר" class="input-box text-sm">
+                <input type="text" id="p-salary" placeholder="שכר" class="input-box text-sm">
+            </div>
+            <input type="tel" id="p-wa" placeholder="וואטסאפ (05...)" class="input-box">
+            <textarea id="p-desc" placeholder="תיאור המשרה..." class="input-box h-24"></textarea>
+            <div id="qList" class="space-y-2"><input type="text" class="q-in input-box py-2" placeholder="שאלת סינון 1"></div>
+            <button onclick="UI.addQ()" class="text-blue-500 text-xs font-bold">+ הוסף שאלה</button>
+            <button onclick="Data.saveJob()" class="btn-blue w-full py-5 text-xl mt-4">פרסם עכשיו</button>
+        </div>
+    </div>
+
+    <nav class="nav-bar">
+        <div onclick="Nav.to('feed')" class="nav-btn active" id="n-feed">🏠<span>לוח</span></div>
         <div onclick="Nav.to('post')" class="nav-btn" id="n-post">➕<span>פרסם</span></div>
         <div onclick="Nav.to('profile')" class="nav-btn" id="n-profile">👤<span>אישי</span></div>
     </nav>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { getFirestore, collection, addDoc, getDocs, query, where, orderBy, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = { apiKey: "AIzaSyD0hsz8SOI1O...", authDomain: "matchme-32bcf.firebaseapp.com", projectId: "matchme-32bcf", storageBucket: "matchme-32bcf.appspot.com", messagingSenderId: "1082863959305", appId: "1:1082863959305:web:f888f4df815598696c601f" };
@@ -131,7 +110,8 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    const State = { user: null, jobs: [], activeJob: null, dashTab: 'emp' };
+    const State = { user: null, guestId: localStorage.getItem('mm_g_id') || 'g_'+Math.random().toString(36).substr(2,9), jobs: [] };
+    if(!localStorage.getItem('mm_g_id')) localStorage.setItem('mm_g_id', State.guestId);
 
     const Nav = {
         to(id) {
@@ -146,36 +126,32 @@
     };
 
     const Auth = {
-        async login() {
+        async handle(type) {
             UI.load(true);
-            try { await signInWithEmailAndPassword(auth, email.value, pass.value); } 
-            catch(e) { alert("שגיאה בהתחברות"); } finally { UI.load(false); }
+            const e = document.getElementById('log-email').value, p = document.getElementById('log-pass').value;
+            try {
+                if(type === 'login') await signInWithEmailAndPassword(auth, e, p);
+                else await createUserWithEmailAndPassword(auth, e, p);
+            } catch(err) { alert("שגיאה בפרטים"); } finally { UI.load(false); }
         },
-        async signup() {
-            UI.load(true);
-            try { await createUserWithEmailAndPassword(auth, email.value, pass.value); } 
-            catch(e) { alert("הסיסמה צריכה להיות 6 תווים לפחות"); } finally { UI.load(false); }
-        },
-        async google() { try { await signInWithPopup(auth, new GoogleAuthProvider()); } catch(e) {} },
         async logout() { await signOut(auth); location.reload(); }
     };
 
     const Data = {
         async saveJob() {
             UI.load(true);
+            const ownerId = State.user ? State.user.uid : State.guestId;
             try {
-                const j = {
-                    title: document.getElementById('p-title').value || "ללא כותרת",
-                    company: document.getElementById('p-company').value || "חברה",
+                await addDoc(collection(db, "jobs"), {
+                    title: document.getElementById('p-title').value || "משרה",
+                    company: document.getElementById('p-company').value || "עסק",
                     city: document.getElementById('p-city').value || "ישראל",
                     salary: document.getElementById('p-salary').value || "גמיש",
                     phone: document.getElementById('p-wa').value.replace(/\D/g,''),
                     desc: document.getElementById('p-desc').value || "",
                     questions: Array.from(document.getElementsByClassName('q-in')).map(i=>i.value).filter(v=>v),
-                    owner: State.user.uid,
-                    createdAt: serverTimestamp()
-                };
-                await addDoc(collection(db, "jobs"), j);
+                    owner: ownerId, createdAt: serverTimestamp()
+                });
                 Nav.to('feed');
             } catch(e) { alert("שגיאה בפרסום"); } finally { UI.load(false); }
         },
@@ -189,126 +165,104 @@
     const UI = {
         load(s) { document.getElementById('loader').classList.toggle('hidden', !s); },
         filter() {
-            const t = searchT.value.toLowerCase();
-            const c = searchC.value.toLowerCase();
-            const filtered = State.jobs.filter(j => 
-                (j.title.toLowerCase().includes(t) || j.company.toLowerCase().includes(t)) && 
-                j.city.toLowerCase().includes(c)
-            );
-            UI.renderFeed(filtered);
+            const q = document.getElementById('search').value.toLowerCase();
+            UI.renderFeed(State.jobs.filter(j => j.title.toLowerCase().includes(q) || j.city.toLowerCase().includes(q)));
         },
         renderFeed(list) {
             document.getElementById('jobsList').innerHTML = list.map(j => `
-                <div onclick="UI.openJob('${j.id}')" class="card p-6 shadow-xl shadow-black/20">
-                    <div class="flex justify-between items-start mb-3">
+                <div onclick="UI.openJob('${j.id}')" class="card p-5">
+                    <div class="flex justify-between items-center mb-2">
                         <h4 class="text-xl font-black">${j.title}</h4>
-                        <span class="text-[10px] bg-blue-500/10 text-blue-500 px-3 py-1 rounded-full font-black uppercase tracking-tighter">${j.salary}</span>
+                        <span class="text-xs text-blue-500 font-bold">${j.salary}</span>
                     </div>
-                    <p class="text-sm font-bold text-slate-400">🏢 ${j.company} | 📍 ${j.city}</p>
+                    <p class="text-xs text-slate-500 font-bold">🏢 ${j.company} | 📍 ${j.city}</p>
                 </div>
             `).join('');
         },
         openJob(id) {
-            State.activeJob = State.jobs.find(x => x.id === id);
-            const j = State.activeJob;
+            const j = State.jobs.find(x => x.id === id);
+            State.activeJob = j;
             document.getElementById('jobDetails').innerHTML = `
-                <div class="card p-8 bg-slate-900/30">
-                    <h2 class="text-4xl font-black mb-2">${j.title}</h2>
-                    <p class="text-blue-500 font-bold mb-8">${j.company} | ${j.city}</p>
-                    <div class="h-px bg-slate-800 mb-8"></div>
-                    <p class="text-slate-300 leading-relaxed whitespace-pre-wrap mb-10">${j.desc}</p>
+                <div class="card p-6 bg-slate-900/50 mb-6">
+                    <h2 class="text-3xl font-black mb-2">${j.title}</h2>
+                    <p class="text-blue-400 font-bold mb-4">${j.company} | ${j.city}</p>
+                    <p class="text-slate-300 text-sm leading-relaxed">${j.desc}</p>
                 </div>
-                <div class="space-y-4 pt-6">
-                    <input type="text" id="app-name" placeholder="השם המלא שלך" class="input-box">
-                    <input type="tel" id="app-phone" placeholder="מספר וואטסאפ ליצירת קשר" class="input-box">
-                    <button onclick="App.startApp()" class="btn-blue w-full py-5 text-xl">המשך להגשה ➔</button>
+                <div class="space-y-4">
+                    <input type="text" id="app-n" placeholder="שמך המלא" class="input-box">
+                    <input type="tel" id="app-p" placeholder="טלפון שלך" class="input-box">
+                    <button onclick="App.start()" class="btn-blue w-full py-5 text-xl">הגש מועמדות 🚀</button>
                 </div>
             `;
             Nav.to('view');
         },
-        dashTab(t) {
-            State.dashTab = t;
-            document.getElementById('t-emp').className = t === 'emp' ? 'flex-1 py-3 rounded-xl font-bold bg-blue-600' : 'flex-1 py-3 rounded-xl font-bold text-slate-500';
-            document.getElementById('t-work').className = t === 'work' ? 'flex-1 py-3 rounded-xl font-bold bg-blue-600' : 'flex-1 py-3 rounded-xl font-bold text-slate-500';
-            UI.renderDash();
-        },
         async renderDash() {
+            if(!State.user) {
+                document.getElementById('auth-wall').classList.remove('hidden');
+                document.getElementById('dash-content').classList.add('hidden');
+                return;
+            }
+            document.getElementById('auth-wall').classList.add('hidden');
+            document.getElementById('dash-content').classList.remove('hidden');
+            
             const wrap = document.getElementById('dashList');
             wrap.innerHTML = '<div class="spinner mx-auto my-10"></div>';
-            if(State.dashTab === 'emp') {
-                const sJ = await getDocs(query(collection(db, "jobs"), where("owner", "==", State.user.uid)));
-                const sL = await getDocs(query(collection(db, "leads"), where("boss", "==", State.user.uid)));
-                wrap.innerHTML = `
-                    <h4 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-4">פניות ממועמדים</h4>
-                    ${sL.docs.map(d => `
-                        <div class="card p-5 border-r-4 border-blue-500 mb-4">
-                            <div class="flex justify-between items-center mb-2"><b>${d.data().name}</b><span class="text-blue-500 font-black">${d.data().score}% התאמה</span></div>
-                            <div class="flex justify-between items-center"><span class="text-xs opacity-50">${d.data().jobTitle}</span><a href="https://wa.me/972${d.data().phone.substring(1)}" class="bg-green-600 px-4 py-2 rounded-xl text-xs font-black">וואטסאפ</a></div>
-                        </div>`).join('') || 'אין פניות'}
-                    <h4 class="text-xs font-black text-slate-500 uppercase tracking-widest mt-10 mb-4">המשרות שלי</h4>
-                    ${sJ.docs.map(d => `<div class="card p-4 flex justify-between mb-2"><span>${d.data().title}</span><button onclick="App.del('${d.id}')" class="text-red-500 font-bold text-xs">מחק</button></div>`).join('') || 'אין משרות'}
-                `;
-            } else {
-                const sH = await getDocs(query(collection(db, "leads"), where("worker", "==", State.user.uid)));
-                wrap.innerHTML = sH.docs.map(d => `<div class="card p-5 flex justify-between mb-3"><span>${d.data().jobTitle}</span><span class="font-black text-blue-500">${d.data().score}% התאמה</span></div>`).join('') || 'טרם הגשת מועמדות';
-            }
+            
+            const sL = await getDocs(query(collection(db, "leads"), where("boss", "in", [State.user.uid, State.guestId])));
+            wrap.innerHTML = sL.docs.map(d => `
+                <div class="card p-4 border-r-4 border-blue-500">
+                    <div class="flex justify-between font-bold"><span>${d.data().name}</span><span class="text-blue-500">${d.data().score}%</span></div>
+                    <div class="flex justify-between items-end mt-2">
+                        <span class="text-[10px] opacity-40">${d.data().jobTitle}</span>
+                        <a href="https://wa.me/972${d.data().phone.substring(1)}" class="bg-green-600 px-3 py-1 rounded-lg text-[10px] font-black">וואטסאפ</a>
+                    </div>
+                </div>
+            `).join('') || '<p class="text-center opacity-30">אין פניות עדיין</p>';
         },
         addQ() {
-            const i = document.createElement('input'); i.className = "q-in input-box py-2 mt-2"; i.placeholder = "שאלה נוספת...";
+            const i = document.createElement('input'); i.className = "q-in input-box py-2 mt-2"; i.placeholder = "שאלת סינון נוספת";
             document.getElementById('qList').appendChild(i);
         }
     };
 
     const App = {
-        startApp() {
-            const n = document.getElementById('app-name').value;
-            const p = document.getElementById('app-phone').value;
-            if(!n || !p) return alert("הזן פרטים");
-            State.curApp = { n, p: p.replace(/\D/g,''), qIdx: 0, score: 0 };
+        start() {
+            const n = document.getElementById('app-n').value, p = document.getElementById('app-p').value;
+            if(!n || !p) return alert("מלא פרטים");
+            State.cur = { n, p: p.replace(/\D/g,''), qIdx: 0, score: 0 };
             if(State.activeJob.questions?.length) { Nav.to('interview'); App.showQ(); }
             else App.finish(100);
         },
         showQ() {
-            document.getElementById('qText').innerText = State.activeJob.questions[State.curApp.qIdx];
-            document.getElementById('pBar').style.width = ((State.curApp.qIdx / State.activeJob.questions.length) * 100) + '%';
+            document.getElementById('qText').innerText = State.activeJob.questions[State.cur.qIdx];
+            document.getElementById('pBar').style.width = ((State.cur.qIdx / State.activeJob.questions.length) * 100) + '%';
         },
         ans(v) {
-            if(v) State.curApp.score += (100 / State.activeJob.questions.length);
-            State.curApp.qIdx++;
-            if(State.curApp.qIdx < State.activeJob.questions.length) App.showQ();
-            else App.finish(Math.round(State.curApp.score));
+            if(v) State.cur.score += (100 / State.activeJob.questions.length);
+            State.cur.qIdx++;
+            if(State.cur.qIdx < State.activeJob.questions.length) App.showQ();
+            else App.finish(Math.round(State.cur.score));
         },
         async finish(score) {
             UI.load(true);
             try {
                 await addDoc(collection(db, "leads"), {
-                    boss: State.activeJob.owner, worker: State.user.uid,
-                    jobTitle: State.activeJob.title, name: State.curApp.n, 
-                    phone: State.curApp.p, score, createdAt: serverTimestamp()
+                    boss: State.activeJob.owner, jobTitle: State.activeJob.title,
+                    name: State.cur.n, phone: State.cur.p, score, createdAt: serverTimestamp()
                 });
-                window.open(`https://wa.me/972${State.activeJob.phone.substring(1)}?text=היי, אני ${State.curApp.n}, קיבלתי ${score}% התאמה למשרה שלך ב-MatchMe!`);
+                window.open(`https://wa.me/972${State.activeJob.phone.substring(1)}?text=היי, אני ${State.cur.n}, קיבלתי ${score}% התאמה למשרת ${State.activeJob.title}!`);
                 Nav.to('feed');
             } catch(e) { alert("שגיאה"); } finally { UI.load(false); }
-        },
-        async del(id) { if(confirm("למחוק?")) { await deleteDoc(doc(db, "jobs", id)); UI.renderDash(); } }
+        }
     };
 
     onAuthStateChanged(auth, u => {
         State.user = u;
-        if(u) {
-            document.getElementById('page-auth').classList.remove('active');
-            document.getElementById('nav').classList.remove('hidden');
-            document.getElementById('userHead').innerHTML = u.photoURL ? `<img src="${u.photoURL}" class="w-full h-full">` : `<div class="w-full h-full bg-slate-800 flex items-center justify-center">👤</div>`;
-            Nav.to('feed');
-        } else {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById('page-auth').classList.add('active');
-            document.getElementById('nav').classList.add('hidden');
-        }
+        if(u) document.getElementById('userBtn').innerHTML = '✅';
+        Data.getJobs();
     });
 
-    window.Auth = Auth; window.Nav = Nav; window.UI = UI; window.Data = Data; window.App = App;
-    UI.dashTab('emp');
+    window.Nav = Nav; window.UI = UI; window.Auth = Auth; window.Data = Data; window.App = App;
 </script>
 </body>
 </html>
