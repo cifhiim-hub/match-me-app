@@ -3,90 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MatchMe | הדרך המהירה לעבודה</title>
+    <title>MatchMe Work | המערכת החיה</title>
     <style>
-        :root { --primary: #0052cc; --dark: #34495e; --success: #28a745; --bg: #f0f2f5; }
+        :root { --blue: #0052cc; --dark: #34495e; --bg: #f0f2f5; --success: #28a745; }
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; }
-        .container { background: white; padding: 20px; border-radius: 18px; box-shadow: 0 8px 30px rgba(0,0,0,0.1); width: 100%; max-width: 480px; min-height: 80vh; position: relative; }
-        h1 { color: var(--primary); text-align: center; font-size: 28px; margin-bottom: 10px; }
-        .section { display: none; animation: fadeIn 0.3s ease; }
+        .container { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 450px; min-height: 85vh; position: relative; }
+        .section { display: none; animation: fadeIn 0.3s; }
         .active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
         .btn { width: 100%; padding: 16px; margin: 10px 0; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .btn-blue { background: var(--primary); color: white; }
-        .btn-dark { background: var(--dark); color: white; }
+        .btn-blue { background: var(--blue); color: white; }
         .btn-outline { background: white; border: 2px solid #ddd; color: #666; }
         
-        .card { background: white; border: 1px solid #eee; padding: 15px; margin-bottom: 12px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.03); cursor: pointer; border-right: 6px solid var(--primary); }
-        .card h3 { margin: 0; color: var(--dark); font-size: 18px; }
-        .card p { margin: 5px 0; color: #666; font-size: 14px; }
-        .tag { background: #eef2ff; color: var(--primary); padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+        .card { background: white; border: 1px solid #eee; padding: 15px; margin-bottom: 12px; border-radius: 12px; border-right: 6px solid var(--blue); cursor: pointer; transition: 0.2s; }
+        .card:active { transform: scale(0.98); background: #f9f9f9; }
         
-        input, textarea { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 16px; }
-        .success-box { text-align: center; padding: 20px; }
-        .loading { text-align: center; color: var(--primary); font-weight: bold; padding: 20px; }
+        input { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 16px; }
+        .success-box { text-align: center; padding: 20px; background: #eefdf3; border-radius: 15px; border: 2px dashed var(--success); }
+        .chat-bubble { background: #e7efff; padding: 25px; border-radius: 15px; text-align: center; font-weight: bold; font-size: 20px; margin-bottom: 20px; color: var(--dark); }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <header onclick="location.reload()" style="cursor:pointer">
-        <h1>MatchMe 💼</h1>
-        <p style="text-align:center; margin-top:-10px; color:#888; font-size:14px;">חיבור חכם בין מעסיקים לעובדים</p>
+    <header onclick="location.reload()" style="cursor:pointer; text-align:center; margin-bottom:20px;">
+        <h1 style="color:var(--blue); margin:0;">MatchMe 💼</h1>
+        <small style="color:#888;">חיבור חכם לעבודה בשיטת ה-Match</small>
     </header>
 
     <div id="mainStep" class="section active">
-        <div style="margin: 30px 0;">
-            <button class="btn btn-blue" onclick="showSection('workerSearchSection')">🔍 חפש עבודה עכשיו</button>
-            <button class="btn btn-outline" onclick="showSection('workerRegisterSection')">📝 פרסם את עצמי כעובד</button>
-            <hr style="border:0; border-top:1px solid #eee; margin:20px 0;">
-            <button class="btn btn-dark" onclick="showSection('employerMenu')">🏢 אזור מעסיקים</button>
+        <div style="margin-top: 40px;">
+            <button class="btn btn-blue" onclick="showSection('workerSearchSection')">🔎 חפש עבודה (עובד)</button>
+            <button class="btn btn-outline" onclick="showSection('employerRegisterSection')">🏢 פרסם משרה (מעסיק)</button>
         </div>
-    </div>
-
-    <div id="employerMenu" class="section">
-        <h3>ניהול גיוס</h3>
-        <button class="btn btn-dark" onclick="showSection('employerRegisterSection')">➕ פרסם משרה חדשה</button>
-        <button class="btn btn-blue" onclick="showSection('employerSearchWorkersSection')">👥 צפה במאגר עובדים</button>
-        <button class="btn btn-outline" onclick="showSection('mainStep')">🏠 חזור למסך הראשי</button>
     </div>
 
     <div id="workerSearchSection" class="section">
-        <h3>משרות שמתאימות לך</h3>
-        <input type="text" id="jobSearch" placeholder="סנן לפי עיר או תפקיד..." onkeyup="filterJobs()">
-        <div id="jobsContainer"></div>
-        <button class="btn btn-outline" onclick="showSection('mainStep')">חזור</button>
-    </div>
-
-    <div id="workerRegisterSection" class="section">
-        <h3>הוסף את עצמך למאגר</h3>
-        <input type="text" id="wName" placeholder="שם מלא">
-        <input type="text" id="wCity" placeholder="עיר">
-        <input type="text" id="wRole" placeholder="מה התפקיד שאתה מחפש?">
-        <input type="tel" id="wPhone" placeholder="מספר טלפון">
-        <textarea id="wExp" placeholder="ספר קצת על הניסיון שלך (אופציונלי)"></textarea>
-        <button class="btn btn-blue" onclick="saveWorker()">פרסם פרופיל</button>
-        <button class="btn btn-outline" onclick="showSection('mainStep')">ביטול</button>
+        <h3>משרות שפורסמו לאחרונה</h3>
+        <input type="text" id="jobSearch" placeholder="חפש עיר או תפקיד..." onkeyup="filterJobs()">
+        <div id="jobsContainer">טוען משרות מהענן...</div>
+        <button class="btn btn-outline" onclick="showSection('mainStep')">🏠 חזור למסך הראשי</button>
     </div>
 
     <div id="employerRegisterSection" class="section">
-        <h3>פרסם משרה עם סינון</h3>
+        <h3>פרסם משרה חדשה</h3>
         <input type="text" id="bizName" placeholder="שם העסק">
-        <input type="text" id="jobCity" placeholder="עיר המשרה">
-        <input type="text" id="jobTitle" placeholder="תפקיד (למשל: נהג חלוקה)">
-        <input type="tel" id="bossPhone" placeholder="טלפון לקבלת פניות">
-        <p style="font-size:13px; color:var(--primary); margin-bottom:5px;">שאלות סינון (העובד יענה עליהן ב"כן/לא"):</p>
+        <input type="text" id="jobCity" placeholder="עיר">
+        <input type="text" id="jobTitle" placeholder="תפקיד המשרה">
+        <input type="tel" id="bossPhone" placeholder="טלפון ליצירת קשר">
+        <p style="font-size:13px; color:var(--blue); font-weight:bold; margin-bottom:5px;">שאלת סינון (העובד יענה בכן/לא):</p>
         <div id="questionsInputs">
-            <input type="text" class="q-input" placeholder="למשל: האם יש לך רישיון ג'?">
+            <input type="text" class="q-input" placeholder="למשל: האם יש לך ניסיון קודם?">
         </div>
-        <button class="btn" style="background:#f9f9f9; color:#666; border:1px dashed #ccc" onclick="addQuestionField()">+ הוסף שאלה</button>
-        <button class="btn btn-dark" onclick="saveJob()">פרסם משרה לענן</button>
-        <button class="btn btn-outline" onclick="showSection('employerMenu')">ביטול</button>
+        <button class="btn btn-blue" onclick="saveJob()">🚀 פרסם לכולם עכשיו</button>
+        <button class="btn btn-outline" onclick="showSection('mainStep')">ביטול</button>
     </div>
 
     <div id="interviewSection" class="section">
-        <div class="chat-bubble" id="questionText" style="background:#e7efff; padding:25px; border-radius:15px; text-align:center; font-weight:bold; font-size:20px; margin-bottom:20px;"></div>
+        <div class="chat-bubble" id="questionText"></div>
         <button class="btn btn-blue" onclick="handleAnswer(true)">✅ כן</button>
         <button class="btn btn-blue" onclick="handleAnswer(false)">❌ לא</button>
     </div>
@@ -94,22 +69,21 @@
     <div id="resultSection" class="section">
         <div id="resultArea"></div>
     </div>
-
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, collection, addDoc, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    // כאן ה-Config האישי שלך (כפי שמופיע בתמונה ששלחת)
+    // ה-Config המלא והמעודכן שלך
     const firebaseConfig = {
         apiKey: "AIzaSyD0hsz8SOI1O...", 
         authDomain: "matchme-32bcf.firebaseapp.com",
         projectId: "matchme-32bcf",
         storageBucket: "matchme-32bcf.appspot.com",
         messagingSenderId: "1082863959305",
-        appId: "1:1082863959305:web:...",
-        measurementId: "G-62Y6QPM..."
+        appId: "1:1082863959305:web:f888f4df815598696c601f",
+        measurementId: "G-62Y6QPMDZT"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -121,7 +95,6 @@
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         if(id === 'workerSearchSection') filterJobs();
-        if(id === 'employerSearchWorkersSection') filterWorkers();
     };
 
     window.saveJob = async () => {
@@ -130,52 +103,36 @@
         const title = document.getElementById('jobTitle').value;
         const phone = document.getElementById('bossPhone').value;
         const qs = Array.from(document.getElementsByClassName('q-input')).map(i => i.value).filter(v => v);
-        if(!biz || !city || !title || !phone) return alert("מלא פרטים");
+        
+        if(!biz || !city || !title || !phone) return alert("אנא מלא את כל השדות");
+
         try {
             await addDoc(collection(db, "jobs"), { biz, city, title, phone, questions: qs, createdAt: new Date() });
-            alert("המשרה פורסמה בהצלחה!");
-            showSection('mainStep');
-        } catch(e) { alert("שגיאה בשמירה"); }
-    };
-
-    window.saveWorker = async () => {
-        const name = document.getElementById('wName').value;
-        const city = document.getElementById('wCity').value;
-        const role = document.getElementById('wRole').value;
-        const phone = document.getElementById('wPhone').value;
-        const exp = document.getElementById('wExp').value;
-        if(!name || !city || !role || !phone) return alert("מלא פרטים");
-        try {
-            await addDoc(collection(db, "workers"), { name, city, role, phone, exp, createdAt: new Date() });
-            alert("הפרופיל שלך פורסם במאגר!");
-            showSection('mainStep');
-        } catch(e) { alert("שגיאה"); }
+            alert("המשרה פורסמה בהצלחה לכל המשתמשים!");
+            location.reload();
+        } catch(e) { 
+            alert("שגיאה! וודא שבחרת 'Test Mode' ב-Firebase Rules");
+            console.error(e);
+        }
     };
 
     window.filterJobs = async () => {
         const qText = document.getElementById('jobSearch').value.toLowerCase();
         const container = document.getElementById('jobsContainer');
-        container.innerHTML = '<div class="loading">מחפש משרות בענן...</div>';
+        container.innerHTML = '<p style="text-align:center;">טוען משרות מהענן...</p>';
+        
         const snapshot = await getDocs(query(collection(db, "jobs"), orderBy("createdAt", "desc")));
         container.innerHTML = '';
         snapshot.forEach(doc => {
             const j = doc.data();
             if(j.city.includes(qText) || j.title.toLowerCase().includes(qText)) {
-                container.innerHTML += `
-                <div class="card" onclick='window.startInterview(${JSON.stringify(j).replace(/'/g, "&apos;")})'>
-                    <span class="tag">${j.city}</span>
-                    <h3>${j.title}</h3>
-                    <p>${j.biz}</p>
-                    <small style="color:var(--primary)">לחץ למבחן התאמה 👈</small>
-                </div>`;
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `<span style="float:left; font-size:12px; color:var(--blue); font-weight:bold;">📍 ${j.city}</span><strong>${j.title}</strong><br><small>${j.biz}</small>`;
+                card.onclick = () => { currentJob = j; score = 0; qIdx = 0; showSection('interviewSection'); ask(); };
+                container.appendChild(card);
             }
         });
-    };
-
-    window.startInterview = (job) => {
-        currentJob = job; score = 0; qIdx = 0;
-        showSection('interviewSection');
-        ask();
     };
 
     function ask() { document.getElementById('questionText').innerText = currentJob.questions[qIdx]; }
@@ -191,27 +148,22 @@
         showSection('resultSection');
         const finalScore = Math.min(Math.round(score), 94);
         const cleanPhone = currentJob.phone.replace(/[^0-9]/g,'');
-        const waPhone = cleanPhone.startsWith('0') ? '972' + cleanPhone.substring(1) : cleanPhone;
+        // תיקון וואטסאפ: שימוש בקישור בינלאומי שעוקף את שגיאת ה-Business שראינו קודם
+        const waLink = `https://api.whatsapp.com/send?phone=972${cleanPhone.startsWith('0') ? cleanPhone.substring(1) : cleanPhone}&text=היי, עברתי את הסינון ב-MatchMe!`;
+
         document.getElementById('resultArea').innerHTML = `
             <div class="success-box">
-                <h2 style="color:var(--primary)">התאמה של ${finalScore}%!</h2>
-                <div style="background:#f8f9fa; padding:15px; border-radius:12px; margin:20px 0; border:1px solid #eee;">
-                    <p style="margin:0; font-size:14px;">המספר של <b>${currentJob.biz}</b>:</p>
-                    <div style="font-size:28px; font-weight:bold; letter-spacing:1px; margin:10px 0;">${currentJob.phone}</div>
+                <h2 style="color:var(--success);">התאמה של ${finalScore}%! 🎉</h2>
+                <p>נמצאת מתאים למשרה, הנה פרטי הקשר:</p>
+                <div style="background:white; padding:15px; border-radius:12px; margin:15px 0; border:1px solid #eee;">
+                    <p style="margin:0; font-size:14px; color:#666;">מספר המעסיק:</p>
+                    <div style="font-size:28px; font-weight:bold; color:var(--blue); letter-spacing:1px;">${currentJob.phone}</div>
                 </div>
                 <button class="btn btn-blue" onclick="window.location.href='tel:${cleanPhone}'">📞 התקשר עכשיו</button>
-                <button class="btn" style="background:#25D366; color:white;" onclick="window.open('https://api.whatsapp.com/send?phone=${waPhone}&text=היי, עברתי את הסינון ב-MatchMe!')">💬 שלח הודעה</button>
-                <button class="btn btn-outline" onclick="location.reload()">חזרה לתפריט</button>
+                <button class="btn" style="background:#25D366; color:white;" onclick="window.open('${waLink}')">💬 שלח וואטסאפ</button>
+                <button class="btn btn-outline" onclick="location.reload()">🏠 חזרה להתחלה</button>
             </div>`;
     }
-
-    window.addQuestionField = () => {
-        const container = document.getElementById('questionsInputs');
-        const input = document.createElement('input');
-        input.className = 'q-input';
-        input.placeholder = `שאלת סינון ${container.children.length + 1}`;
-        container.appendChild(input);
-    };
 </script>
 </body>
 </html>
