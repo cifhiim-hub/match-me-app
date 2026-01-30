@@ -3,85 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MatchMe | מצא עבודה או עובד</title>
+    <title>MatchMe | לוח דרושים ועובדים</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Assistant', sans-serif; background-color: #0f172a; color: white; margin: 0; }
-        .page { display: none; min-height: 100vh; padding: 20px 20px 100px; }
-        .active { display: block; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        body { font-family: 'Assistant', sans-serif; background-color: #0f172a; color: white; margin: 0; overflow-x: hidden; }
+        .page { display: none; min-height: 100vh; padding: 20px 20px 120px; }
+        .active { display: block; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        .card { background: #1e293b; border-radius: 20px; padding: 20px; margin-bottom: 15px; border: 1px solid #334155; }
-        .btn-primary { background: #3b82f6; color: white; border-radius: 12px; padding: 15px; width: 100%; font-weight: bold; }
-        .input-style { background: #334155; border: none; border-radius: 12px; padding: 15px; width: 100%; color: white; margin-bottom: 10px; }
+        .card { background: #1e293b; border-radius: 24px; padding: 20px; margin-bottom: 16px; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2); }
+        .btn-main { background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); color: white; border-radius: 16px; padding: 18px; width: 100%; font-weight: 800; border: none; }
+        .input-dark { background: #2d3748; border: 2px solid transparent; border-radius: 16px; padding: 16px; width: 100%; color: white; outline: none; transition: 0.3s; }
+        .input-dark:focus { border-color: #3b82f6; background: #334155; }
         
-        .nav-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #1e293b; display: flex; justify-content: space-around; padding: 15px; border-top: 1px solid #334155; }
-        .nav-item { color: #94a3b8; font-size: 12px; text-align: center; cursor: pointer; }
+        .nav-bar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(10px); display: flex; justify-content: space-around; padding: 15px; border-top: 1px solid #334155; z-index: 1000; }
+        .nav-item { color: #64748b; font-size: 12px; text-align: center; font-weight: bold; }
         .nav-item.active { color: #3b82f6; }
         
-        .badge-worker { background: #10b981; color: white; padding: 2px 8px; border-radius: 6px; font-size: 10px; }
-        .badge-job { background: #3b82f6; color: white; padding: 2px 8px; border-radius: 6px; font-size: 10px; }
+        .badge { font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 8px; text-transform: uppercase; }
+        .badge-worker { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+        .badge-job { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
     </style>
 </head>
 <body>
 
     <div id="page-feed" class="page active">
-        <h1 class="text-3xl font-black mb-6 italic">MATCH<span class="text-blue-500">ME</span></h1>
-        
-        <div class="flex gap-2 mb-6">
-            <button onclick="UI.filter('all')" class="bg-slate-700 px-4 py-2 rounded-full text-xs">הכל</button>
-            <button onclick="UI.filter('job')" class="bg-blue-600 px-4 py-2 rounded-full text-xs">משרות</button>
-            <button onclick="UI.filter('worker')" class="bg-green-600 px-4 py-2 rounded-full text-xs">עובדים</button>
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-3xl font-black tracking-tighter italic">MATCH<span class="text-blue-500">ME</span></h1>
+            <div id="auth-status" class="w-3 h-3 bg-red-500 rounded-full"></div>
         </div>
 
-        <div id="feed-container"></div>
+        <div class="flex gap-2 mb-6 overflow-x-auto pb-2 no-scrollbar">
+            <button onclick="UI.filter('all')" class="bg-slate-800 px-6 py-2 rounded-full text-sm font-bold whitespace-nowrap">הכל</button>
+            <button onclick="UI.filter('job')" class="bg-blue-600 px-6 py-2 rounded-full text-sm font-bold whitespace-nowrap">משרות</button>
+            <button onclick="UI.filter('worker')" class="bg-green-600 px-6 py-2 rounded-full text-sm font-bold whitespace-nowrap">עובדים זמינים</button>
+        </div>
+
+        <div id="main-container" class="space-y-4">
+            </div>
     </div>
 
     <div id="page-post" class="page">
-        <h2 class="text-2xl font-bold mb-6">מה תרצה לפרסם?</h2>
+        <h2 class="text-2xl font-black mb-6">פרסום חדש בלוח</h2>
+        
         <div class="grid grid-cols-2 gap-4 mb-8">
-            <div onclick="UI.setPostMode('job')" id="mode-job" class="card text-center border-blue-500 border-2">
-                <span class="text-3xl">💼</span>
+            <div onclick="UI.setPostType('job')" id="type-job" class="card text-center border-2 border-blue-500 cursor-pointer">
+                <span class="text-3xl">🏢</span>
                 <p class="mt-2 font-bold">אני מעסיק</p>
             </div>
-            <div onclick="UI.setPostMode('worker')" id="mode-worker" class="card text-center">
+            <div onclick="UI.setPostType('worker')" id="type-worker" class="card text-center border-2 border-transparent cursor-pointer">
                 <span class="text-3xl">🙋‍♂️</span>
                 <p class="mt-2 font-bold">אני עובד</p>
             </div>
         </div>
 
-        <div id="post-form" class="space-y-3">
-            <input type="text" id="p-title" placeholder="כותרת (תפקיד / מקצוע)" class="input-style">
-            <input type="text" id="p-name" placeholder="שם העסק / שם מלא" class="input-style">
-            <input type="text" id="p-city" placeholder="עיר" class="input-style">
-            <input type="tel" id="p-phone" placeholder="וואטסאפ ליצירת קשר" class="input-style">
-            <textarea id="p-desc" placeholder="פירוט נוסף..." class="input-style h-32"></textarea>
-            <button onclick="Data.save()" class="btn-primary">פרסם עכשיו 🚀</button>
+        <div class="space-y-4">
+            <input type="text" id="p-title" placeholder="כותרת (למשל: נהג חלוקה / מחפש עבודה בבנייה)" class="input-dark">
+            <input type="text" id="p-name" placeholder="שם העסק / שם פרטי" class="input-dark">
+            <div class="grid grid-cols-2 gap-4">
+                <input type="text" id="p-city" placeholder="עיר" class="input-dark">
+                <input type="tel" id="p-phone" placeholder="וואטסאפ (05...)" class="input-dark">
+            </div>
+            <textarea id="p-desc" placeholder="פירוט נוסף, דרישות או ניסיון..." class="input-dark h-32"></textarea>
+            <button onclick="Data.save()" class="btn-main shadow-lg shadow-blue-900/40">פרסם בלוח עכשיו 🚀</button>
         </div>
     </div>
 
     <div id="page-admin" class="page">
-        <div id="auth-ui">
-            <h2 class="text-2xl font-bold mb-4">כניסה למערכת</h2>
-            <input type="email" id="auth-email" placeholder="אימייל" class="input-style">
-            <input type="password" id="auth-pass" placeholder="סיסמה (לפחות 6 תווים)" class="input-style">
-            <button onclick="Auth.login()" class="btn-primary mb-3">התחבר</button>
-            <button onclick="Auth.signup()" class="w-full text-slate-400 text-sm">יצירת חשבון חדש</button>
-        </div>
-        <div id="dash-ui" class="hidden">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold">הפרסומים שלי</h2>
-                <button onclick="Auth.logout()" class="text-red-400 text-sm">התנתק</button>
+        <div id="login-view">
+            <h2 class="text-3xl font-black mb-2">אזור אישי</h2>
+            <p class="text-slate-400 mb-8 text-sm">נהל את המודעות שלך וצפה בפניות</p>
+            <div class="space-y-4">
+                <input type="email" id="auth-email" placeholder="אימייל" class="input-dark">
+                <input type="password" id="auth-pass" placeholder="סיסמה (6 תווים לפחות)" class="input-dark">
+                <button onclick="Auth.handle('login')" class="btn-main">התחבר</button>
+                <button onclick="Auth.handle('signup')" class="w-full py-4 text-slate-500 font-bold text-sm">צור חשבון חדש</button>
             </div>
-            <div id="my-posts"></div>
+        </div>
+        <div id="dash-view" class="hidden">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-2xl font-black">המודעות שלי</h2>
+                <button onclick="Auth.logout()" class="text-red-500 font-bold text-sm">התנתק</button>
+            </div>
+            <div id="my-items-container"></div>
         </div>
     </div>
 
     <nav class="nav-bar">
-        <div onclick="Nav.go('feed')" class="nav-item active" id="n-feed"><span>🏠</span><br>לוח</div>
-        <div onclick="Nav.go('post')" class="nav-item" id="n-post"><span>➕</span><br>פרסם</div>
-        <div onclick="Nav.go('admin')" class="nav-item" id="n-admin"><span>👤</span><br>אישי</div>
+        <div onclick="Nav.go('feed')" class="nav-item active" id="btn-feed">🏠<br>לוח</div>
+        <div onclick="Nav.go('post')" class="nav-item" id="btn-post">➕<br>פרסם</div>
+        <div onclick="Nav.go('admin')" class="nav-item" id="btn-admin">👤<br>אישי</div>
     </nav>
 
 <script type="module">
@@ -89,106 +101,112 @@
     import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { getFirestore, collection, addDoc, getDocs, query, where, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    const firebaseConfig = { /* השתמש בקונפיג שלך כאן */ };
+    const firebaseConfig = { 
+        apiKey: "AIzaSyD0hsz8SOI1O...", // הכנס את ה-API Key שלך
+        authDomain: "matchme-32bcf.firebaseapp.com",
+        projectId: "matchme-32bcf",
+        storageBucket: "matchme-32bcf.appspot.com",
+        messagingSenderId: "1082863959305",
+        appId: "1:1082863959305:web:f888f4df815598696c601f"
+    };
+
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    let currentMode = 'job';
-    let allData = [];
+    let activeType = 'job';
+    let globalData = [];
 
     const Nav = {
         go(id) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById(`page-${id}`).classList.add('active');
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById(`n-${id}`).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            document.getElementById(`btn-${id}`).classList.add('active');
             if(id === 'feed') Data.load();
         }
     };
 
     const UI = {
-        setPostMode(mode) {
-            currentMode = mode;
-            document.getElementById('mode-job').className = mode === 'job' ? 'card text-center border-blue-500 border-2' : 'card text-center';
-            document.getElementById('mode-worker').className = mode === 'worker' ? 'card text-center border-green-500 border-2' : 'card text-center';
+        setPostType(type) {
+            activeType = type;
+            document.getElementById('type-job').style.borderColor = type === 'job' ? '#3b82f6' : 'transparent';
+            document.getElementById('type-worker').style.borderColor = type === 'worker' ? '#10b981' : 'transparent';
         },
         filter(type) {
-            const filtered = type === 'all' ? allData : allData.filter(d => d.type === type);
-            UI.render(filtered);
+            const filtered = type === 'all' ? globalData : globalData.filter(d => d.type === type);
+            UI.renderList(filtered);
         },
-        render(list) {
-            const container = document.getElementById('feed-container');
-            // תיקון ה-Undefined: שימוש ב-|| לערכי ברירת מחדל
+        renderList(list) {
+            const container = document.getElementById('main-container');
+            // פתרון ה-Undefined: שימוש ב-|| לכל שדה
             container.innerHTML = list.map(item => `
                 <div class="card">
-                    <div class="flex justify-between">
-                        <span class="${item.type === 'job' ? 'badge-job' : 'badge-worker'}">
-                            ${item.type === 'job' ? 'משרה' : 'עובד/ת'}
+                    <div class="flex justify-between items-start mb-3">
+                        <span class="badge ${item.type === 'job' ? 'badge-job' : 'badge-worker'}">
+                            ${item.type === 'job' ? 'משרה פתוחה' : 'עובד זמין'}
                         </span>
-                        <span class="text-slate-500 text-xs">📍 ${item.city || 'לא צוין'}</span>
+                        <span class="text-slate-500 text-xs font-bold">📍 ${item.city || 'כל הארץ'}</span>
                     </div>
-                    <h3 class="text-xl font-bold mt-2">${item.title || 'ללא כותרת'}</h3>
-                    <p class="text-blue-400 font-bold text-sm">${item.name || 'אנונימי'}</p>
-                    <p class="text-slate-300 text-sm mt-2 line-clamp-2">${item.desc || 'אין תיאור מפורט'}</p>
-                    <button onclick="window.open('https://wa.me/972${item.phone?.substring(1)}')" class="mt-4 text-blue-500 font-bold text-sm">
-                        💬 צור קשר בוואטסאפ
+                    <h3 class="text-xl font-black mb-1">${item.title || 'ללא כותרת'}</h3>
+                    <p class="text-blue-400 font-bold text-sm mb-3">${item.name || 'מפרסם פרטי'}</p>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-4 line-clamp-2">${item.desc || 'אין תיאור מפורט'}</p>
+                    <button onclick="window.open('https://wa.me/972${item.phone?.replace(/\D/g,'').substring(1)}')" class="w-full py-3 bg-slate-800 rounded-xl text-sm font-bold border border-slate-700">
+                        💬 שלח הודעה בוואטסאפ
                     </button>
                 </div>
-            `).join('') || '<p class="text-center opacity-30 mt-10">אין פרסומים להצגה</p>';
+            `).join('') || '<div class="text-center py-20 opacity-20 font-bold">אין מודעות כרגע</div>';
         }
     };
 
     const Data = {
         async save() {
-            const title = document.getElementById('p-title').value;
-            const phone = document.getElementById('p-phone').value;
-            if(!title || !phone) return alert("חובה למלא כותרת וטלפון");
+            const title = document.getElementById('p-title').value.trim();
+            const phone = document.getElementById('p-phone').value.trim();
+            if(!title || phone.length < 9) return alert("נא להזין כותרת ומספר טלפון תקין");
 
             try {
                 await addDoc(collection(db, "posts"), {
-                    type: currentMode,
+                    type: activeType,
                     title,
-                    name: document.getElementById('p-name').value,
-                    city: document.getElementById('p-city').value,
+                    name: document.getElementById('p-name').value.trim() || "פרטי",
+                    city: document.getElementById('p-city').value.trim() || "כל הארץ",
                     phone: phone.replace(/\D/g, ''),
-                    desc: document.getElementById('p-desc').value,
+                    desc: document.getElementById('p-desc').value.trim() || "",
                     owner: auth.currentUser?.uid || 'guest',
                     createdAt: serverTimestamp()
                 });
                 alert("פורסם בהצלחה!");
                 Nav.go('feed');
-            } catch(e) { alert("שגיאה בפרסום"); }
+            } catch(e) { alert("שגיאה בפרסום. נסה שוב."); }
         },
         async load() {
             const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
             const snap = await getDocs(q);
-            allData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-            UI.render(allData);
+            globalData = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            UI.renderList(globalData);
         }
     };
 
     const Auth = {
-        async signup() {
-            const e = document.getElementById('auth-email').value;
-            const p = document.getElementById('auth-pass').value;
-            if(p.length < 6) return alert("הסיסמה חייבת להיות לפחות 6 תווים");
-            try { await createUserWithEmailAndPassword(auth, e, p); } 
-            catch(e) { alert("שגיאה ברישום: " + e.message); }
+        async handle(mode) {
+            const email = document.getElementById('auth-email').value;
+            const pass = document.getElementById('auth-pass').value;
+            if(pass.length < 6) return alert("הסיסמה חייבת לכלול לפחות 6 תווים");
+
+            try {
+                if(mode === 'login') await signInWithEmailAndPassword(auth, email, pass);
+                else await createUserWithEmailAndPassword(auth, email, pass);
+            } catch(e) { alert("שגיאה: וודא שהפרטים נכונים"); }
         },
-        async login() {
-            const e = document.getElementById('auth-email').value;
-            const p = document.getElementById('auth-pass').value;
-            try { await signInWithEmailAndPassword(auth, e, p); }
-            catch(e) { alert("פרטים לא נכונים"); }
-        },
-        logout() { signOut(auth); location.reload(); }
+        logout() { signOut(auth).then(() => location.reload()); }
     };
 
     onAuthStateChanged(auth, user => {
+        document.getElementById('auth-status').className = user ? 'w-3 h-3 bg-green-500 rounded-full' : 'w-3 h-3 bg-red-500 rounded-full';
         if(user) {
-            document.getElementById('auth-ui').classList.add('hidden');
-            document.getElementById('dash-ui').classList.remove('hidden');
+            document.getElementById('login-view').classList.add('hidden');
+            document.getElementById('dash-view').classList.remove('hidden');
         }
         Data.load();
     });
