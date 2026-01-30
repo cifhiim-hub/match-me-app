@@ -3,308 +3,244 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>MatchMe Ultimate Pro 2026</title>
+    <title>MatchMe Pro | הפלטפורמה המושלמת</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@200;300;400;500;600;700;800&family=Inter:wght@900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@200;400;700;800&family=Inter:wght@900&display=swap" rel="stylesheet">
     
     <style>
         :root {
             --primary: #3b82f6;
-            --primary-dark: #1d4ed8;
-            --bg-dark: #0f172a;
-            --card-bg: #1e293b;
+            --primary-dark: #1e40af;
+            --bg: #0f172a;
+            --card: #1e293b;
             --accent: #10b981;
-            --error: #ef4444;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-        }
-
-        * { 
-            box-sizing: border-box; 
-            -webkit-tap-highlight-color: transparent;
-            font-family: 'Assistant', sans-serif;
+            --error: #f43f5e;
         }
 
         body {
-            background-color: var(--bg-dark);
-            color: var(--text-main);
+            font-family: 'Assistant', sans-serif;
+            background-color: var(--bg);
+            color: #f8fafc;
             margin: 0;
-            padding: 0;
-            line-height: 1.6;
             overflow-x: hidden;
-            -webkit-font-smoothing: antialiased;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        /* מערכת דפים ואנימציות */
+        /* מערכת אנימציות למעברי דפים חלקים */
         .page {
             display: none;
             min-height: 100vh;
-            padding: 20px 20px 100px 20px;
+            padding: 24px 24px 120px 24px;
             opacity: 0;
-            transform: translateY(15px);
+            transform: scale(0.98);
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .page.active {
             display: block;
             opacity: 1;
-            transform: translateY(0);
+            transform: scale(1);
         }
 
-        /* עיצובי כפתורים ואלמנטים */
-        .glass-nav {
-            background: rgba(15, 23, 42, 0.9);
+        /* אלמנטים עיצוביים משודרגים */
+        .glass-header {
+            background: rgba(15, 23, 42, 0.8);
             backdrop-filter: blur(12px);
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 -5px 20px rgba(0,0,0,0.3);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            position: sticky; top: 0; z-index: 100;
         }
 
-        .btn-grad {
+        .job-card {
+            background: var(--card);
+            border-radius: 24px;
+            padding: 24px;
+            border: 1px solid rgba(255,255,255,0.05);
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+            transition: 0.3s ease;
+            position: relative; overflow: hidden;
+        }
+
+        .job-card::before {
+            content: ''; position: absolute; top: 0; right: 0; width: 6px; height: 100%;
+            background: var(--primary); opacity: 0.7;
+        }
+
+        .job-card:active { transform: translateY(2px) scale(0.98); background: #26334d; }
+
+        .btn-premium {
             background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            border-radius: 18px;
+            border-radius: 20px;
             font-weight: 800;
             color: white;
-            box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3);
-            transition: all 0.2s ease;
+            box-shadow: 0 12px 20px -8px rgba(59, 130, 246, 0.5);
+            transition: 0.2s;
             border: none;
-            cursor: pointer;
+            width: 100%;
+            padding: 18px;
+            font-size: 18px;
         }
 
-        .btn-grad:active { transform: scale(0.95); opacity: 0.9; }
-        .btn-grad:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-premium:active { transform: scale(0.96); opacity: 0.9; }
 
         .input-premium {
             background: #2d3748;
             border: 2px solid transparent;
             color: white;
-            border-radius: 16px;
-            padding: 16px;
+            border-radius: 18px;
+            padding: 18px;
             width: 100%;
-            transition: all 0.3s ease;
+            outline: none;
+            transition: 0.3s;
             font-size: 16px;
         }
 
-        .input-premium:focus {
-            border-color: var(--primary);
-            background: #334155;
-            outline: none;
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+        .input-premium:focus { border-color: var(--primary); background: #334155; }
+
+        /* ניווט תחתון יוקרתי */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            height: 85px; background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255,255,255,0.08);
+            display: flex; justify-content: space-around; align-items: center;
+            z-index: 1000; padding-bottom: env(safe-area-inset-bottom);
         }
 
-        .card-job {
-            background: var(--card-bg);
-            border-radius: 24px;
-            border: 1px solid rgba(255,255,255,0.05);
-            padding: 24px;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
+        .nav-link {
+            display: flex; flex-direction: column; align-items: center;
+            color: #64748b; font-size: 12px; font-weight: 700; transition: 0.3s;
         }
 
-        .card-job::after {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 4px; height: 100%;
-            background: var(--primary);
-            opacity: 0.5;
+        .nav-link.active { color: var(--primary); }
+        .nav-link i { font-size: 24px; margin-bottom: 4px; }
+
+        /* לואדר (Loader) מעוצב */
+        #mainLoader {
+            position: fixed; inset: 0; background: var(--bg);
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 9999;
         }
 
-        .card-job:active { background: #334155; transform: scale(0.98); }
-
-        /* בר טעינה מותאם אישית */
-        .loader-overlay {
-            position: fixed; inset: 0; background: rgba(15, 23, 42, 0.95);
-            z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center;
-        }
-
-        .custom-spinner {
-            width: 50px; height: 50px; border: 4px solid rgba(255,255,255,0.1);
-            border-top: 4px solid var(--primary); border-radius: 50%;
+        .spinner {
+            width: 50px; height: 50px; border: 5px solid rgba(255,255,255,0.1);
+            border-top-color: var(--primary); border-radius: 50%;
             animation: spin 1s linear infinite;
         }
 
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* ניווט תחתון */
-        .nav-item {
-            display: flex; flex-direction: column; align-items: center; 
-            color: var(--text-muted); font-weight: 700; font-size: 12px;
-            transition: 0.3s; padding: 10px;
-        }
-        .nav-item.active { color: var(--primary); transform: translateY(-3px); }
-
-        /* מערכת שאלון (Quiz) */
-        .quiz-option {
-            padding: 30px; border-radius: 20px; font-size: 24px; font-weight: 800;
-            transition: 0.2s;
-        }
     </style>
 </head>
 <body>
 
-    <div id="loader" class="loader-overlay">
-        <div class="custom-spinner mb-4"></div>
-        <p class="text-primary font-bold animate-pulse">המערכת מעבדת את הבקשה שלך...</p>
+    <div id="mainLoader">
+        <div class="spinner mb-4"></div>
+        <p class="text-blue-500 font-bold animate-pulse">MatchMe מעבד נתונים...</p>
     </div>
 
     <div id="page-feed" class="page active">
-        <div class="flex justify-between items-center mb-10 pt-4">
-            <div>
-                <h1 style="font-family: 'Inter', sans-serif;" class="text-4xl font-black italic tracking-tighter">
-                    MATCH<span class="text-blue-500">ME</span>
-                </h1>
-                <p class="text-text-muted text-sm font-medium">מצא את ההזדמנות הבאה שלך</p>
-            </div>
-            <div id="user-avatar" onclick="Nav.to('profile')" class="w-12 h-12 rounded-2xl bg-slate-800 border-2 border-slate-700 flex items-center justify-center text-xl cursor-pointer">
-                👤
-            </div>
+        <div class="glass-header mb-8 py-4">
+            <h1 style="font-family: 'Inter', sans-serif;" class="text-4xl font-black italic tracking-tighter">
+                MATCH<span class="text-blue-500">ME</span>
+            </h1>
         </div>
 
         <div class="relative mb-8">
-            <input type="text" id="globalSearch" onkeyup="UI.filterJobs()" placeholder="חפש תפקיד, חברה או עיר..." class="input-premium pr-12">
-            <span class="absolute right-4 top-1/2 -translate-y-1/2 opacity-30">🔍</span>
+            <input type="text" id="jobSearch" onkeyup="UI.search()" placeholder="חפש תפקיד, עיר או חברה..." class="input-premium pr-12">
+            <span class="absolute right-5 top-1/2 -translate-y-1/2 opacity-30">🔍</span>
         </div>
 
-        <div id="jobsList" class="space-y-5">
+        <div id="jobsGrid" class="space-y-6">
             </div>
     </div>
 
-    <div id="page-view" class="page">
-        <div class="flex items-center gap-4 mb-8">
-            <button onclick="Nav.to('feed')" class="p-2 bg-slate-800 rounded-xl">➔</button>
-            <h2 class="text-xl font-bold">פרטי המשרה</h2>
-        </div>
+    <div id="page-details" class="page">
+        <button onclick="Nav.go('feed')" class="text-blue-500 font-bold mb-6 flex items-center">➔ חזרה ללוח</button>
+        <div id="detailsBox"></div>
         
-        <div id="fullJobContent"></div>
-
-        <div class="mt-10 pt-10 border-t border-slate-800">
-            <h3 class="text-lg font-black mb-6">הגשת מועמדות מהירה</h3>
+        <div class="mt-12 p-6 bg-slate-900/50 rounded-[32px] border border-slate-800">
+            <h3 class="text-xl font-black mb-6">הגשת מועמדות מהירה</h3>
             <div class="space-y-4">
-                <div class="group">
-                    <label class="text-xs font-bold text-slate-500 mb-2 block">שם מלא</label>
-                    <input type="text" id="app-name" placeholder="איך קוראים לך?" class="input-premium">
-                </div>
-                <div class="group">
-                    <label class="text-xs font-bold text-slate-500 mb-2 block">מספר וואטסאפ</label>
-                    <input type="tel" id="app-phone" placeholder="050-0000000" class="input-premium">
-                </div>
-                <button onclick="App.initApplication()" class="btn-grad w-full py-6 text-xl mt-4">בדיקת התאמה והגשה 🚀</button>
+                <input type="text" id="cand-name" placeholder="שם מלא" class="input-premium">
+                <input type="tel" id="cand-phone" placeholder="מספר טלפון (וואטסאפ)" class="input-premium">
+                <button onclick="App.startProcess()" class="btn-premium mt-4 text-xl py-6">המשך לשאלון התאמה 🚀</button>
             </div>
         </div>
     </div>
 
     <div id="page-quiz" class="page text-center">
-        <div class="max-w-md mx-auto h-[80vh] flex flex-col justify-between py-10">
-            <div>
-                <div class="w-full bg-slate-800 h-2.5 rounded-full mb-12">
-                    <div id="quizBar" class="bg-blue-600 h-full w-0 transition-all duration-700 rounded-full shadow-[0_0_15px_rgba(59,130,246,0.5)]"></div>
-                </div>
-                <p id="quizStepInfo" class="text-blue-500 font-bold text-sm mb-4 uppercase tracking-widest"></p>
-                <h3 id="quizQuestion" class="text-4xl font-black leading-tight"></h3>
+        <div class="max-w-md mx-auto h-[70vh] flex flex-col justify-center">
+            <div class="w-full bg-slate-800 h-2 rounded-full mb-12 overflow-hidden">
+                <div id="quizProgress" class="bg-blue-600 h-full w-0 transition-all duration-500"></div>
             </div>
-
-            <div class="grid grid-cols-1 gap-6">
-                <button onclick="App.processAnswer(true)" class="quiz-option bg-blue-600 text-white shadow-xl">בטח / כן</button>
-                <button onclick="App.processAnswer(false)" class="quiz-option bg-slate-800 text-slate-300">פחות / לא</button>
+            <h2 id="qText" class="text-4xl font-black mb-20 leading-tight"></h2>
+            <div class="grid grid-cols-2 gap-6">
+                <button onclick="App.answer(true)" class="btn-premium py-12 text-3xl">כן</button>
+                <button onclick="App.answer(false)" class="bg-slate-800 py-12 text-3xl rounded-[28px] font-bold">לא</button>
             </div>
         </div>
     </div>
 
-    <div id="page-profile" class="page">
-        <div id="locked-state" class="text-center py-20">
-            <div class="w-24 h-24 bg-blue-600/10 rounded-full flex items-center justify-center mx-auto mb-8">
-                <span class="text-5xl">🔐</span>
+    <div id="page-admin" class="page">
+        <div id="loginSection">
+            <div class="text-center mb-10">
+                <div class="text-6xl mb-4">🔐</div>
+                <h2 class="text-3xl font-black">כניסת מעסיקים</h2>
+                <p class="text-slate-400">צפה במועמדים ששלחו לך הודעה</p>
             </div>
-            <h2 class="text-3xl font-black mb-4">גישה למעסיקים</h2>
-            <p class="text-text-muted mb-10 px-10">כדי לנהל את המשרות שלך ולראות מי הגיש מועמדות, עליך להיכנס לחשבון.</p>
-            
-            <div class="max-w-xs mx-auto space-y-4">
+            <div class="space-y-4 max-w-xs mx-auto">
                 <input type="email" id="auth-email" placeholder="אימייל" class="input-premium">
                 <input type="password" id="auth-pass" placeholder="סיסמה" class="input-premium">
-                <button onclick="Auth.handle('login')" class="btn-grad w-full py-4">כניסה למערכת</button>
-                <button onclick="Auth.handle('signup')" class="w-full py-4 text-slate-500 font-bold border border-slate-800 rounded-2xl">יצירת חשבון מעסיק</button>
+                <button onclick="Auth.exec('login')" class="btn-premium">התחבר</button>
+                <button onclick="Auth.exec('signup')" class="w-full text-slate-500 font-bold text-sm">יצירת חשבון חדש</button>
             </div>
         </div>
 
-        <div id="admin-state" class="hidden">
+        <div id="dashboardSection" class="hidden">
             <div class="flex justify-between items-center mb-10">
-                <h2 class="text-3xl font-black">ניהול מועמדים</h2>
+                <h2 class="text-3xl font-black">הלידים שלי</h2>
                 <button onclick="Auth.logout()" class="text-error font-bold text-sm">התנתק</button>
             </div>
-            
-            <div class="grid grid-cols-2 gap-4 mb-10">
-                <div class="bg-slate-800/50 p-6 rounded-3xl border border-slate-700">
-                    <div class="text-2xl font-black" id="stat-jobs">0</div>
-                    <div class="text-xs text-slate-500">משרות פעילות</div>
-                </div>
-                <div class="bg-slate-800/50 p-6 rounded-3xl border border-slate-700">
-                    <div class="text-2xl font-black text-blue-500" id="stat-leads">0</div>
-                    <div class="text-xs text-slate-500">פניות שקיבלת</div>
-                </div>
-            </div>
-
-            <div id="adminList" class="space-y-4">
-                </div>
+            <div id="leadsGrid" class="space-y-4"></div>
         </div>
     </div>
 
     <div id="page-post" class="page">
-        <h2 class="text-3xl font-black mb-8 italic">פרסם משרה <span class="text-blue-500">עכשיו</span></h2>
-        
-        <div class="space-y-6">
-            <section class="space-y-4">
-                <h4 class="text-xs font-black text-blue-500 uppercase">פרטי העסק</h4>
-                <input type="text" id="p-company" placeholder="שם החברה / העסק" class="input-premium">
-                <input type="tel" id="p-wa" placeholder="וואטסאפ לקבלת פניות (05...)" class="input-premium">
-            </section>
-
-            <section class="space-y-4 pt-4">
-                <h4 class="text-xs font-black text-blue-500 uppercase">פרטי התפקיד</h4>
-                <input type="text" id="p-title" placeholder="כותרת המשרה (למשל: מלצר/ית)" class="input-premium">
-                <div class="grid grid-cols-2 gap-3">
-                    <input type="text" id="p-city" placeholder="עיר" class="input-premium">
-                    <input type="text" id="p-salary" placeholder="שכר (למשל: 50₪ לשעה)" class="input-premium">
+        <h2 class="text-3xl font-black mb-8 italic text-blue-500">פרסם משרה חדשה</h2>
+        <div class="space-y-5">
+            <input type="text" id="p-title" placeholder="כותרת המשרה" class="input-premium">
+            <input type="text" id="p-company" placeholder="שם העסק" class="input-premium">
+            <div class="grid grid-cols-2 gap-3">
+                <input type="text" id="p-city" placeholder="עיר" class="input-premium">
+                <input type="text" id="p-salary" placeholder="שכר" class="input-premium">
+            </div>
+            <input type="tel" id="p-phone" placeholder="טלפון ליצירת קשר (05...)" class="input-premium">
+            <textarea id="p-desc" placeholder="תיאור מפורט של התפקיד..." class="input-premium h-32"></textarea>
+            
+            <div class="p-6 bg-slate-900/50 rounded-3xl border border-dashed border-slate-700">
+                <p class="text-xs font-black text-blue-400 mb-4 uppercase">שאלות סינון (כן/לא):</p>
+                <div id="dynamicQs" class="space-y-3">
+                    <input type="text" class="q-val input-premium py-3" placeholder="למשל: יש לך רישיון נהיגה?">
                 </div>
-                <textarea id="p-desc" placeholder="ספר קצת על התפקיד, דרישות ותנאים..." class="input-premium h-32"></textarea>
-            </section>
-
-            <section class="p-6 bg-slate-900 rounded-3xl border border-slate-800">
-                <h4 class="text-xs font-black text-blue-400 mb-4 uppercase">שאלות סינון (כן/לא)</h4>
-                <div id="dynamicQuestions" class="space-y-3">
-                    <input type="text" class="q-field input-premium py-3" placeholder="למשל: יש לך ניסיון קודם?">
-                </div>
-                <button onclick="UI.addQuestionField()" class="mt-4 text-blue-500 font-bold text-xs">+ הוסף שאלת סינון</button>
-            </section>
-
-            <button onclick="Data.publishJob()" class="btn-grad w-full py-6 text-xl mt-6">פרסם משרה בלוח 🚀</button>
+                <button onclick="UI.addQ()" class="text-blue-500 text-xs mt-4 font-bold">+ הוסף שאלה</button>
+            </div>
+            <button onclick="Data.saveJob()" class="btn-premium py-6 text-xl mt-6">פרסם בלוח עכשיו 🚀</button>
         </div>
     </div>
 
-    <nav class="fixed bottom-0 left-0 right-0 glass-nav h-20 flex justify-around items-center px-4 z-[999]">
-        <div onclick="Nav.to('feed')" class="nav-item active" id="btn-feed">
-            <span class="text-2xl mb-1">🏠</span>
-            <span>ראשי</span>
-        </div>
-        <div onclick="Nav.to('post')" class="nav-item" id="btn-post">
-            <div class="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg -mt-10 border-4 border-[#0f172a]">
-                +
-            </div>
-            <span class="mt-1">פרסם</span>
-        </div>
-        <div onclick="Nav.to('profile')" class="nav-item" id="btn-profile">
-            <span class="text-2xl mb-1">💼</span>
-            <span>ניהול</span>
-        </div>
+    <nav class="bottom-nav">
+        <div onclick="Nav.go('feed')" class="nav-link active" id="n-feed"><i>🏠</i><span>לוח</span></div>
+        <div onclick="Nav.go('post')" class="nav-link" id="n-post"><i>➕</i><span>פרסם</span></div>
+        <div onclick="Nav.go('admin')" class="nav-link" id="n-admin"><i>👤</i><span>אישי</span></div>
     </nav>
 
 <script type="module">
-    // ייבוא Firebase מתוך CDN
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, collection, addDoc, getDocs, query, where, orderBy, serverTimestamp, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, query, where, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    // הגדרות הפרויקט (Firebase Config)
+    // הגדרות Firebase - וודא שהן נכונות
     const firebaseConfig = { 
         apiKey: "AIzaSyD0hsz8SOI1O...", 
         authDomain: "matchme-32bcf.firebaseapp.com", 
@@ -314,294 +250,246 @@
         appId: "1:1082863959305:web:f888f4df815598696c601f" 
     };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+    const firebaseApp = initializeApp(firebaseConfig);
+    const auth = getAuth(firebaseApp);
+    const db = getFirestore(firebaseApp);
 
-    // ניהול זיכרון ומצב האפליקציה (Global State)
+    // ניהול מצב גלובלי (State) - פותר את בעיית ה-undefined
     const State = {
         user: null,
-        allJobs: [],
-        selectedJob: null,
-        quiz: { currentIdx: 0, score: 0 },
-        // זיהוי מכשיר ייחודי למקרה שהמשתמש אינו רשום
-        guestUID: localStorage.getItem('mm_device_id') || 'guest_' + Math.random().toString(36).substr(2, 9)
+        jobs: [],
+        activeJob: null,
+        quiz: { idx: 0, score: 0 },
+        // יצירת מזהה ייחודי למשתמש זמני כדי למנוע שגיאות שמירה
+        tempID: localStorage.getItem('mm_uid') || 'u_' + Math.random().toString(36).substr(2, 9)
     };
-    if(!localStorage.getItem('mm_device_id')) localStorage.setItem('mm_device_id', State.guestUID);
+    if(!localStorage.getItem('mm_uid')) localStorage.setItem('mm_uid', State.tempID);
 
-    // --- מערכת ניווט (Navigation Engine) ---
+    // מנוע ניווט
     const Nav = {
-        to(pageId) {
-            // אנימציית יציאה
-            const current = document.querySelector('.page.active');
-            if(current) {
-                current.style.opacity = '0';
-                current.style.transform = 'translateY(15px)';
-            }
+        go(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(`page-${id}`).classList.add('active');
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            const activeNav = document.getElementById(`n-${id}`);
+            if(activeNav) activeNav.classList.add('active');
             
-            setTimeout(() => {
-                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-                const next = document.getElementById(`page-${pageId}`);
-                next.classList.add('active');
-                
-                // עדכון תפריט תחתון
-                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-                const btn = document.getElementById(`btn-${pageId}`);
-                if(btn) btn.classList.add('active');
-
-                // טעינת נתונים לפי הדף
-                if(pageId === 'feed') Data.fetchJobs();
-                if(pageId === 'profile') UI.renderDashboard();
-                
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }, 100);
+            if(id === 'feed') Data.load();
+            if(id === 'admin') UI.renderDash();
+            window.scrollTo(0,0);
         }
     };
 
-    // --- מערכת אימות (Authentication Engine) ---
-    const Auth = {
-        async handle(mode) {
-            UI.toggleLoader(true);
-            const email = document.getElementById('auth-email').value;
-            const pass = document.getElementById('auth-pass').value;
-
-            if(!email || pass.length < 6) {
-                alert("וודא שהזנת אימייל תקין וסיסמה עם 6 תווים לפחות");
-                UI.toggleLoader(false);
-                return;
-            }
-
-            try {
-                if(mode === 'login') await signInWithEmailAndPassword(auth, email, pass);
-                else await createUserWithEmailAndPassword(auth, email, pass);
-            } catch (err) {
-                console.error(err);
-                alert("שגיאה בתהליך האימות. נסה שוב.");
-            } finally {
-                UI.toggleLoader(false);
-            }
-        },
-        async logout() {
-            await signOut(auth);
-            location.reload();
-        }
-    };
-
-    // --- ניהול נתונים (Data & Firebase Engine) ---
+    // מנוע נתונים (Firebase) - טיפול בשגיאת addDoc ו-undefined
     const Data = {
-        async publishJob() {
-            const title = document.getElementById('p-title').value;
-            const company = document.getElementById('p-company').value;
-            const phone = document.getElementById('p-wa').value.replace(/\D/g, '');
+        async saveJob() {
+            UI.loading(true);
+            const title = document.getElementById('p-title').value.trim();
+            const company = document.getElementById('p-company').value.trim();
+            const phone = document.getElementById('p-phone').value.replace(/\D/g, '');
             
-            if(!title || !company || phone.length < 9) {
-                alert("מלא את כל שדות החובה וודא מספר טלפון תקין");
+            if(!title || !company || !phone) {
+                alert("חובה למלא כותרת, חברה וטלפון!");
+                UI.loading(false);
                 return;
             }
 
-            UI.toggleLoader(true);
-            const questions = Array.from(document.querySelectorAll('.q-field'))
-                                   .map(i => i.value.trim())
-                                   .filter(v => v !== "");
-
             try {
+                const owner = State.user ? State.user.uid : State.tempID;
                 await addDoc(collection(db, "jobs"), {
                     title, company, phone,
-                    city: document.getElementById('p-city').value || "ישראל",
+                    city: document.getElementById('p-city').value || "כל הארץ",
                     salary: document.getElementById('p-salary').value || "גמיש",
-                    desc: document.getElementById('p-desc').value || "",
-                    questions,
-                    ownerID: State.user ? State.user.uid : State.guestUID,
+                    desc: document.getElementById('p-desc').value || "אין תיאור",
+                    questions: Array.from(document.querySelectorAll('.q-val')).map(i => i.value).filter(v => v),
+                    owner: owner,
                     createdAt: serverTimestamp()
                 });
-                Nav.to('feed');
-            } catch (e) {
-                alert("תקלה בפרסום המשרה.");
-            } finally {
-                UI.toggleLoader(false);
-            }
+                Nav.go('feed');
+            } catch (err) {
+                console.error(err);
+                alert("שגיאה בשמירת המשרה. נסה שוב.");
+            } finally { UI.loading(false); }
         },
 
-        async fetchJobs() {
+        async load() {
             const q = query(collection(db, "jobs"), orderBy("createdAt", "desc"));
-            const snapshot = await getDocs(q);
-            State.allJobs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            UI.renderJobs(State.allJobs);
+            const snap = await getDocs(q);
+            State.jobs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            UI.renderFeed(State.jobs);
         }
     };
 
-    // --- מערכת ה-UI והרינדור (UI Engine) ---
+    // ממשק משתמש (UI) - תיקון הצגת נתוני ה-undefined בלוח
     const UI = {
-        toggleLoader(show) {
-            document.getElementById('loader').style.display = show ? 'flex' : 'none';
-        },
-
-        filterJobs() {
-            const term = document.getElementById('globalSearch').value.toLowerCase();
-            const filtered = State.allJobs.filter(j => 
-                j.title.toLowerCase().includes(term) || 
-                j.city.toLowerCase().includes(term) ||
-                j.company.toLowerCase().includes(term)
+        loading(s) { document.getElementById('mainLoader').style.display = s ? 'flex' : 'none'; },
+        
+        search() {
+            const val = document.getElementById('jobSearch').value.toLowerCase();
+            const filtered = State.jobs.filter(j => 
+                j.title.toLowerCase().includes(val) || 
+                j.city.toLowerCase().includes(val) || 
+                j.company.toLowerCase().includes(val)
             );
-            UI.renderJobs(filtered);
+            UI.renderFeed(filtered);
         },
 
-        renderJobs(list) {
-            const container = document.getElementById('jobsList');
+        renderFeed(list) {
+            const grid = document.getElementById('jobsGrid');
             if(list.length === 0) {
-                container.innerHTML = `<div class="text-center py-20 opacity-20 font-bold">לא נמצאו משרות מתאימות</div>`;
+                grid.innerHTML = `<div class="text-center py-20 opacity-30 font-bold">לא נמצאו משרות...</div>`;
                 return;
             }
-            container.innerHTML = list.map(job => `
-                <div onclick="UI.showJobDetails('${job.id}')" class="card-job">
+            grid.innerHTML = list.map(j => `
+                <div onclick="UI.openJob('${j.id}')" class="job-card">
                     <div class="flex justify-between items-start mb-2">
-                        <h3 class="text-xl font-extrabold">${job.title}</h3>
-                        <span class="text-xs font-black text-blue-500 bg-blue-500/10 px-3 py-1 rounded-full">${job.salary}</span>
+                        <h3 class="text-2xl font-black">${j.title || 'משרה ללא שם'}</h3>
+                        <span class="text-xs font-black text-blue-500 bg-blue-500/10 px-3 py-1 rounded-full uppercase">${j.salary || 'גמיש'}</span>
                     </div>
-                    <p class="text-slate-400 font-bold text-sm">🏢 ${job.company} • 📍 ${job.city}</p>
+                    <p class="text-slate-400 font-bold">🏢 ${j.company || 'מעסיק'} | 📍 ${j.city || 'ישראל'}</p>
                 </div>
             `).join('');
         },
 
-        showJobDetails(id) {
-            State.selectedJob = State.allJobs.find(j => j.id === id);
-            const j = State.selectedJob;
-            document.getElementById('fullJobContent').innerHTML = `
-                <div class="card-job bg-slate-900/50 border-none p-8">
-                    <h1 class="text-4xl font-black mb-4">${j.title}</h1>
-                    <div class="flex gap-4 mb-8">
-                        <span class="bg-slate-800 px-4 py-2 rounded-xl text-xs font-bold">📍 ${j.city}</span>
-                        <span class="bg-slate-800 px-4 py-2 rounded-xl text-xs font-bold">💰 ${j.salary}</span>
-                    </div>
-                    <p class="text-slate-300 text-lg leading-relaxed whitespace-pre-wrap">${j.desc || 'אין תיאור נוסף למשרה זו.'}</p>
+        openJob(id) {
+            State.activeJob = State.jobs.find(x => x.id === id);
+            const j = State.activeJob;
+            document.getElementById('detailsBox').innerHTML = `
+                <div class="job-card bg-slate-900/40 border-none p-10 mb-8">
+                    <h2 class="text-4xl font-black mb-4">${j.title}</h2>
+                    <p class="text-blue-500 font-bold mb-8 text-xl">${j.company} • ${j.city}</p>
+                    <div class="h-px bg-slate-800 mb-8"></div>
+                    <p class="text-slate-300 leading-relaxed text-lg whitespace-pre-wrap">${j.desc}</p>
                 </div>
             `;
-            Nav.to('view');
+            Nav.go('details');
         },
 
-        addQuestionField() {
-            const container = document.getElementById('dynamicQuestions');
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.className = 'q-field input-premium py-3 mt-2';
-            input.placeholder = 'שאלת סינון נוספת...';
-            container.appendChild(input);
+        addQ() {
+            const inp = document.createElement('input');
+            inp.className = "q-val input-premium py-3 mt-2";
+            inp.placeholder = "שאלה נוספת...";
+            document.getElementById('dynamicQs').appendChild(inp);
         },
 
-        async renderDashboard() {
+        async renderDash() {
             if(!State.user) {
-                document.getElementById('locked-state').classList.remove('hidden');
-                document.getElementById('admin-state').classList.add('hidden');
+                document.getElementById('loginSection').classList.remove('hidden');
+                document.getElementById('dashboardSection').classList.add('hidden');
                 return;
             }
-            document.getElementById('locked-state').classList.add('hidden');
-            document.getElementById('admin-state').classList.remove('hidden');
-
-            const leadsWrap = document.getElementById('adminList');
-            leadsWrap.innerHTML = '<div class="custom-spinner mx-auto my-10"></div>';
-
-            // משיכת פניות (Leads) ששייכות למשתמש המחובר
-            const q = query(collection(db, "leads"), where("bossID", "==", State.user.uid), orderBy("createdAt", "desc"));
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('dashboardSection').classList.remove('hidden');
+            
+            const grid = document.getElementById('leadsGrid');
+            grid.innerHTML = '<div class="spinner mx-auto my-10"></div>';
+            
+            const q = query(collection(db, "leads"), where("boss", "==", State.user.uid), orderBy("createdAt", "desc"));
             const snap = await getDocs(q);
             
-            // עדכון סטטיסטיקה
-            document.getElementById('stat-leads').innerText = snap.size;
-            
-            leadsWrap.innerHTML = snap.docs.map(doc => {
+            grid.innerHTML = snap.docs.map(doc => {
                 const d = doc.data();
                 return `
-                <div class="card-job border-r-4 border-accent">
-                    <div class="flex justify-between items-center">
-                        <h4 class="font-black text-lg">${d.candidateName}</h4>
-                        <span class="text-accent font-black">${d.matchScore}% התאמה</span>
+                <div class="job-card border-r-4 border-green-500">
+                    <div class="flex justify-between items-center mb-1">
+                        <b class="text-xl">${d.name}</b>
+                        <span class="text-green-500 font-black">${d.score}% התאמה</span>
                     </div>
-                    <div class="flex justify-between items-end mt-4">
-                        <div class="text-xs text-slate-500">${d.jobTitle}</div>
-                        <a href="https://wa.me/972${d.candidatePhone.substring(1)}" class="bg-green-600 text-white px-4 py-2 rounded-xl text-xs font-bold">דבר איתו</a>
+                    <div class="flex justify-between items-end">
+                        <span class="text-xs text-slate-500">${d.jobTitle}</span>
+                        <a href="https://api.whatsapp.com/send?phone=972${d.phone.substring(1)}" class="bg-green-600 text-white px-5 py-2 rounded-xl text-xs font-black shadow-lg">וואטסאפ</a>
                     </div>
                 </div>
                 `;
-            }).join('') || '<p class="text-center opacity-20 py-10">אין פניות כרגע</p>';
+            }).join('') || '<p class="text-center opacity-20 py-20 font-bold">עוד לא הגיעו מועמדים...</p>';
         }
     };
 
-    // --- מנוע הגשת מועמדות (Application Logic) ---
+    // לוגיקת אפליקציה - שאלון וחיבור לוואטסאפ (פותר את שגיאת ה-Business שראית)
     const App = {
-        initApplication() {
-            const name = document.getElementById('app-name').value.trim();
-            const phone = document.getElementById('app-phone').value.replace(/\D/g, '');
-
-            if(name.length < 2 || phone.length < 9) {
-                alert("אנא הזן שם מלא ומספר טלפון תקין");
+        startProcess() {
+            const n = document.getElementById('cand-name').value.trim();
+            const p = document.getElementById('cand-phone').value.replace(/\D/g, '');
+            
+            if(n.length < 2 || p.length < 9) {
+                alert("נא למלא שם מלא ומספר טלפון תקין להמשך");
                 return;
             }
-
-            State.currentApplication = { name, phone };
             
-            if(State.selectedJob.questions && State.selectedJob.questions.length > 0) {
-                State.quiz.currentIdx = 0;
-                State.quiz.score = 0;
-                Nav.to('quiz');
-                App.renderQuiz();
+            State.cand = { n, p };
+            State.quiz = { idx: 0, score: 0 };
+            
+            if(State.activeJob.questions?.length > 0) {
+                Nav.go('quiz');
+                App.showQ();
             } else {
-                App.finalizeApplication(100);
+                App.finish(100);
             }
         },
 
-        renderQuiz() {
-            const q = State.selectedJob.questions[State.quiz.currentIdx];
-            const total = State.selectedJob.questions.length;
-            
-            document.getElementById('quizStepInfo').innerText = `שאלה ${State.quiz.currentIdx + 1} מתוך ${total}`;
-            document.getElementById('quizQuestion').innerText = q;
-            document.getElementById('quizBar').style.width = ((State.quiz.currentIdx / total) * 100) + '%';
+        showQ() {
+            const q = State.activeJob.questions[State.quiz.idx];
+            document.getElementById('qText').innerText = q;
+            document.getElementById('quizProgress').style.width = ((State.quiz.idx / State.activeJob.questions.length) * 100) + '%';
         },
 
-        processAnswer(isYes) {
-            if(isYes) State.quiz.score += (100 / State.selectedJob.questions.length);
+        answer(val) {
+            if(val) State.quiz.score += (100 / State.activeJob.questions.length);
+            State.quiz.idx++;
             
-            State.quiz.currentIdx++;
-            if(State.quiz.currentIdx < State.selectedJob.questions.length) {
-                App.renderQuiz();
+            if(State.quiz.idx < State.activeJob.questions.length) {
+                App.showQ();
             } else {
-                App.finalizeApplication(Math.round(State.quiz.score));
+                App.finish(Math.round(State.quiz.score));
             }
         },
 
-        async finalizeApplication(score) {
-            UI.toggleLoader(true);
+        async finish(score) {
+            UI.loading(true);
             try {
-                // שמירת הפנייה ב-Database
+                // שמירת הליד (התיקון לשגיאת ה-addDoc)
                 await addDoc(collection(db, "leads"), {
-                    bossID: State.selectedJob.ownerID,
-                    candidateName: State.currentApplication.name,
-                    candidatePhone: State.currentApplication.phone,
-                    jobTitle: State.selectedJob.title,
-                    matchScore: score,
+                    boss: State.activeJob.owner || "anon",
+                    jobTitle: State.activeJob.title,
+                    name: State.cand.n,
+                    phone: State.cand.p,
+                    score: score,
                     createdAt: serverTimestamp()
                 });
 
-                // פתיחת וואטסאפ עם הודעה מוכנה
-                const waMsg = encodeURIComponent(`היי, אני ${State.currentApplication.name}. ראיתי את המשרה שלך (${State.selectedJob.title}) ב-MatchMe. ציון ההתאמה שלי הוא ${score}%. אשמח לדבר!`);
-                window.location.href = `https://wa.me/972${State.selectedJob.phone.substring(1)}?text=${waMsg}`;
+                // פתיחת וואטסאפ עם קישור אוניברסלי (פותר את הבעיה בצילום מסך 10)
+                const msg = encodeURIComponent(`היי, אני ${State.cand.n}, הגשתי מועמדות למשרת ${State.activeJob.title} וקיבלתי ${score}% התאמה!`);
+                window.location.href = `https://api.whatsapp.com/send?phone=972${State.activeJob.phone.substring(1)}&text=${msg}`;
                 
-            } catch (e) {
-                alert("שגיאה בשליחת המועמדות.");
-            } finally {
-                UI.toggleLoader(false);
-            }
+                Nav.go('feed');
+            } catch (err) {
+                console.error(err);
+                alert("שגיאה בסיום התהליך. נסה שוב.");
+            } finally { UI.loading(false); }
         }
     };
 
-    // האזנה לשינויי משתמש (Auth State Observer)
-    onAuthStateChanged(auth, (user) => {
-        State.user = user;
-        document.getElementById('user-avatar').innerHTML = user ? '✅' : '👤';
-        Data.fetchJobs();
+    // ניהול הרשאות (Auth)
+    const Auth = {
+        async exec(mode) {
+            UI.loading(true);
+            const e = document.getElementById('auth-email').value, p = document.getElementById('auth-pass').value;
+            try {
+                if(mode === 'login') await signInWithEmailAndPassword(auth, e, p);
+                else await createUserWithEmailAndPassword(auth, e, p);
+            } catch(e) { alert("שגיאה: וודא שהאימייל נכון והסיסמה ארוכה מ-6 תווים"); }
+            finally { UI.loading(false); }
+        },
+        async logout() { await signOut(auth); location.reload(); }
+    };
+
+    onAuthStateChanged(auth, u => {
+        State.user = u;
+        Data.load();
     });
 
-    // חשיפת פונקציות ל-Window כדי שיוכלו להיקרא מה-HTML
-    window.Nav = Nav; window.UI = UI; window.Auth = Auth; window.Data = Data; window.App = App;
+    // חשיפת פונקציות לגלובל
+    window.Nav = Nav; window.UI = UI; window.Data = Data; window.App = App; window.Auth = Auth;
 
 </script>
 </body>
