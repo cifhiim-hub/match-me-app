@@ -3,19 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MatchMe | מערכת סינון חכמה</title>
+    <title>MatchMe | מערכת סינון גמישה</title>
     <style>
         body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
         .container { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 500px; }
         h1 { color: #0052cc; text-align: center; margin-bottom: 5px; }
         .section { display: none; margin-top: 20px; }
         .active { display: block; }
-        .btn { width: 100%; padding: 15px; margin: 10px 0; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 16px; }
+        .btn { width: 100%; padding: 15px; margin: 10px 0; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.3s; }
         .btn-blue { background: #0052cc; color: white; }
         .btn-dark { background: #34495e; color: white; }
+        .btn-add { background: #e7efff; color: #0052cc; padding: 10px; font-size: 14px; }
         .job-card { background: #fff; border: 1px solid #ddd; border-right: 5px solid #0052cc; padding: 15px; margin-bottom: 15px; border-radius: 8px; cursor: pointer; text-align: right; }
-        input, textarea { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        .chat-bubble { background: #e7efff; padding: 20px; border-radius: 15px; margin-bottom: 15px; font-size: 18px; text-align: center; border-bottom-right-radius: 0; }
+        input, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        .chat-bubble { background: #e7efff; padding: 20px; border-radius: 15px; margin-bottom: 15px; font-size: 18px; text-align: center; font-weight: bold; }
         .success-box { background: #d4edda; color: #155724; padding: 25px; border-radius: 10px; text-align: center; border: 2px dashed #28a745; }
     </style>
 </head>
@@ -29,27 +30,32 @@
             <button class="btn btn-blue" onclick="showSection('workerSection')">חפש עבודה</button>
             <button class="btn btn-dark" onclick="showSection('employerSection')">פרסם משרה</button>
         </div>
-        <div id="jobsList"></div>
     </div>
 
     <div id="employerSection" class="section">
-        <h3>פרסום משרה חדשה</h3>
+        <h3>פרסום משרה וסינון מותאם</h3>
         <input type="text" id="bizName" placeholder="שם העסק">
         <input type="text" id="jobTitle" placeholder="תפקיד">
-        <input type="tel" id="bossPhone" placeholder="מספר הטלפון שלך (לשליחת הודעות)">
-        <textarea id="jobDesc" placeholder="תיאור קצר..."></textarea>
-        <button class="btn btn-dark" onclick="saveJob()">פרסם באתר</button>
-        <button onclick="showSection('mainStep')">חזור</button>
+        <input type="tel" id="bossPhone" placeholder="מספר וואטסאפ">
+        
+        <p style="font-weight: bold; margin-bottom: 5px;">שאלות סינון (מינימום 1, מקסימום 10):</p>
+        <div id="questionsInputs">
+            <input type="text" class="q-input" placeholder="שאלה 1: למשל - האם יש לך רישיון?">
+        </div>
+        <button class="btn btn-add" id="addQBtn" onclick="addQuestionField()">+ הוסף שאלת סינון נוספת</button>
+        
+        <button class="btn btn-dark" onclick="saveJob()">פרסם משרה עכשיו</button>
+        <button class="btn" onclick="showSection('mainStep')">חזור</button>
     </div>
 
     <div id="workerSection" class="section">
-        <h3>משרות פנויות:</h3>
+        <h3>משרות שמתאימות לך:</h3>
         <div id="jobsContainer"></div>
-        <button onclick="showSection('mainStep')">חזור</button>
+        <button class="btn" onclick="showSection('mainStep')">חזור</button>
     </div>
 
     <div id="interviewSection" class="section">
-        <div class="chat-bubble" id="questionText">שאלה...</div>
+        <div class="chat-bubble" id="questionText"></div>
         <button class="btn btn-blue" onclick="handleAnswer(true)">כן</button>
         <button class="btn btn-blue" onclick="handleAnswer(false)">לא</button>
     </div>
@@ -60,72 +66,84 @@
 </div>
 
 <script>
-    let jobs = JSON.parse(localStorage.getItem('matchJobs')) || [];
+    let jobs = JSON.parse(localStorage.getItem('megaMatchJobs')) || [];
     let currentJob = null;
     let score = 0;
     let qIdx = 0;
-    const questions = ["יש לך ניסיון?", "זמין מיידית?", "נייד עם רכב?", "מוכן למשמרות?"];
+
+    function addQuestionField() {
+        const container = document.getElementById('questionsInputs');
+        const count = container.getElementsByClassName('q-input').length;
+        if (count < 10) {
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'q-input';
+            input.placeholder = `שאלה ${count + 1}:`;
+            container.appendChild(input);
+        }
+        if (count + 1 === 10) document.getElementById('addQBtn').style.display = 'none';
+    }
 
     function saveJob() {
         const biz = document.getElementById('bizName').value;
         const title = document.getElementById('jobTitle').value;
         const phone = document.getElementById('bossPhone').value;
-        const desc = document.getElementById('jobDesc').value;
+        const qInputs = document.getElementsByClassName('q-input');
+        let qs = [];
+        for(let i=0; i<qInputs.length; i++) {
+            if(qInputs[i].value) qs.push(qInputs[i].value);
+        }
         
-        if(!biz || !title || !phone) return alert("מלא פרטים חסרים");
+        if(!biz || !title || !phone || qs.length === 0) return alert("מלאו את כל הפרטים ולפחות שאלת סינון אחת");
         
-        jobs.push({ biz, title, phone, desc });
-        localStorage.setItem('matchJobs', JSON.stringify(jobs));
-        alert("המשרה פורסמה!");
+        jobs.push({ biz, title, phone, questions: qs });
+        localStorage.setItem('megaMatchJobs', JSON.stringify(jobs));
+        alert("המשרה פורסמה עם מערכת הסינון!");
         location.reload();
     }
 
     function loadJobs() {
         const container = document.getElementById('jobsContainer');
         container.innerHTML = jobs.length ? '' : '<p>אין משרות כרגע</p>';
-        jobs.reverse().forEach((job, idx) => {
-            container.innerHTML += `
-                <div class="job-card" onclick="startInterview(${idx})">
-                    <strong>${job.title}</strong><br>
-                    <span>${job.biz}</span>
-                </div>`;
+        jobs.slice().reverse().forEach((job, idx) => {
+            const originalIdx = jobs.length - 1 - idx;
+            container.innerHTML += `<div class="job-card" onclick="startInterview(${originalIdx})"><strong>${job.title}</strong><br>${job.biz}</div>`;
         });
     }
 
     function startInterview(idx) {
         currentJob = jobs[idx];
-        score = 0;
-        qIdx = 0;
+        score = 0; qIdx = 0;
         showSection('interviewSection');
-        document.getElementById('questionText').innerText = questions[qIdx];
+        ask();
+    }
+
+    function ask() {
+        document.getElementById('questionText').innerText = currentJob.questions[qIdx];
     }
 
     function handleAnswer(isYes) {
-        if(isYes) score += 23.5; // חישוב שיגיע למקסימום 94%
+        if(isYes) score += (94 / currentJob.questions.length);
         qIdx++;
-        if(qIdx < questions.length) {
-            document.getElementById('questionText').innerText = questions[qIdx];
-        } else {
-            showResult();
-        }
+        if(qIdx < currentJob.questions.length) ask();
+        else showResult();
     }
 
     function showResult() {
         showSection('resultSection');
+        const finalScore = Math.min(Math.round(score), 94);
         const area = document.getElementById('resultArea');
-        const finalScore = Math.floor(score);
         
-        if(finalScore >= 70) {
+        if(finalScore >= 65) {
             area.innerHTML = `
                 <div class="success-box">
-                    <h2>נמצאת מתאים ב-${finalScore}%! 🎉</h2>
-                    <p>הנתונים שלך נראים מעולה למשרה ב-${currentJob.biz}.</p>
-                    <p><strong>המספר של המעסיק:</strong></p>
-                    <h2 style="color:#0052cc">${currentJob.phone}</h2>
-                    <button class="btn btn-blue" onclick="window.open('https://wa.me/${currentJob.phone.replace(/-/g,'')}?text=היי, עברתי את הסינון ב-MatchMe למשרת ${currentJob.title}')">שלח וואטסאפ לבוס</button>
+                    <h2>התאמה של ${finalScore}%! 🎉</h2>
+                    <p>עברת את הסינון של <strong>${currentJob.biz}</strong>.</p>
+                    <button class="btn btn-blue" onclick="window.open('https://wa.me/${currentJob.phone.replace(/[^0-9]/g,'')}?text=היי, עברתי סינון ל${currentJob.title}')">דבר עם המעסיק</button>
+                    <button class="btn" onclick="location.reload()">סגור</button>
                 </div>`;
         } else {
-            area.innerHTML = `<div style="text-align:center"><h2>פחות מתאים כרגע (התאמה: ${finalScore}%)</h2><button class="btn btn-blue" onclick="location.reload()">חזרה</button></div>`;
+            area.innerHTML = `<div style="text-align:center"><h2>התאמה נמוכה (${finalScore}%)</h2><button class="btn btn-blue" onclick="location.reload()">חזור</button></div>`;
         }
     }
 
