@@ -865,6 +865,201 @@
         Data.sync();
         UI.toggleSmartQuiz();
     });
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, getDocs, query, where, orderBy, serverTimestamp, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    // הקונפיגורציה המעודכנת שלך
+    const firebaseConfig = {
+        apiKey: "AIzaSyD0hsz8SOI1OG2Fh-DBy1SHeabPaEKZx-Y",
+        authDomain: "matchme-32bcf.firebaseapp.com",
+        projectId: "matchme-32bcf",
+        storageBucket: "matchme-32bcf.firebasestorage.app", // עודכן
+        messagingSenderId: "1082863959305",
+        appId: "1:1082863959305:web:d8da5ea69af003602c27d8" // עודכן
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const GlobalState = {
+        user: null,
+        posts: [],
+        filteredPosts: [],
+        currentView: 'feed',
+        isSyncing: false
+    };
+
+    const Router = {
+        go(viewId) {
+            document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+            const target = document.getElementById(`view-${viewId}`);
+            if (target) target.classList.add('active');
+            
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            const link = document.getElementById(`nav-${viewId}`);
+            if (link) link.classList.add('active');
+
+            GlobalState.currentView = viewId;
+            if (viewId === 'feed') Data.sync();
+            if (viewId === 'admin') UI.refreshDashboard();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    };
+
+    const Data = {
+        async sync() {
+            if (GlobalState.isSyncing) return;
+            GlobalState.isSyncing = true;
+            UI.toggleLoader(true);
+            try {
+                const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
+                const snap = await getDocs(q);
+                GlobalState.posts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                UI.renderFeed(GlobalState.posts);
+            } catch (e) {
+                console.error(e);
+                Toast.error("שגיאת סנכרון. וודא שהגדרת Rules ב-Firebase.");
+            } finally {
+                UI.toggleLoader(false);
+                GlobalState.isSyncing = false;
+            }
+        },
+
+        async handlePublish() {
+            const title = document.getElementById('field-title').value.trim();
+            const phone = document.getElementById('field-phone').value.trim();
+            const name = document.getElementById('field-name').value.trim();
+            const type = document.getElementById('field-type').value;
+
+            if (!title || !phone || !name) return Toast.warning("מלא שדות חובה");
+
+            UI.toggleLoader(true);
+            try {
+                await addDoc(collection(db, "posts"), {
+                    type, title, name, phone,
+                    city: document.getElementById('field-city').value || "כל הארץ",
+                    desc: document.getElementById('field-desc').value,
+                    owner: GlobalState.user ? GlobalState.user.uid : "guest",
+                    createdAt: serverTimestamp()
+                });
+                Toast.success("פורסם בהצלחה!");
+                Router.go('feed');
+            } catch (e) {
+                Toast.error("שגיאה בפרסום. בדוק הרשאות ב-Database.");
+            } finally {
+                UI.toggleLoader(false);
+            }
+        }
+    };
+
+    const App = {
+        async engage(postId) {
+            const post = GlobalState.posts.find(p => p.id === postId);
+            if (!post) return;
+
+            const name = prompt("מה שמך?");
+            const phone = prompt("מה הטלפון שלך?");
+            if (!name || !phone) return;
+
+            try {
+                UI.toggleLoader(true);
+                // שמירת ליד
+                await addDoc(collection(db, "leads"), {
+                    bossID: post.owner,
+                    candidateName: name,
+                    candidatePhone: phone,
+                    jobTitle: post.title,
+                    createdAt: serverTimestamp()
+                });
+                
+                // שליחה לוואטסאפ בפורמט wa.me (עובד הכי טוב)
+                let num = post.phone.replace(/\D/g, '');
+                if (num.startsWith('0')) num = '972' + num.substring(1);
+                const msg = encodeURIComponent(`היי ${post.name}, פניתי למודעה "${post.title}" ב-MatchMe. שמי ${name}.`);
+                window.location.href = `https://wa.me/${num}?text=${msg}`;
+            } catch (e) {
+                Toast.error("תקלה בשליחה.");
+            } finally {
+                UI.toggleLoader(false);
+            }
+        }
+    };
+
+    const UI = {
+        toggleLoader(s) { document.getElementById('master-loader').style.display = s ? 'flex' : 'none'; },
+        
+        renderFeed(list) {
+            const container = document.getElementById('feed-container');
+            container.innerHTML = list.map(item => `
+                <div class="feed-card animate-fade-in" onclick="App.engage('${item.id}')">
+                    <h3 class="text-xl font-black">${item.title}</h3>
+                    <p class="text-blue-400 text-sm">${item.name} | ${item.city}</p>
+                    <p class="text-slate-400 text-xs mt-2 opacity-70">${item.desc || ''}</p>
+                </div>
+            `).join('');
+        },
+
+        handleSearch(val) {
+            const term = val.toLowerCase();
+            const filtered = GlobalState.posts.filter(p => p.title.toLowerCase().includes(term));
+            this.renderFeed(filtered);
+        },
+
+        async refreshDashboard() {
+            if (!GlobalState.user) {
+                document.getElementById('auth-panel').classList.remove('hidden');
+                document.getElementById('dashboard-panel').classList.add('hidden');
+                return;
+            }
+            document.getElementById('auth-panel').classList.add('hidden');
+            document.getElementById('dashboard-panel').classList.remove('hidden');
+            // כאן אפשר להוסיף שליפת לידים מה-DB כפי שעשינו קודם
+        },
+        
+        addNewQuizField() { /* Logic here */ },
+        toggleSmartQuiz() { /* Logic here */ },
+        showAppInfo() { alert("MatchMe Pro 2026"); }
+    };
+
+    const Auth = {
+        async process(mode) {
+            const email = document.getElementById('auth-email').value;
+            const pass = document.getElementById('auth-pass').value;
+            try {
+                UI.toggleLoader(true);
+                if (mode === 'login') await signInWithEmailAndPassword(auth, email, pass);
+                else await createUserWithEmailAndPassword(auth, email, pass);
+                Router.go('admin');
+            } catch (e) { Toast.error("שגיאה בחשבון"); }
+            finally { UI.toggleLoader(false); }
+        },
+        logout() { signOut(auth).then(() => location.reload()); }
+    };
+
+    const Toast = {
+        show(m, type) {
+            const container = document.getElementById('toast-container');
+            const t = document.createElement('div');
+            t.className = `glass-morphism p-4 rounded-xl border-r-4 ${type === 'success' ? 'border-green-500' : 'border-red-500'}`;
+            t.innerHTML = m;
+            container.appendChild(t);
+            setTimeout(() => t.remove(), 3000);
+        },
+        success(m) { this.show(m, 'success'); },
+        error(m) { this.show(m, 'error'); },
+        warning(m) { this.show(m, 'error'); }
+    };
+
+    onAuthStateChanged(auth, u => {
+        GlobalState.user = u;
+        UI.toggleLoader(false);
+    });
+
+    window.Router = Router; window.Data = Data; window.UI = UI; window.Auth = Auth; window.App = App;
+    Data.sync();
 </script>
 </body>
 </html>
