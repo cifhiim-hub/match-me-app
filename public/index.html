@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MatchMe - Final</title>
+    <title>MatchMe - Fixed</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;700;800&display=swap" rel="stylesheet">
     <style>
@@ -18,7 +18,7 @@
 
     <header class="p-6 flex justify-between items-center max-w-xl mx-auto">
         <h1 class="text-2xl font-black italic">MATCH<span class="text-blue-500">ME</span></h1>
-        <div id="u-status" class="text-[10px] bg-white/5 px-3 py-1 rounded-full border border-white/10">אורח</div>
+        <div id="u-status" class="text-[10px] bg-blue-500/10 text-blue-400 px-3 py-1 rounded-full border border-blue-500/20 font-bold">אורח</div>
     </header>
 
     <section id="v-feed" class="view-section active p-4 max-w-xl mx-auto pb-32">
@@ -27,10 +27,11 @@
 
     <section id="v-post" class="view-section p-4 max-w-xl mx-auto pb-32">
         <div class="glass p-8 rounded-[35px] space-y-4">
-            <h2 class="text-xl font-bold">פרסום מודעה חדשה</h2>
-            <input id="post-t" type="text" placeholder="מה התפקיד? (למשל: מלצר)" class="w-full bg-slate-800 p-4 rounded-xl border-none">
-            <input id="post-p" type="tel" placeholder="וואטסאפ (05...)" class="w-full bg-slate-800 p-4 rounded-xl border-none">
-            <button onclick="Data.add()" class="w-full bg-blue-600 py-4 rounded-2xl font-bold">פרסם בלוח</button>
+            <h2 class="text-xl font-bold">פרסום חדש</h2>
+            <input id="in-title" type="text" placeholder="שם העסק / תפקיד" class="w-full bg-slate-800 p-4 rounded-xl border-none">
+            <input id="in-city" type="text" placeholder="עיר" class="w-full bg-slate-800 p-4 rounded-xl border-none">
+            <input id="in-phone" type="tel" placeholder="וואטסאפ (05...)" class="w-full bg-slate-800 p-4 rounded-xl border-none">
+            <button onclick="Data.add()" class="w-full bg-blue-600 py-4 rounded-2xl font-bold">פרסם עכשיו</button>
         </div>
     </section>
 
@@ -52,10 +53,10 @@
         </div>
     </section>
 
-    <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-sm glass h-20 rounded-[35px] flex justify-around items-center px-4 z-50 shadow-2xl">
-        <div onclick="Router.go('feed')" class="cursor-pointer text-xl">🏠</div>
+    <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-sm glass h-20 rounded-[35px] flex justify-around items-center px-4 z-50">
+        <div onclick="Router.go('feed')" class="cursor-pointer">🏠</div>
         <div onclick="Router.go('post')" class="cursor-pointer bg-blue-600 w-14 h-14 rounded-full flex items-center justify-center -mt-10 border-4 border-slate-950 text-white text-2xl">+</div>
-        <div onclick="Router.go('admin')" class="cursor-pointer text-xl">👤</div>
+        <div onclick="Router.go('admin')" class="cursor-pointer">👤</div>
     </nav>
 
 <script type="module">
@@ -63,7 +64,7 @@
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { getFirestore, collection, addDoc, getDocs, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    const firebaseConfig = {
+    const cfg = {
         apiKey: "AIzaSyD0hsz8SOI1OG2Fh-DBy1SHeabPaEKZx-Y",
         authDomain: "matchme-32bcf.firebaseapp.com",
         projectId: "matchme-32bcf",
@@ -71,62 +72,65 @@
         appId: "1:1082863959305:web:f888f4df815598696c601f"
     };
 
-    const app = initializeApp(firebaseConfig);
+    const app = initializeApp(cfg);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
     window.Router = {
         go(id) {
             document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
-            document.getElementById(`v-${id}`).classList.add('active');
+            document.getElementById('v-'+id).classList.add('active');
         }
     };
 
     window.Auth = {
         async login() {
             try { await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('pass').value); }
-            catch(e) { alert("שגיאה בכניסה: " + e.message); }
+            catch(e) { alert("שגיאה: " + e.message); }
         },
         async reg() {
-            try { await createUserWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('pass').value); alert("נרשמת בהצלחה!"); }
-            catch(e) { alert("שגיאה בהרשמה: " + e.message); }
+            try { await createUserWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('pass').value); alert("נרשמת!"); }
+            catch(e) { alert("שגיאה: וודא שהפעלת Authentication ב-Firebase"); }
         },
         logout() { signOut(auth).then(() => location.reload()); }
     };
 
     window.Data = {
         async add() {
-            const t = document.getElementById('post-t').value;
-            const p = document.getElementById('post-p').value;
-            if(!t || !p) return alert("מלא את כל השדות");
+            const t = document.getElementById('in-title').value;
+            const c = document.getElementById('in-city').value;
+            const p = document.getElementById('in-phone').value;
+            if(!t || !p) return alert("מלא פרטים");
             try {
-                await addDoc(collection(db, "posts"), { title: t, phone: p, createdAt: serverTimestamp() });
+                await addDoc(collection(db, "posts"), { title: t, city: c, phone: p, createdAt: serverTimestamp() });
                 alert("פורסם!"); Router.go('feed'); Data.load();
             } catch(e) { alert("שגיאה בפרסום"); }
         },
         async load() {
             const snap = await getDocs(query(collection(db, "posts"), orderBy("createdAt", "desc")));
             document.getElementById('feed-list').innerHTML = snap.docs.map(doc => {
-                const p = doc.data();
-                return `<div class="glass p-6 rounded-3xl border-r-4 border-blue-500">
-                    <h3 class="font-bold text-lg">${p.title || 'ללא כותרת'}</h3>
-                    <button onclick="window.open('https://wa.me/${p.phone ? p.phone.replace(/\D/g,'') : ''}')" class="text-blue-400 text-xs font-bold mt-2">פנה בוואטסאפ ➜</button>
+                const item = doc.data();
+                return `
+                <div class="glass p-6 rounded-3xl border-r-4 border-blue-500">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="font-bold text-lg">${item.title || 'ללא כותרת'}</h3>
+                            <p class="text-slate-400 text-xs">${item.city || ''}</p>
+                        </div>
+                        <span class="bg-blue-500/20 text-blue-400 text-[10px] px-2 py-1 rounded-lg">חדש</span>
+                    </div>
+                    <button onclick="window.open('https://wa.me/${item.phone ? item.phone.replace(/\D/g,'') : ''}')" class="text-blue-400 text-xs font-bold mt-4 block">פנה בוואטסאפ ➜</button>
                 </div>`;
             }).join('');
         }
     };
 
     onAuthStateChanged(auth, u => {
-        const authBox = document.getElementById('auth-box');
-        const dashBox = document.getElementById('dash-box');
-        if (u) {
-            authBox.classList.add('hidden');
-            dashBox.classList.remove('hidden');
+        if(u) {
+            document.getElementById('auth-box').classList.add('hidden');
+            document.getElementById('dash-box').classList.remove('hidden');
             document.getElementById('u-mail').innerText = u.email;
             document.getElementById('u-status').innerText = "מחובר";
-        } else {
-            authBox.classList.remove('hidden');
-            dashBox.classList.add('hidden');
         }
         Data.load();
     });
