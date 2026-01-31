@@ -870,14 +870,13 @@
     import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { getFirestore, collection, addDoc, getDocs, query, where, orderBy, serverTimestamp, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    // הקונפיגורציה המעודכנת שלך
     const firebaseConfig = {
         apiKey: "AIzaSyD0hsz8SOI1OG2Fh-DBy1SHeabPaEKZx-Y",
         authDomain: "matchme-32bcf.firebaseapp.com",
         projectId: "matchme-32bcf",
-        storageBucket: "matchme-32bcf.firebasestorage.app", // עודכן
+        storageBucket: "matchme-32bcf.firebasestorage.app",
         messagingSenderId: "1082863959305",
-        appId: "1:1082863959305:web:d8da5ea69af003602c27d8" // עודכן
+        appId: "1:1082863959305:web:d8da5ea69af003602c27d8"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -887,7 +886,6 @@
     const GlobalState = {
         user: null,
         posts: [],
-        filteredPosts: [],
         currentView: 'feed',
         isSyncing: false
     };
@@ -921,7 +919,7 @@
                 UI.renderFeed(GlobalState.posts);
             } catch (e) {
                 console.error(e);
-                Toast.error("שגיאת סנכרון. וודא שהגדרת Rules ב-Firebase.");
+                Toast.error("שגיאת סנכרון. בדוק Rules ב-Firebase.");
             } finally {
                 UI.toggleLoader(false);
                 GlobalState.isSyncing = false;
@@ -933,25 +931,41 @@
             const phone = document.getElementById('field-phone').value.trim();
             const name = document.getElementById('field-name').value.trim();
             const type = document.getElementById('field-type').value;
+            const city = document.getElementById('field-city').value.trim() || "כל הארץ";
+            const desc = document.getElementById('field-desc').value.trim();
 
             if (!title || !phone || !name) return Toast.warning("מלא שדות חובה");
 
             UI.toggleLoader(true);
             try {
+                // איסוף שאלות שאלון
+                const questions = Array.from(document.querySelectorAll('.quiz-q-input'))
+                    .map(input => input.value.trim())
+                    .filter(val => val !== "");
+
                 await addDoc(collection(db, "posts"), {
-                    type, title, name, phone,
-                    city: document.getElementById('field-city').value || "כל הארץ",
-                    desc: document.getElementById('field-desc').value,
+                    type, title, name, phone, city, desc,
+                    questions: type === 'job' ? questions : [],
                     owner: GlobalState.user ? GlobalState.user.uid : "guest",
                     createdAt: serverTimestamp()
                 });
                 Toast.success("פורסם בהצלחה!");
                 Router.go('feed');
             } catch (e) {
-                Toast.error("שגיאה בפרסום. בדוק הרשאות ב-Database.");
+                console.error(e);
+                Toast.error("שגיאה בפרסום. וודא שביצעת Publish ל-Rules.");
             } finally {
                 UI.toggleLoader(false);
             }
+        },
+
+        async deletePost(postId) {
+            if (!confirm("למחוק את המודעה?")) return;
+            try {
+                await deleteDoc(doc(db, "posts", postId));
+                Toast.success("המודעה נמחקה");
+                UI.refreshDashboard();
+            } catch (e) { Toast.error("תקלה במחיקה"); }
         }
     };
 
@@ -960,31 +974,39 @@
             const post = GlobalState.posts.find(p => p.id === postId);
             if (!post) return;
 
-            const name = prompt("מה שמך?");
-            const phone = prompt("מה הטלפון שלך?");
-            if (!name || !phone) return;
+            const candidateName = prompt("הכנס שם מלא להגשת מועמדות:");
+            if (!candidateName) return;
+            const candidatePhone = prompt("מה מספר הטלפון שלך?");
+            if (!candidatePhone) return;
+
+            let score = 100;
+            if (post.questions && post.questions.length > 0) {
+                let correct = 0;
+                for (const q of post.questions) {
+                    if (confirm(`${q}\n\n(אישור=כן, ביטול=לא)`)) correct++;
+                }
+                score = Math.round((correct / post.questions.length) * 100);
+            }
 
             try {
                 UI.toggleLoader(true);
-                // שמירת ליד
                 await addDoc(collection(db, "leads"), {
                     bossID: post.owner,
-                    candidateName: name,
-                    candidatePhone: phone,
                     jobTitle: post.title,
+                    candidateName,
+                    candidatePhone,
+                    matchScore: score,
                     createdAt: serverTimestamp()
                 });
                 
-                // שליחה לוואטסאפ בפורמט wa.me (עובד הכי טוב)
+                Toast.success("הפנייה נשלחה!");
+                
                 let num = post.phone.replace(/\D/g, '');
                 if (num.startsWith('0')) num = '972' + num.substring(1);
-                const msg = encodeURIComponent(`היי ${post.name}, פניתי למודעה "${post.title}" ב-MatchMe. שמי ${name}.`);
+                const msg = encodeURIComponent(`היי ${post.name}, פניתי למשרה "${post.title}". שמי ${candidateName}, התאמה: ${score}%`);
                 window.location.href = `https://wa.me/${num}?text=${msg}`;
-            } catch (e) {
-                Toast.error("תקלה בשליחה.");
-            } finally {
-                UI.toggleLoader(false);
-            }
+            } catch (e) { Toast.error("תקלה בשליחה"); }
+            finally { UI.toggleLoader(false); }
         }
     };
 
@@ -994,17 +1016,20 @@
         renderFeed(list) {
             const container = document.getElementById('feed-container');
             container.innerHTML = list.map(item => `
-                <div class="feed-card animate-fade-in" onclick="App.engage('${item.id}')">
-                    <h3 class="text-xl font-black">${item.title}</h3>
-                    <p class="text-blue-400 text-sm">${item.name} | ${item.city}</p>
-                    <p class="text-slate-400 text-xs mt-2 opacity-70">${item.desc || ''}</p>
+                <div class="feed-card animate-fade-in ${item.type !== 'job' ? 'worker-post' : ''}" onclick="App.engage('${item.id}')">
+                    <h3 class="text-2xl font-black">${item.title}</h3>
+                    <p class="text-blue-400 font-bold">${item.name} | ${item.city}</p>
+                    <p class="text-slate-400 text-sm mt-2 opacity-80">${item.desc || ''}</p>
+                    <div class="mt-4 pt-3 border-t border-white/5 text-[10px] font-black uppercase text-blue-500">
+                        ${item.type === 'job' ? 'לחץ להגשת מועמדות >' : 'לחץ ליצירת קשר >'}
+                    </div>
                 </div>
             `).join('');
         },
 
         handleSearch(val) {
             const term = val.toLowerCase();
-            const filtered = GlobalState.posts.filter(p => p.title.toLowerCase().includes(term));
+            const filtered = GlobalState.posts.filter(p => p.title.toLowerCase().includes(term) || p.city.toLowerCase().includes(term));
             this.renderFeed(filtered);
         },
 
@@ -1016,20 +1041,53 @@
             }
             document.getElementById('auth-panel').classList.add('hidden');
             document.getElementById('dashboard-panel').classList.remove('hidden');
-            // כאן אפשר להוסיף שליפת לידים מה-DB כפי שעשינו קודם
+
+            // טעינת מודעות שלי
+            const pSnap = await getDocs(query(collection(db, "posts"), where("owner", "==", GlobalState.user.uid)));
+            document.getElementById('my-listings-grid').innerHTML = pSnap.docs.map(d => `
+                <div class="glass-morphism p-4 rounded-xl flex justify-between items-center mb-2">
+                    <span class="font-bold">${d.data().title}</span>
+                    <button onclick="Data.deletePost('${d.id}')" class="text-red-500">🗑️</button>
+                </div>
+            `).join('') || 'אין מודעות';
+
+            // טעינת פניות (Leads)
+            const lSnap = await getDocs(query(collection(db, "leads"), where("bossID", "==", GlobalState.user.uid)));
+            document.getElementById('my-leads-grid').innerHTML = lSnap.docs.map(d => {
+                const l = d.data();
+                return `
+                <div class="glass-morphism p-4 rounded-2xl border-r-4 border-green-500 mb-4">
+                    <h4 class="font-black">${l.candidateName}</h4>
+                    <p class="text-xs text-blue-400">${l.jobTitle} | ${l.matchScore}% התאמה</p>
+                    <div class="flex gap-2 mt-3">
+                        <a href="https://wa.me/972${l.candidatePhone.substring(1)}" class="bg-green-600 px-3 py-1 rounded-lg text-[10px] font-black">WhatsApp</a>
+                        <a href="tel:${l.candidatePhone}" class="bg-slate-700 px-3 py-1 rounded-lg text-[10px] font-black">התקשר</a>
+                    </div>
+                </div>`;
+            }).join('') || 'אין פניות כרגע';
         },
         
-        addNewQuizField() { /* Logic here */ },
-        toggleSmartQuiz() { /* Logic here */ },
-        showAppInfo() { alert("MatchMe Pro 2026"); }
+        addNewQuizField() {
+            const container = document.getElementById('quiz-inputs-container');
+            const input = document.createElement('input');
+            input.className = "quiz-q-input input-premium py-4 text-sm mt-2";
+            input.placeholder = `שאלה ${container.children.length + 1}...`;
+            container.appendChild(input);
+        },
+        toggleSmartQuiz() {
+            const isJob = document.getElementById('field-type').value === 'job';
+            document.getElementById('smart-quiz-builder').style.display = isJob ? 'block' : 'none';
+        },
+        showAppInfo() { alert("MatchMe Pro 2026\nמערכת גיוס חכמה"); }
     };
 
     const Auth = {
         async process(mode) {
             const email = document.getElementById('auth-email').value;
             const pass = document.getElementById('auth-pass').value;
+            if (!email || pass.length < 6) return Toast.warning("פרטים לא תקינים");
+            UI.toggleLoader(true);
             try {
-                UI.toggleLoader(true);
                 if (mode === 'login') await signInWithEmailAndPassword(auth, email, pass);
                 else await createUserWithEmailAndPassword(auth, email, pass);
                 Router.go('admin');
@@ -1044,7 +1102,7 @@
             const container = document.getElementById('toast-container');
             const t = document.createElement('div');
             t.className = `glass-morphism p-4 rounded-xl border-r-4 ${type === 'success' ? 'border-green-500' : 'border-red-500'}`;
-            t.innerHTML = m;
+            t.innerHTML = `<p class="font-bold text-sm">${m}</p>`;
             container.appendChild(t);
             setTimeout(() => t.remove(), 3000);
         },
@@ -1055,11 +1113,13 @@
 
     onAuthStateChanged(auth, u => {
         GlobalState.user = u;
+        if (GlobalState.currentView === 'admin') UI.refreshDashboard();
         UI.toggleLoader(false);
     });
 
     window.Router = Router; window.Data = Data; window.UI = UI; window.Auth = Auth; window.App = App;
     Data.sync();
+    UI.toggleSmartQuiz();
 </script>
 </body>
 </html>
