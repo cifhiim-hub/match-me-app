@@ -3,183 +3,306 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MatchMe Ultimate Pro</title>
+    <title>MatchMe Ultimate 2026</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@200;300;400;600;700;800&display=swap" rel="stylesheet">
     
     <style>
-        /* הגדרות יסוד למניעת סתירות */
+        /* הגדרות ליבה ומערכת צבעים */
         :root { 
             --primary: #3b82f6; 
-            --secondary: #10b981; 
-            --dark-bg: #020617; 
-            --glass-bg: rgba(30, 41, 59, 0.7);
+            --primary-glow: rgba(59, 130, 246, 0.5);
+            --secondary: #10b981;
+            --bg-dark: #020617; 
+            --glass: rgba(30, 41, 59, 0.7);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * { 
+            box-sizing: border-box; 
+            -webkit-tap-highlight-color: transparent; 
         }
 
         body { 
             font-family: 'Assistant', sans-serif; 
-            background-color: var(--dark-bg); 
+            background-color: var(--bg-dark); 
             color: #f8fafc; 
             margin: 0; 
-            -webkit-tap-highlight-color: transparent;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* עיצוב זכוכית (Glassmorphism) */
+        .glass { 
+            background: var(--glass); 
+            backdrop-filter: blur(16px); 
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
+            border-radius: 32px;
         }
 
         /* מערכת הניווט בין מסכים */
         .view-section { 
             display: none; 
             min-height: 100vh; 
-            padding-bottom: 110px; 
-            animation: fadeIn 0.4s ease-out;
+            padding-bottom: 120px; 
+            padding-top: 20px;
         }
-        .view-section.active { display: block; }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* אלמנטים עיצוביים מתקדמים - Glassmorphism */
-        .glass-panel { 
-            background: var(--glass-bg); 
-            backdrop-filter: blur(12px); 
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 30px;
+        
+        .view-section.active { 
+            display: block; 
+            animation: screenIn 0.5s cubic-bezier(0.4, 0, 0.2, 1); 
         }
 
-        .btn-main {
+        @keyframes screenIn {
+            from { opacity: 0; transform: translateY(30px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* אלמנטים אינטראקטיביים */
+        .btn-primary {
             background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.4);
+            transition: all 0.3s ease;
         }
-        .btn-main:active { transform: scale(0.96); opacity: 0.9; }
 
-        /* עיצוב המודאל (כרטיס מורחב) */
+        .btn-primary:active { transform: scale(0.95); }
+
+        .input-field {
+            background: rgba(255, 255, 255, 0.03) !important;
+            border: 1px solid var(--border) !important;
+            color: white !important;
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            border-color: var(--primary) !important;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1) !important;
+            outline: none;
+        }
+
+        /* עיצוב המודאל (הכרטיס המורחב) */
         .modal-overlay {
             display: none;
             position: fixed;
             inset: 0;
             background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(8px);
-            z-index: 100;
+            backdrop-filter: blur(12px);
+            z-index: 1000;
             align-items: center;
             justify-content: center;
             padding: 20px;
         }
+
         .modal-overlay.active { display: flex; }
 
-        /* סרגל ניווט תחתון מעוצב */
-        .nav-bottom {
+        .modal-card {
+            width: 100%;
+            max-width: 500px;
+            max-height: 85vh;
+            overflow-y: auto;
+            animation: modalIn 0.4s ease-out;
+        }
+
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* סרגל ניווט תחתון */
+        .nav-bar {
             position: fixed;
             bottom: 24px;
             left: 50%;
             transform: translateX(-50%);
-            width: 90%;
-            max-width: 400px;
-            height: 75px;
-            z-index: 50;
+            width: 92%;
+            max-width: 420px;
+            height: 76px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 500;
+            padding: 0 10px;
+        }
+
+        .nav-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            opacity: 0.4;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn.active {
+            opacity: 1;
+            color: var(--primary);
+        }
+
+        .add-btn-container {
+            position: relative;
+            top: -25px;
+        }
+
+        .add-btn-circle {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            border: 6px solid var(--bg-dark);
+        }
+
+        /* מחוון סוג מודעה */
+        .type-pill {
+            padding: 4px 12px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
     </style>
 </head>
 <body>
 
-    <div class="fixed inset-0 -z-10 overflow-hidden">
-        <div class="absolute -top-[10%] -left-[10%] w-[50%] h-[50%] bg-blue-600/10 blur-[120px] rounded-full"></div>
-        <div class="absolute -bottom-[10%] -right-[10%] w-[50%] h-[50%] bg-emerald-600/10 blur-[120px] rounded-full"></div>
+    <div class="fixed inset-0 -z-10">
+        <div class="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-blue-600/10 blur-[120px] rounded-full"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-emerald-600/10 blur-[120px] rounded-full"></div>
     </div>
 
-    <header class="sticky top-0 z-40 glass-panel !rounded-none !border-x-0 !border-t-0 p-5 flex justify-between items-center">
+    <header class="sticky top-0 z-50 glass !rounded-none border-x-0 border-t-0 p-5 flex justify-between items-center shadow-lg">
         <div>
-            <h1 class="text-2xl font-black tracking-tighter italic">MATCH<span class="text-blue-500">ME</span></h1>
-            <div class="h-1 w-full bg-blue-500/30 rounded-full mt-[-4px]"></div>
+            <h1 class="text-2xl font-black italic tracking-tighter">MATCH<span class="text-blue-500">ME</span></h1>
+            <div class="h-1 w-8 bg-blue-500 rounded-full"></div>
         </div>
-        <div id="top-status" class="px-3 py-1 rounded-full border border-white/10 text-[10px] font-bold uppercase tracking-widest bg-white/5">
-            מתחבר...
+        <div id="u-status-tag" class="px-4 py-1.5 rounded-full border border-white/10 bg-white/5 text-[10px] font-extrabold uppercase tracking-widest text-slate-400">
+            אורח
         </div>
     </header>
 
-    <main id="app-content">
+    <main class="relative z-10">
+        
         <section id="view-feed" class="view-section active p-4 max-w-2xl mx-auto">
-            <div class="mb-6 relative">
-                <input type="text" id="search-input" placeholder="חפש תפקיד, עיר או חברה..." 
-                       class="w-full glass-panel p-4 pr-12 outline-none focus:ring-2 focus:ring-blue-500 transition-all">
-                <span class="absolute right-4 top-1/2 -translate-y-1/2 opacity-40 text-xl">🔍</span>
+            <div class="relative mb-8">
+                <input type="text" id="main-search" placeholder="חפש תפקיד, עיר או שם עסק..." 
+                       class="w-full glass p-5 pr-14 input-field outline-none">
+                <span class="absolute right-6 top-1/2 -translate-y-1/2 text-xl opacity-30">🔍</span>
             </div>
-            <div id="feed-items-container" class="space-y-4">
+            
+            <div id="feed-container" class="space-y-4">
                 </div>
         </section>
 
         <section id="view-post" class="view-section p-4 max-w-xl mx-auto">
-            <div class="glass-panel p-8 shadow-2xl">
-                <h2 class="text-2xl font-extrabold mb-6 flex items-center gap-2">
-                    <span class="text-blue-500">●</span> פרסום מודעה
+            <div class="glass p-8 shadow-2xl">
+                <h2 class="text-2xl font-black mb-8 flex items-center gap-3">
+                    <span class="w-2 h-8 bg-blue-500 rounded-full"></span>
+                    פרסום מודעה חדשה
                 </h2>
-                <div class="grid grid-cols-2 gap-3 mb-6">
-                    <button onclick="st.currentType='job';UI.syncType()" id="type-job-btn" class="p-4 rounded-2xl border-2 border-blue-500 bg-blue-500/10 font-bold transition-all">💼 מעסיק</button>
-                    <button onclick="st.currentType='worker';UI.syncType()" id="type-worker-btn" class="p-4 rounded-2xl border-2 border-transparent bg-slate-800 font-bold transition-all opacity-50">🙋‍♂️ עובד</button>
-                </div>
-                <div class="space-y-4">
-                    <input id="post-title" type="text" placeholder="מה התפקיד? (למשל: נהג משאית)" class="w-full glass-panel p-4 rounded-2xl border-none">
-                    <input id="post-biz" type="text" placeholder="שם העסק / שם מועמד" class="w-full glass-panel p-4 rounded-2xl border-none">
-                    <input id="post-city" type="text" placeholder="באיזו עיר?" class="w-full glass-panel p-4 rounded-2xl border-none">
-                    <input id="post-phone" type="tel" placeholder="וואטסאפ ליצירת קשר" class="w-full glass-panel p-4 rounded-2xl border-none">
-                    
-                    <div class="pt-6 mt-4 border-t border-white/5">
-                        <label class="text-[11px] font-bold text-blue-400 uppercase tracking-widest block mb-3">שאלות התאמה לסינון פניות</label>
-                        <input id="post-q1" type="text" placeholder="שאלה 1 (למשל: האם יש רכב?)" class="w-full glass-panel p-4 rounded-2xl border-none mb-3 text-sm">
-                        <input id="post-q2" type="text" placeholder="שאלה 2 (למשל: האם יש ניסיון?)" class="w-full glass-panel p-4 rounded-2xl border-none text-sm">
+
+                <div class="space-y-6">
+                    <div class="grid grid-cols-2 gap-4">
+                        <button onclick="st.currentType='job';UI.updateTypeUI()" id="type-job-btn" 
+                                class="p-4 rounded-2xl border-2 border-blue-500 bg-blue-500/10 font-bold transition-all">💼 מעסיק</button>
+                        <button onclick="st.currentType='worker';UI.updateTypeUI()" id="type-worker-btn" 
+                                class="p-4 rounded-2xl border-2 border-transparent bg-slate-800 font-bold opacity-40 transition-all">🙋‍♂️ עובד</button>
                     </div>
-                    
-                    <button id="main-publish-btn" class="w-full btn-main py-5 rounded-2xl font-black text-lg shadow-lg shadow-blue-500/20 mt-6">פרסם בלוח</button>
+
+                    <div class="space-y-4">
+                        <input id="post-title" type="text" placeholder="מה התפקיד? (למשל: מנהל חשבונות)" class="w-full p-4 rounded-2xl input-field">
+                        <input id="post-biz" type="text" placeholder="שם העסק / המפרסם" class="w-full p-4 rounded-2xl input-field">
+                        <input id="post-city" type="text" placeholder="עיר / מיקום" class="w-full p-4 rounded-2xl input-field">
+                        <input id="post-phone" type="tel" placeholder="מספר וואטסאפ ליצירת קשר" class="w-full p-4 rounded-2xl input-field">
+                    </div>
+
+                    <div class="pt-6 border-t border-white/5">
+                        <div class="flex justify-between items-center mb-4">
+                            <label class="text-xs font-black text-blue-400 uppercase tracking-widest">שאלות התאמה לסינון</label>
+                            <button onclick="UI.addNewQuestionField()" class="text-[10px] font-bold bg-white/5 px-3 py-1 rounded-lg border border-white/10 hover:bg-white/10 transition-colors">
+                                + הוסף שאלה
+                            </button>
+                        </div>
+                        <div id="dynamic-questions-container" class="space-y-3">
+                            </div>
+                    </div>
+
+                    <button id="btn-publish-final" onclick="Data.publish()" class="w-full btn-primary py-5 rounded-2xl font-black text-lg mt-4">
+                        פרסם בלוח עכשיו
+                    </button>
                 </div>
             </div>
         </section>
 
         <section id="view-admin" class="view-section p-4 max-w-md mx-auto">
-            <div id="login-container" class="glass-panel p-10 text-center">
-                <div class="w-20 h-20 bg-blue-600/20 text-blue-500 rounded-3xl mx-auto mb-6 flex items-center justify-center text-4xl">🔐</div>
-                <h2 class="text-2xl font-black mb-2">ניהול חשבון</h2>
-                <p class="text-slate-400 text-sm mb-8">התחבר כדי לנהל את המודעות שלך</p>
+            <div id="auth-form-container" class="glass p-10 text-center">
+                <div class="w-20 h-20 bg-blue-500/10 text-blue-500 rounded-3xl mx-auto mb-6 flex items-center justify-center text-4xl shadow-inner">👤</div>
+                <h2 class="text-2xl font-black mb-2">אזור אישי</h2>
+                <p class="text-slate-400 text-sm mb-10">התחבר כדי לנהל את המודעות שלך ולערוך שאלות התאמה</p>
+                
                 <div class="space-y-4">
-                    <input id="auth-email" type="email" placeholder="אימייל" class="w-full glass-panel p-4 border-none">
-                    <input id="auth-pass" type="password" placeholder="סיסמה" class="w-full glass-panel p-4 border-none">
-                    <div class="grid grid-cols-2 gap-4 pt-4">
-                        <button id="auth-login-btn" class="btn-main py-4 rounded-2xl font-bold">התחבר</button>
-                        <button id="auth-reg-btn" class="bg-slate-800 hover:bg-slate-700 py-4 rounded-2xl font-bold transition-colors">הרשמה</button>
+                    <input id="login-email" type="email" placeholder="אימייל" class="w-full p-4 rounded-2xl input-field">
+                    <input id="login-pass" type="password" placeholder="סיסמה (6 תווים לפחות)" class="w-full p-4 rounded-2xl input-field">
+                    
+                    <div class="grid grid-cols-2 gap-4 pt-6">
+                        <button id="btn-do-login" class="btn-primary py-4 rounded-2xl font-bold">התחבר</button>
+                        <button id="btn-do-register" class="bg-slate-800 hover:bg-slate-700 py-4 rounded-2xl font-bold transition-colors">הרשמה</button>
                     </div>
                 </div>
             </div>
-            <div id="dashboard-container" class="hidden space-y-4">
+
+            <div id="user-dashboard" class="hidden space-y-4">
+                <div class="glass p-8 text-center border-blue-500/20 shadow-2xl">
+                    <div id="user-avatar" class="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-700 text-white rounded-[25px] mx-auto mb-4 flex items-center justify-center text-3xl font-black">?</div>
+                    <p class="text-sm font-bold text-slate-300">ברוך הבא לאזור האישי</p>
+                    <p id="user-email-display" class="text-[11px] text-slate-500 mb-8 font-mono tracking-tighter"></p>
+                    <button id="btn-logout" class="w-full py-4 rounded-2xl bg-red-500/10 text-red-500 font-bold border border-red-500/10 hover:bg-red-500/20 transition-all">התנתק מהחשבון</button>
                 </div>
+                <div id="admin-notice" class="hidden p-4 bg-blue-500/10 border border-blue-500/20 rounded-2xl text-center">
+                    <p class="text-[10px] font-black text-blue-400 uppercase tracking-widest">מצב מנהל מערכת פעיל</p>
+                </div>
+            </div>
         </section>
+
     </main>
 
-    <div id="full-modal" class="modal-overlay" onclick="UI.closeCard(event)">
-        <div class="glass-panel p-8 w-full max-w-lg relative" onclick="event.stopPropagation()">
-            <div id="modal-content"></div>
-            <button onclick="UI.closeCard()" class="w-full mt-8 py-4 rounded-2xl bg-slate-800 text-xs font-bold uppercase tracking-widest opacity-60 hover:opacity-100 transition-opacity">סגור חלון</button>
+    <div id="modal-card-overlay" class="modal-overlay" onclick="UI.closeFullCard(event)">
+        <div class="glass modal-card p-8 shadow-2xl relative" onclick="event.stopPropagation()">
+            <div id="modal-body-content">
+                </div>
+            <button onclick="UI.closeFullCard()" class="w-full mt-8 py-4 rounded-2xl bg-slate-800 text-xs font-black uppercase tracking-widest opacity-60 hover:opacity-100 transition-opacity">
+                סגור חלון
+            </button>
         </div>
     </div>
 
-    <nav class="nav-bottom glass-panel flex justify-around items-center px-6 shadow-2xl border border-white/10">
-        <button onclick="Router.go('feed')" class="nav-link flex flex-col items-center opacity-100 transition-all transform hover:scale-110">
+    <nav class="nav-bar glass shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+        <button onclick="Router.navigate('feed')" id="nav-item-feed" class="nav-btn active">
             <span class="text-2xl">🏠</span>
-            <span class="text-[9px] font-extrabold mt-1">לוח</span>
+            <span class="text-[9px] font-black uppercase">הלוח</span>
         </button>
-        <button onclick="Router.go('post')" class="relative -mt-16 w-16 h-16 btn-main rounded-full flex items-center justify-center text-3xl font-light shadow-2xl border-[6px] border-[#020617] hover:rotate-90 transition-transform">
-            <span>+</span>
-        </button>
-        <button onclick="Router.go('admin')" class="nav-link flex flex-col items-center opacity-40 transition-all transform hover:scale-110">
+
+        <div class="add-btn-container">
+            <button onclick="Router.navigate('post')" class="add-btn-circle btn-primary shadow-blue-500/40">
+                <span>+</span>
+            </button>
+        </div>
+
+        <button onclick="Router.navigate('admin')" id="nav-item-admin" class="nav-btn">
             <span class="text-2xl">👤</span>
-            <span class="text-[9px] font-extrabold mt-1">ניהול</span>
+            <span class="text-[9px] font-black uppercase">אזור אישי</span>
         </button>
     </nav>
 <script type="module">
-    // ייבוא מודולים של Firebase CDN
+    // ייבוא המודולים הרשמיים של Firebase 10.7.1
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, collection, addDoc, getDocs, query, orderBy, serverTimestamp, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, query, orderBy, serverTimestamp, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    // הגדרות הפרויקט (Config) - מחובר ישירות למסד הנתונים שלך
+    // הגדרות החיבור לפרויקט שלך
     const firebaseConfig = {
         apiKey: "AIzaSyD0hsz8SOI1OG2Fh-DBy1SHeabPaEKZx-Y",
         authDomain: "matchme-32bcf.firebaseapp.com",
@@ -188,337 +311,492 @@
         appId: "1:1082863959305:web:f888f4df815598696c601f"
     };
 
-    // אתחול שירותים
+    // אתחול האפליקציה והשירותים
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // ניהול מצב האפליקציה (Global State) כדי למנוע סתירות בין חלקים
+    /**
+     * אובייקט ה-State המרכזי של האפליקציה
+     * מרכז את כל הנתונים במקום אחד כדי למנוע סתירות
+     */
     window.st = {
-        user: null,
-        posts: [],
-        currentType: 'job', // ברירת מחדל: מחפש עובד
-        isLoaded: false
+        user: null,         // פרטי המשתמש המחובר
+        posts: [],          // רשימת המודעות מהשרת
+        currentType: 'job', // סוג מודעה בפרסום (מעסיק/עובד)
+        isInitialLoad: true // האם זו טעינה ראשונה
     };
 
-    // מנוע הניווט (Router) - מחליף מסכים ללא רענון דף
+    /**
+     * מערכת הניווט (Router)
+     * מטפלת במעבר בין מסכים ובשינוי ויזואלי של התפריט
+     */
     window.Router = {
-        go(viewId) {
-            // הסתרת כל המסכים
+        navigate(viewId) {
+            // הסתרת כל המסכים וביטול מצב פעיל בתפריט
             document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
-            // הצגת המסך הנבחר
-            const target = document.getElementById(`view-${viewId}`);
-            if (target) target.classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
 
-            // עדכון ויזואלי של התפריט התחתון
-            document.querySelectorAll('.nav-link').forEach(link => link.classList.add('opacity-40'));
-            // אם זה לא כפתור ה-+ המרכזי, נדגיש את האייקון המתאים
-            if(viewId !== 'post') {
-                const navIndex = viewId === 'feed' ? 0 : 1;
-                document.querySelectorAll('.nav-link')[navIndex].classList.remove('opacity-40');
-                document.querySelectorAll('.nav-link')[navIndex].classList.add('opacity-100');
-            }
+            // הצגת המסך המבוקש
+            const targetView = document.getElementById(`view-${viewId}`);
+            if (targetView) targetView.classList.add('active');
 
-            // טעינת נתונים אוטומטית במעבר ללוח
-            if(viewId === 'feed') Data.load();
+            // עדכון כפתור התפריט המתאים
+            const navBtn = document.getElementById(`nav-item-${viewId}`);
+            if (navBtn) navBtn.classList.add('active');
+
+            // פעולות אוטומטיות לפי מסך
+            if (viewId === 'feed') Data.fetchPosts();
+            if (viewId === 'post') UI.resetPostForm();
             
-            // גלילה לראש הדף בחילוף מסך
-            window.scrollTo(0, 0);
+            // גלילה חלקה לראש הדף
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     };
 
-    // מנוע הנתונים (Data Engine) - ה-CRUD של האפליקציה
+    /**
+     * מנוע ממשק המשתמש (UI Engine) - לוגיקה ויזואלית
+     */
+    window.UI = {
+        // עדכון כפתורי הבחירה (מעסיק/עובד)
+        updateTypeUI() {
+            const isJob = st.currentType === 'job';
+            const jBtn = document.getElementById('type-job-btn');
+            const wBtn = document.getElementById('type-worker-btn');
+
+            if (isJob) {
+                jBtn.className = "p-4 rounded-2xl border-2 border-blue-500 bg-blue-500/10 font-bold transition-all scale-105 shadow-[0_0_15px_rgba(59,130,246,0.2)]";
+                wBtn.className = "p-4 rounded-2xl border-2 border-transparent bg-slate-800 font-bold opacity-40 transition-all";
+            } else {
+                wBtn.className = "p-4 rounded-2xl border-2 border-emerald-500 bg-emerald-500/10 font-bold transition-all scale-105 shadow-[0_0_15px_rgba(16,185,129,0.2)]";
+                jBtn.className = "p-4 rounded-2xl border-2 border-transparent bg-slate-800 font-bold opacity-40 transition-all";
+            }
+        },
+
+        // הוספת שדה שאלה חדש לטופס
+        addNewQuestionField() {
+            const container = document.getElementById('dynamic-questions-container');
+            const qId = Date.now(); // מזהה ייחודי למחיקה
+            
+            const div = document.createElement('div');
+            div.id = `q-row-${qId}`;
+            div.className = "flex gap-2 animate-slideUp items-center";
+            div.innerHTML = `
+                <div class="flex-grow relative">
+                    <input type="text" placeholder="הכנס שאלה (למשל: יש לך רישיון ג'?)" 
+                           class="dynamic-q-input w-full p-4 rounded-2xl input-field text-sm pr-10">
+                    <span class="absolute right-4 top-1/2 -translate-y-1/2 opacity-30 text-[10px]">❓</span>
+                </div>
+                <button onclick="UI.removeQuestionField('${qId}')" 
+                        class="w-12 h-12 flex items-center justify-center bg-red-500/10 text-red-500 rounded-xl hover:bg-red-500/20 transition-all">
+                    ✕
+                </button>
+            `;
+            container.appendChild(div);
+        },
+
+        // הסרת שדה שאלה מהטופס
+        removeQuestionField(qId) {
+            const row = document.getElementById(`q-row-${qId}`);
+            if (row) {
+                row.style.opacity = '0';
+                row.style.transform = 'translateX(20px)';
+                setTimeout(() => row.remove(), 300);
+            }
+        },
+
+        // איפוס הטופס לפני פרסום חדש
+        resetPostForm() {
+            document.getElementById('post-title').value = '';
+            document.getElementById('post-biz').value = '';
+            document.getElementById('post-city').value = '';
+            document.getElementById('post-phone').value = '';
+            document.getElementById('dynamic-questions-container').innerHTML = '';
+            // הוספת שדה אחד כברירת מחדל
+            this.addNewQuestionField();
+        },
+
+        // הצגת סטטוס טעינה בכפתור הפרסום
+        setPublishLoading(isLoading) {
+            const btn = document.getElementById('btn-publish-final');
+            if (isLoading) {
+                btn.disabled = true;
+                btn.innerHTML = `<span class="inline-block animate-spin ml-2">⏳</span> שולח מודעה...`;
+                btn.style.opacity = '0.7';
+            } else {
+                btn.disabled = false;
+                btn.innerHTML = `פרסם בלוח עכשיו`;
+                btn.style.opacity = '1';
+            }
+        }
+    };
+
+    /**
+     * מנוע הנתונים (Data Engine) - חיבור ל-Cloud Firestore
+     */
     window.Data = {
-        // פרסום מודעה חדשה כולל שאלות התאמה
-        async add() {
-            const btn = document.getElementById('main-publish-btn');
-            const p = {
-                title: document.getElementById('post-title').value.trim(),
-                biz: document.getElementById('post-biz').value.trim(),
-                city: document.getElementById('post-city').value.trim(),
-                phone: document.getElementById('post-phone').value.trim(),
-                q1: document.getElementById('post-q1').value.trim(),
-                q2: document.getElementById('post-q2').value.trim(),
+        // פרסום מודעה
+        async publish() {
+            const title = document.getElementById('post-title').value.trim();
+            const phone = document.getElementById('post-phone').value.trim();
+            
+            if (!title || !phone) {
+                return alert("חובה למלא לפחות שם תפקיד ומספר וואטסאפ ליצירת קשר.");
+            }
+
+            UI.setPublishLoading(true);
+
+            // איסוף שאלות דינמיות
+            const questions = [];
+            document.querySelectorAll('.dynamic-q-input').forEach(input => {
+                if (input.value.trim()) questions.push(input.value.trim());
+            });
+
+            const newPost = {
+                title: title,
+                biz: document.getElementById('post-biz').value.trim() || 'מפרסם פרטי',
+                city: document.getElementById('post-city').value.trim() || 'כל הארץ',
+                phone: phone,
+                questions: questions,
                 type: st.currentType,
-                owner: st.user ? st.user.uid : 'guest',
+                ownerId: st.user ? st.user.uid : 'guest',
                 ownerEmail: st.user ? st.user.email : 'guest',
                 createdAt: serverTimestamp()
             };
 
-            // וולידציה בסיסית
-            if(!p.title || !p.phone) return alert("חובה להזין כותרת ומספר וואטסאפ");
-
-            btn.disabled = true;
-            btn.innerHTML = 'מפרסם...';
-
             try {
-                await addDoc(collection(db, "posts"), p);
-                alert("המודעה פורסמה בהצלחה!");
-                this.resetForm();
-                Router.go('feed');
-            } catch (e) {
-                console.error("Error adding document: ", e);
-                alert("שגיאה בפרסום. וודא שאתה מחובר ושהגדרות ה-Rules ב-Firebase פתוחות.");
+                await addDoc(collection(db, "posts"), newPost);
+                alert("מזל טוב! המודעה עלתה לאוויר.");
+                Router.navigate('feed');
+            } catch (error) {
+                console.error("Firebase Error:", error);
+                alert("שגיאה בפרסום. וודא שאתה מחובר ושהגדרות האבטחה (Rules) מאפשרות כתיבה.");
             } finally {
-                btn.disabled = false;
-                btn.innerText = "פרסם בלוח";
+                UI.setPublishLoading(false);
             }
         },
 
-        // טעינת כל המודעות מהשרת
-        async load() {
-            const container = document.getElementById('feed-items-container');
-            if(!st.isLoaded) container.innerHTML = '<div class="text-center py-10 opacity-50">מחפש התאמות...</div>';
-            
+        // משיכת מודעות מהשרת
+        async fetchPosts() {
             try {
                 const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
-                const snap = await getDocs(q);
-                st.posts = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                st.isLoaded = true;
-                // קריאה למנוע התצוגה (יוגדר בחלק 3)
-                if(window.UI && window.UI.render) window.UI.render(st.posts);
-            } catch (e) {
-                container.innerHTML = '<div class="text-center text-red-400 py-10">שגיאה בחיבור למסד הנתונים</div>';
+                const querySnapshot = await getDocs(q);
+                st.posts = querySnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+                
+                // קריאה לפונקציית הרינדור (תהיה בחלק 3)
+                if (window.UI && window.UI.renderFeed) {
+                    window.UI.renderFeed(st.posts);
+                }
+            } catch (error) {
+                console.error("Fetch Error:", error);
             }
-        },
-
-        resetForm() {
-            ['post-title', 'post-biz', 'post-city', 'post-phone', 'post-q1', 'post-q2'].forEach(id => {
-                document.getElementById(id).value = '';
-            });
         }
     };
-    // מנוע התצוגה (UI Engine) - אחראי על כל מה שהמשתמש רואה ומרגיש
-    window.UI = {
-        // סנכרון כפתורי בחירת סוג (מעסיק/עובד) בטופס הפרסום
-        syncType() {
-            const isJob = st.currentType === 'job';
-            const jBtn = document.getElementById('type-job-btn');
-            const wBtn = document.getElementById('type-worker-btn');
-            
-            jBtn.className = isJob ? 
-                'p-4 rounded-2xl border-2 border-blue-500 bg-blue-500/10 font-bold transition-all scale-105' : 
-                'p-4 rounded-2xl border-2 border-transparent bg-slate-800 font-bold transition-all opacity-50';
-            
-            wBtn.className = !isJob ? 
-                'p-4 rounded-2xl border-2 border-emerald-500 bg-emerald-500/10 font-bold transition-all scale-105' : 
-                'p-4 rounded-2xl border-2 border-transparent bg-slate-800 font-bold transition-all opacity-50';
-        },
+    /**
+     * המשך מנוע ממשק המשתמש (UI Engine) - תצוגת נתונים ואינטראקציה
+     */
+    
+    // רינדור רשימת המודעות ללוח הראשי
+    window.UI.renderFeed = function(posts) {
+        const container = document.getElementById('feed-container');
+        
+        if (!posts || posts.length === 0) {
+            container.innerHTML = `
+                <div class="glass p-12 text-center border-dashed border-white/5">
+                    <div class="text-5xl mb-4 opacity-20">🔎</div>
+                    <p class="text-slate-400 font-bold">לא נמצאו מודעות כרגע...</p>
+                    <p class="text-[10px] text-slate-600 mt-2 uppercase tracking-widest">נסה לשנות את מונחי החיפוש</p>
+                </div>`;
+            return;
+        }
 
-        // רינדור רשימת המודעות ללוח (Feed)
-        render(list) {
-            const container = document.getElementById('feed-items-container');
-            if (list.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-20 glass-panel border-dashed">
-                        <p class="opacity-40 font-bold">לא נמצאו תוצאות מתאימות...</p>
-                    </div>`;
-                return;
-            }
-
-            container.innerHTML = list.map(post => `
+        container.innerHTML = posts.map(post => {
+            const isJob = post.type === 'job';
+            const date = post.createdAt ? new Date(post.createdAt.seconds * 1000).toLocaleDateString('he-IL') : 'עכשיו';
+            
+            return `
                 <div onclick="UI.openFullCard('${post.id}')" 
-                     class="glass-panel p-6 border-r-4 ${post.type === 'job' ? 'border-blue-500' : 'border-emerald-500'} 
-                            active:scale-95 transition-all cursor-pointer group">
-                    <div class="flex justify-between items-start">
-                        <div class="space-y-1">
-                            <span class="text-[10px] font-black uppercase tracking-widest ${post.type === 'job' ? 'text-blue-400' : 'text-emerald-400'}">
-                                ${post.type === 'job' ? '💼 דרושים' : '🙋‍♂️ מחפש עבודה'}
-                            </span>
-                            <h3 class="text-xl font-extrabold text-white group-hover:text-blue-400 transition-colors">${post.title}</h3>
-                            <div class="flex items-center gap-2 text-slate-400 text-xs">
-                                <span class="font-bold text-slate-200">${post.biz || ''}</span>
-                                <span>•</span>
-                                <span>${post.city || 'כל הארץ'}</span>
+                     class="glass p-6 border-r-4 ${isJob ? 'border-blue-500' : 'border-emerald-500'} 
+                            hover:bg-white/5 active:scale-[0.97] transition-all cursor-pointer group relative overflow-hidden">
+                    
+                    <div class="absolute top-0 left-0 w-24 h-24 bg-gradient-to-br ${isJob ? 'from-blue-500/5' : 'from-emerald-500/5'} to-transparent -translate-x-10 -translate-y-10 rounded-full"></div>
+
+                    <div class="flex justify-between items-start relative z-10">
+                        <div class="space-y-2">
+                            <div class="flex items-center gap-2">
+                                <span class="type-pill ${isJob ? 'bg-blue-500/10 text-blue-400' : 'bg-emerald-500/10 text-emerald-400'}">
+                                    ${isJob ? '💼 דרושים' : '🙋‍♂️ מחפש עבודה'}
+                                </span>
+                                <span class="text-[9px] text-slate-500 font-bold tracking-tighter">${date}</span>
+                            </div>
+                            
+                            <h3 class="text-xl font-extrabold text-white group-hover:text-blue-400 transition-colors leading-tight">
+                                ${post.title}
+                            </h3>
+                            
+                            <div class="flex items-center gap-3 text-slate-400 text-xs">
+                                <span class="flex items-center gap-1 font-bold text-slate-200">
+                                    <span class="opacity-50">🏢</span> ${post.biz}
+                                </span>
+                                <span class="opacity-30">|</span>
+                                <span class="flex items-center gap-1">
+                                    <span class="opacity-50">📍</span> ${post.city}
+                                </span>
                             </div>
                         </div>
-                        <div class="bg-white/5 p-2 rounded-xl text-xl opacity-50 group-hover:opacity-100">➜</div>
-                    </div>
-                    
-                    ${(post.q1 || post.q2) ? `
-                        <div class="mt-4 flex gap-2">
-                            <span class="bg-blue-500/10 text-blue-400 text-[9px] px-2 py-1 rounded-md font-bold italic">כולל שאלות התאמה</span>
+
+                        <div class="flex flex-col items-end gap-3">
+                            <div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-blue-500 group-hover:text-white transition-all shadow-lg">
+                                <span class="text-lg">←</span>
+                            </div>
+                            ${post.questions && post.questions.length > 0 ? `
+                                <div class="flex -space-x-1 rtl:space-x-reverse">
+                                    <div class="w-5 h-5 rounded-full bg-blue-500/20 border border-blue-500/40 flex items-center justify-center text-[8px] font-black text-blue-400" title="כולל שאלות">?</div>
+                                </div>
+                            ` : ''}
                         </div>
-                    ` : ''}
-                </div>
-            `).join('');
-        },
-
-        // פתיחת כרטיס מורחב עם שאלות התאמה
-        openFullCard(id) {
-            const post = st.posts.find(p => p.id === id);
-            if (!post) return;
-
-            const modal = document.getElementById('full-modal');
-            const content = document.getElementById('modal-content');
-
-            content.innerHTML = `
-                <div class="text-center mb-8">
-                    <div class="inline-block px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-black mb-4 uppercase tracking-tighter">
-                        פרטי מודעה מלאים
                     </div>
-                    <h2 class="text-3xl font-black mb-2">${post.title}</h2>
-                    <p class="text-blue-400 font-bold text-lg">${post.biz || ''}</p>
-                    <p class="text-slate-500 text-sm">${post.city || 'כל הארץ'}</p>
+                </div>
+            `;
+        }).join('');
+    };
+
+    // פתיחת הכרטיס המורחב (Modal) עם כל הפרטים
+    window.UI.openFullCard = function(postId) {
+        const post = st.posts.find(p => p.id === postId);
+        if (!post) return;
+
+        const modalContent = document.getElementById('modal-body-content');
+        const isJob = post.type === 'job';
+
+        modalContent.innerHTML = `
+            <div class="text-center">
+                <div class="inline-block px-4 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-black mb-6 uppercase tracking-widest text-blue-400">
+                    פירוט מודעה מלא
+                </div>
+                
+                <h2 class="text-3xl font-black text-white mb-2 leading-tight">${post.title}</h2>
+                <div class="flex items-center justify-center gap-2 mb-8">
+                    <span class="text-lg font-bold text-blue-500">${post.biz}</span>
+                    <span class="text-slate-600">•</span>
+                    <span class="text-slate-400">${post.city}</span>
                 </div>
 
-                <div class="space-y-6">
-                    ${(post.q1 || post.q2) ? `
-                        <div class="space-y-3">
-                            <h4 class="text-[11px] font-black text-slate-500 uppercase tracking-widest border-b border-white/5 pb-2">שאלות התאמה מהמפרסם:</h4>
-                            ${post.q1 ? `<div class="bg-blue-600/5 p-4 rounded-2xl border border-blue-500/10"><p class="text-sm font-bold"><span class="opacity-50 ml-2">Q1:</span> ${post.q1}</p></div>` : ''}
-                            ${post.q2 ? `<div class="bg-blue-600/5 p-4 rounded-2xl border border-blue-500/10"><p class="text-sm font-bold"><span class="opacity-50 ml-2">Q2:</span> ${post.q2}</p></div>` : ''}
-                            <p class="text-[10px] text-center text-slate-500 italic mt-2">מומלץ לענות על שאלות אלו בפנייה בוואטסאפ</p>
+                <div class="space-y-6 text-right">
+                    ${post.questions && post.questions.length > 0 ? `
+                        <div class="bg-blue-500/5 rounded-3xl p-6 border border-blue-500/10">
+                            <h4 class="text-xs font-black text-blue-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></span>
+                                שאלות התאמה מהמפרסם
+                            </h4>
+                            <div class="space-y-3">
+                                ${post.questions.map((q, idx) => `
+                                    <div class="flex gap-3 items-start bg-white/5 p-4 rounded-2xl border border-white/5">
+                                        <span class="text-blue-500 font-black opacity-40 text-xs mt-0.5">${idx + 1}.</span>
+                                        <p class="text-sm font-bold text-slate-200 leading-relaxed">${q}</p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <p class="text-[10px] text-center text-slate-500 italic mt-4">מומלץ לענות על שאלות אלו בפנייה הראשונית</p>
                         </div>
-                    ` : ''}
+                    ` : `
+                        <div class="p-6 text-center opacity-30 border border-dashed border-white/10 rounded-3xl">
+                            <p class="text-xs">אין שאלות התאמה ספציפיות למודעה זו</p>
+                        </div>
+                    `}
 
                     <div class="pt-6">
-                        <button onclick="UI.contactWhatsApp('${post.phone}', '${post.title}')" 
-                                class="w-full btn-main py-5 rounded-[25px] font-black text-lg flex items-center justify-center gap-3 shadow-xl">
-                            <span>דבר איתי בוואטסאפ</span>
-                            <span class="text-2xl">💬</span>
+                        <button onclick="UI.contactViaWhatsApp('${post.phone}', '${post.title}')" 
+                                class="w-full btn-primary py-5 rounded-3xl font-black text-lg flex items-center justify-center gap-3 group shadow-2xl">
+                            <span>פנה בוואטסאפ עכשיו</span>
+                            <span class="text-2xl transition-transform group-hover:scale-125">💬</span>
                         </button>
                         
-                        ${st.user && (st.user.uid === post.owner || st.user.email === 'cifhiim@gmail.com') ? `
-                            <button onclick="Data.deletePost('${post.id}')" class="w-full mt-4 text-red-500/50 hover:text-red-500 text-[11px] font-bold transition-all">מחק מודעה זו לצמיתות</button>
+                        ${st.user && (st.user.uid === post.ownerId || st.user.email === 'cifhiim@gmail.com') ? `
+                            <button onclick="Data.deletePost('${post.id}')" 
+                                    class="w-full mt-6 py-2 text-red-500/40 hover:text-red-500 text-[10px] font-black uppercase tracking-widest transition-all">
+                                מחק מודעה לצמיתות
+                            </button>
                         ` : ''}
                     </div>
                 </div>
-            `;
-            modal.classList.add('active');
-            document.body.style.overflow = 'hidden'; // מניעת גלילה ברקע
-        },
+            </div>
+        `;
 
-        closeCard(e) {
-            if (!e || e.target.id === 'full-modal') {
-                document.getElementById('full-modal').classList.remove('active');
-                document.body.style.overflow = 'auto';
-            }
-        },
+        document.getElementById('modal-card-overlay').classList.add('active');
+        document.body.style.overflow = 'hidden'; // מניעת גלילה ברקע
+    };
 
-        // טיפול בחיפוש וסינון
-        handleSearch(term) {
-            const t = term.toLowerCase();
-            const filtered = st.posts.filter(p => 
-                p.title.toLowerCase().includes(t) || 
-                p.city.toLowerCase().includes(t) || 
-                p.biz.toLowerCase().includes(t)
-            );
-            this.render(filtered);
-        },
-
-        // פונקציית וואטסאפ חכמה
-        contactWhatsApp(phone, title) {
-            let num = phone.replace(/\D/g, '');
-            if (num.startsWith('0')) num = '972' + num.substring(1);
-            const text = encodeURIComponent(`היי, אני פונה אליך דרך MatchMe לגבי: ${title}.`);
-            window.open(`https://wa.me/${num}?text=${text}`, '_blank');
+    // סגירת הכרטיס המורחב
+    window.UI.closeFullCard = function(event) {
+        if (!event || event.target.id === 'modal-card-overlay') {
+            document.getElementById('modal-card-overlay').classList.remove('active');
+            document.body.style.overflow = 'auto';
         }
     };
-    // מנוע אימות המשתמשים (Auth Engine)
-    window.Auth = {
-        // כניסה והרשמה
-        async go(action) {
-            const email = document.getElementById('auth-email').value;
-            const pass = document.getElementById('auth-pass').value;
 
-            if (!email || pass.length < 6) return alert("נא להזין אימייל תקין וסיסמה (מינימום 6 תווים)");
+    // חיבור לוואטסאפ עם הודעה מוכנה
+    window.UI.contactViaWhatsApp = function(phone, title) {
+        let cleanPhone = phone.replace(/\D/g, '');
+        if (cleanPhone.startsWith('0')) {
+            cleanPhone = '972' + cleanPhone.substring(1);
+        }
+        
+        const message = encodeURIComponent(`היי, אני פונה אליך דרך אפליקציית MatchMe לגבי המשרה: ${title}. אשמח לשוחח!`);
+        window.open(`https://wa.me/${cleanPhone}?text=${message}`, '_blank');
+    };
+
+    // מנוע החיפוש בזמן אמת
+    document.getElementById('main-search').addEventListener('input', (e) => {
+        const term = e.target.value.toLowerCase().trim();
+        
+        if (!term) {
+            UI.renderFeed(st.posts);
+            return;
+        }
+
+        const filtered = st.posts.filter(p => 
+            p.title.toLowerCase().includes(term) || 
+            p.biz.toLowerCase().includes(term) || 
+            p.city.toLowerCase().includes(term)
+        );
+        
+        UI.renderFeed(filtered);
+    });
+
+    /**
+     * המשך מנוע הנתונים (Data Engine) - פונקציות ניהול
+     */
+
+    window.Data.deletePost = async function(postId) {
+        if (!confirm("האם אתה בטוח שברצונך למחוק את המודעה? פעולה זו סופית.")) return;
+
+        try {
+            await deleteDoc(doc(db, "posts", postId));
+            UI.closeFullCard();
+            Data.fetchPosts(); // רענון הלוח
+        } catch (error) {
+            console.error("Delete error:", error);
+            alert("שגיאה במחיקה. ייתכן שאין לך הרשאות מתאימות.");
+        }
+    };
+    /**
+     * מנוע אימות המשתמשים (Auth Engine)
+     */
+    window.Auth = {
+        // ביצוע כניסה או הרשמה
+        async go(actionType) {
+            const email = document.getElementById('login-email').value.trim();
+            const pass = document.getElementById('login-pass').value.trim();
+
+            if (!email || pass.length < 6) {
+                return alert("נא להזין אימייל תקין וסיסמה עם 6 תווים לפחות.");
+            }
+
+            const btn = actionType === 'in' ? document.getElementById('btn-do-login') : document.getElementById('btn-do-register');
+            const originalText = btn.innerText;
+            btn.disabled = true;
+            btn.innerText = "...";
 
             try {
-                if (action === 'in') {
+                if (actionType === 'in') {
                     await signInWithEmailAndPassword(auth, email, pass);
                 } else {
                     await createUserWithEmailAndPassword(auth, email, pass);
-                    alert("החשבון נוצר בהצלחה!");
+                    alert("החשבון נוצר בהצלחה! ברוך הבא ל-MatchMe.");
                 }
-            } catch (e) {
-                console.error(e);
-                alert("שגיאה: וודא שהפרטים נכונים או שהמשתמש אינו קיים כבר.");
+                // המאזין onAuthStateChanged יטפל בשאר
+            } catch (error) {
+                console.error("Auth Error:", error);
+                let msg = "שגיאה בתהליך. וודא שהפרטים נכונים.";
+                if (error.code === 'auth/configuration-not-found') msg = "שגיאה: עליך להפעיל Email/Password ב-Firebase Console.";
+                if (error.code === 'auth/email-already-in-use') msg = "האימייל הזה כבר רשום במערכת.";
+                alert(msg);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = originalText;
             }
         },
 
-        // התנתקות מהמערכת
+        // התנתקות
         async logout() {
-            if (confirm("להתנתק מהחשבון?")) {
-                await signOut(auth);
-                location.reload(); // רענון נקי
+            if (confirm("האם אתה בטוח שברצונך להתנתק?")) {
+                try {
+                    await signOut(auth);
+                    location.reload();
+                } catch (e) { console.error(e); }
             }
         }
     };
 
-    // פונקציית מחיקה מאובטחת
-    window.Data.deletePost = async (id) => {
-        if (!confirm("האם אתה בטוח שברצונך למחוק את המודעה לצמיתות?")) return;
-        
-        try {
-            await deleteDoc(doc(db, "posts", id));
-            UI.closeCard();
-            Data.load(); // טעינה מחדש של הלוח
-        } catch (e) {
-            alert("אין לך הרשאה למחוק מודעה זו.");
-        }
-    };
-
-    // מאזין אירועים מרכזי (Auth Observer) - פועל בכל רענון או שינוי מצב
+    /**
+     * מאזין מצב אימות (Auth State Observer)
+     * זהו הלב של האפליקציה - הוא מגיב לכל שינוי בסטטוס המשתמש
+     */
     onAuthStateChanged(auth, (user) => {
         st.user = user;
-        const statusTag = document.getElementById('top-status');
-        const loginUI = document.getElementById('login-container');
-        const dashUI = document.getElementById('dashboard-container');
+        
+        const statusTag = document.getElementById('u-status-tag');
+        const authForm = document.getElementById('auth-form-container');
+        const dashboard = document.getElementById('user-dashboard');
+        const adminNotice = document.getElementById('admin-notice');
+        const userEmailDisp = document.getElementById('user-email-display');
+        const userAvatar = document.getElementById('user-avatar');
 
         if (user) {
-            // עדכון סטטוס עליון
+            // המשתמש מחובר
             const isAdmin = user.email === 'cifhiim@gmail.com';
+            
+            // עדכון תג הסטטוס העליון
             statusTag.innerText = isAdmin ? "מנהל מערכת" : "מחובר";
-            statusTag.className = "px-3 py-1 rounded-full border border-blue-500/30 text-[10px] font-black uppercase tracking-widest bg-blue-500/10 text-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.2)]";
+            statusTag.className = "px-4 py-1.5 rounded-full border border-blue-500/40 bg-blue-500/10 text-[10px] font-extrabold uppercase tracking-widest text-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.2)]";
 
-            // עדכון אזור אישי
-            loginUI.classList.add('hidden');
-            dashUI.classList.remove('hidden');
-            dashUI.innerHTML = `
-                <div class="glass-panel p-8 text-center border-blue-500/20">
-                    <div class="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-700 text-white rounded-[25px] mx-auto mb-4 flex items-center justify-center text-3xl font-black shadow-lg">
-                        ${user.email[0].toUpperCase()}
-                    </div>
-                    <h3 class="text-xl font-black mb-1">ברוך הבא!</h3>
-                    <p class="text-xs text-slate-500 mb-8 font-mono">${user.email}</p>
-                    
-                    <div class="space-y-3">
-                        <button onclick="Router.go('post')" class="w-full py-4 rounded-2xl bg-white/5 border border-white/10 font-bold hover:bg-white/10 transition-all">פרסם מודעה חדשה</button>
-                        <button onclick="Auth.logout()" class="w-full py-4 rounded-2xl bg-red-500/5 text-red-500 border border-red-500/10 font-bold hover:bg-red-500/10 transition-all">התנתק מהחשבון</button>
-                    </div>
-                </div>
-                ${isAdmin ? `
-                    <div class="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-2xl text-center">
-                        <p class="text-[10px] font-bold text-yellow-500 uppercase">מצב מנהל פעיל: יש לך הרשאת מחיקה גלובלית</p>
-                    </div>
-                ` : ''}
-            `;
+            // החלפת תצוגה באזור אישי
+            authForm.classList.add('hidden');
+            dashboard.classList.remove('hidden');
+            
+            // עדכון פרטי דאשבורד
+            userEmailDisp.innerText = user.email;
+            userAvatar.innerText = user.email[0].toUpperCase();
+            
+            if (isAdmin) {
+                adminNotice.classList.remove('hidden');
+            } else {
+                adminNotice.classList.add('hidden');
+            }
         } else {
-            // מצב אורח
+            // המשתמש מנותק
             statusTag.innerText = "אורח";
-            statusTag.className = "px-3 py-1 rounded-full border border-white/10 text-[10px] font-bold uppercase tracking-widest bg-white/5 opacity-50";
-            loginUI.classList.remove('hidden');
-            dashUI.classList.add('hidden');
+            statusTag.className = "px-4 py-1.5 rounded-full border border-white/10 bg-white/5 text-[10px] font-extrabold uppercase tracking-widest text-slate-400";
+            
+            authForm.classList.remove('hidden');
+            dashboard.classList.add('hidden');
         }
 
-        // טעינה ראשונית של נתונים
-        Data.load();
+        // טעינה ראשונית של הנתונים ברגע שהסטטוס נקבע
+        if (st.isInitialLoad) {
+            Data.fetchPosts();
+            st.isInitialLoad = false;
+        }
     });
 
-    // חיבור אירועים לאלמנטים (Event Binding)
+    /**
+     * חיבור אירועים סופי (Event Initializer)
+     */
     document.addEventListener('DOMContentLoaded', () => {
-        // כפתור פרסום
-        document.getElementById('main-publish-btn').onclick = () => Data.add();
-        
         // כפתורי אימות
-        document.getElementById('auth-login-btn').onclick = () => Auth.go('in');
-        document.getElementById('auth-reg-btn').onclick = () => Auth.go('reg');
-        
-        // חיפוש בזמן אמת
-        document.getElementById('search-input').oninput = (e) => UI.handleSearch(e.target.value);
+        document.getElementById('btn-do-login').onclick = () => Auth.go('in');
+        document.getElementById('btn-do-register').onclick = () => Auth.go('reg');
+        document.getElementById('btn-logout').onclick = () => Auth.logout();
+
+        // אתחול שדה שאלה ראשון בטופס הפרסום
+        UI.addNewQuestionField();
     });
 
 </script>
+
 </body>
 </html>
