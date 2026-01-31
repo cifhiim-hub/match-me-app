@@ -9,9 +9,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@200;300;400;500;600;700;800&family=Rubik:wght@400;700;900&display=swap" rel="stylesheet">
     
     <style>
-        /* =========================================
-           ADVANCED DESIGN SYSTEM (PRO-LEVEL)
-           ========================================= */
         :root {
             --bg-main: #020617;
             --bg-card: #0f172a;
@@ -19,21 +16,13 @@
             --primary: #3b82f6;
             --primary-glow: rgba(59, 130, 246, 0.5);
             --accent: #10b981;
-            --danger: #ef4444;
             --text-main: #f8fafc;
             --text-dim: #94a3b8;
             --glass-border: rgba(255, 255, 255, 0.08);
             --transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
 
-        /* Base Reset */
-        * {
-            box-sizing: border-box;
-            -webkit-font-smoothing: antialiased;
-            margin: 0; padding: 0;
-            scrollbar-width: thin;
-            scrollbar-color: var(--primary) var(--bg-main);
-        }
+        * { box-sizing: border-box; -webkit-font-smoothing: antialiased; margin: 0; padding: 0; }
 
         body {
             font-family: 'Assistant', sans-serif;
@@ -41,65 +30,28 @@
             color: var(--text-main);
             overflow-x: hidden;
             line-height: 1.6;
-            touch-action: manipulation;
         }
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: var(--bg-main); }
-        ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 
-        /* =========================================
-           ANIMATION KEYFRAMES
-           ========================================= */
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(40px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes shimmer {
-            0% { background-position: -200% 0; }
-            100% { background-position: 200% 0; }
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-
-        /* =========================================
-           REUSABLE COMPONENTS
-           ========================================= */
         .glass-morphism {
             background: rgba(15, 23, 42, 0.8);
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
             border: 1px solid var(--glass-border);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
         }
 
         .btn-neo {
-            position: relative;
-            overflow: hidden;
             background: linear-gradient(135deg, #1d4ed8, #3b82f6);
             transition: var(--transition-bounce);
             border-radius: 16px;
             font-weight: 800;
-            letter-spacing: 0.5px;
             cursor: pointer;
         }
 
-        .btn-neo:hover {
-            transform: scale(1.02);
-            box-shadow: 0 0 20px var(--primary-glow);
-        }
-
-        .btn-neo:active { transform: scale(0.95); }
+        .btn-neo:hover { transform: scale(1.02); box-shadow: 0 0 20px var(--primary-glow); }
 
         .input-premium {
             background: rgba(15, 23, 42, 0.6);
@@ -107,128 +59,44 @@
             border-radius: 20px;
             padding: 18px 24px;
             color: white;
-            transition: all 0.3s ease;
-            width: 100%;
             outline: none;
+            width: 100%;
         }
 
-        .input-premium:focus {
-            border-color: var(--primary);
-            background: rgba(30, 41, 59, 0.8);
-            box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
-        }
-
-        /* =========================================
-           LAYOUT & NAVIGATION
-           ========================================= */
         .bottom-nav {
-            position: fixed;
-            bottom: 25px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90%;
-            max-width: 450px;
-            height: 75px;
-            z-index: 1000;
-            border-radius: 35px;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            padding: 0 15px;
+            position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%);
+            width: 90%; max-width: 450px; height: 75px; z-index: 1000;
+            border-radius: 35px; display: flex; justify-content: space-around; align-items: center;
         }
 
-        .nav-link {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: var(--text-dim);
-            transition: all 0.3s ease;
-            text-decoration: none;
-            cursor: pointer;
-            position: relative;
-        }
+        .nav-link { display: flex; flex-direction: column; align-items: center; color: var(--text-dim); cursor: pointer; }
+        .nav-link.active { color: var(--primary); transform: translateY(-5px); }
 
-        .nav-link.active {
-            color: var(--primary);
-            transform: translateY(-5px);
-        }
+        .view-section { display: none; padding: 20px; min-height: 100vh; padding-bottom: 120px; animation: slideUp 0.6s ease-out forwards; }
+        .view-section.active { display: block; }
 
-        .nav-link.active::after {
-            content: '';
-            position: absolute;
-            bottom: -8px;
-            width: 5px;
-            height: 5px;
-            background: var(--primary);
-            border-radius: 50%;
-        }
-
-        /* =========================================
-           PAGE STATES
-           ========================================= */
-        .view-section {
-            display: none;
-            padding: 20px;
-            min-height: 100vh;
-            padding-bottom: 120px;
-            animation: slideUp 0.6s ease-out forwards;
-        }
-
-        .view-section.active {
-            display: block;
-        }
-
-        /* =========================================
-           LOADER SYSTEM
-           ========================================= */
         #master-loader {
-            position: fixed;
-            inset: 0;
-            background: var(--bg-main);
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            transition: opacity 0.5s ease;
+            position: fixed; inset: 0; background: var(--bg-main); z-index: 9999;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
         }
 
-        .pulse-logo {
-            width: 80px;
-            height: 80px;
-            background: var(--primary);
-            border-radius: 20px;
-            animation: float 2s infinite ease-in-out;
-            box-shadow: 0 0 30px var(--primary-glow);
-        }
+        .pulse-logo { width: 80px; height: 80px; background: var(--primary); border-radius: 20px; animation: float 2s infinite ease-in-out; }
 
-        /* Card Styling */
         .feed-card {
-            background: var(--bg-card);
-            border-radius: 24px;
-            padding: 20px;
-            margin-bottom: 20px;
-            border-right: 5px solid var(--primary);
-            transition: all 0.3s ease;
-            cursor: pointer;
+            background: var(--bg-card); border-radius: 24px; padding: 20px; margin-bottom: 20px;
+            border-right: 5px solid var(--primary); transition: all 0.3s ease; cursor: pointer;
         }
-
-        .feed-card:hover {
-            background: var(--bg-card-hover);
-            transform: translateX(-5px);
-        }
-
-        .feed-card.worker-post {
-            border-right-color: var(--accent);
-        }
+        .feed-card:hover { transform: translateX(-5px); background: var(--bg-card-hover); }
+        .feed-card.worker-post { border-right-color: var(--accent); }
+        .animate-fade-in { animation: fadeIn 0.5s ease forwards; }
     </style>
 </head>
-<body class="custom-scrollbar overflow-x-hidden">
+<body>
 
     <div id="master-loader">
         <div class="pulse-logo flex items-center justify-center text-3xl">🔥</div>
         <div class="mt-8 text-center animate-pulse">
-            <h2 class="text-2xl font-black tracking-tighter text-white">MATCHME <span class="text-blue-500">PRO</span></h2>
+            <h2 class="text-2xl font-black text-white">MATCHME <span class="text-blue-500">PRO</span></h2>
             <p class="text-[10px] text-slate-500 font-bold uppercase tracking-[0.4em] mt-2">Enterprise Edition 2026</p>
         </div>
     </div>
@@ -241,630 +109,82 @@
                 <span class="text-[10px] font-black text-blue-500 uppercase tracking-widest block mb-1">הזדמנויות חדשות</span>
                 <h1 class="text-5xl font-black tracking-tighter italic">הפיד <span class="text-blue-500">שלך</span></h1>
             </div>
-            <div onclick="Router.go('admin')" class="w-14 h-14 glass-morphism rounded-2xl flex items-center justify-center text-2xl cursor-pointer hover:bg-blue-500/10 transition-colors border border-blue-500/20">
-                👤
-            </div>
+            <div onclick="Router.go('admin')" class="w-14 h-14 glass-morphism rounded-2xl flex items-center justify-center text-2xl cursor-pointer border border-blue-500/20">👤</div>
         </header>
 
-        <div class="relative mb-10 group">
-            <div class="absolute -inset-1 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-2xl blur opacity-20 group-focus-within:opacity-40 transition duration-1000"></div>
-            <div class="relative">
-                <input type="text" id="main-search" oninput="UI.handleSearch(this.value)" 
-                       class="input-premium pl-14 text-lg" 
-                       placeholder="חפש תפקיד, חברה או עיר...">
-                <span class="absolute left-5 top-1/2 -translate-y-1/2 text-xl opacity-40">🔍</span>
-            </div>
+        <div class="relative mb-10">
+            <input type="text" oninput="UI.handleSearch(this.value)" class="input-premium pl-14 text-lg" placeholder="חפש תפקיד, עיר או חברה...">
+            <span class="absolute left-5 top-1/2 -translate-y-1/2 text-xl opacity-40">🔍</span>
         </div>
 
-        <div id="feed-container" class="space-y-6">
-            <div class="py-20 text-center opacity-30">
-                <div class="loader-circle mx-auto mb-4"></div>
-                <p class="font-bold tracking-widest uppercase text-xs">מסתנכרן עם מסד הנתונים...</p>
-            </div>
-        </div>
+        <div id="feed-container" class="space-y-6"></div>
     </section>
 
     <section id="view-post" class="view-section max-w-2xl mx-auto">
-        <div class="flex items-center gap-4 mb-10">
-            <div class="w-2 h-10 bg-blue-500 rounded-full shadow-[0_0_15px_rgba(59,130,246,0.5)]"></div>
-            <h2 class="text-4xl font-black tracking-tighter">יצירת <span class="text-blue-500">מודעה</span></h2>
-        </div>
+        <h2 class="text-4xl font-black mb-10">יצירת <span class="text-blue-500">מודעה</span></h2>
+        <div class="glass-morphism p-8 rounded-[40px] space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <select id="field-type" onchange="UI.toggleSmartQuiz()" class="input-premium bg-slate-900 font-bold">
+                    <option value="job">💼 אני מגייס עובדים</option>
+                    <option value="worker">🙋‍♂️ אני מחפש עבודה</option>
+                </select>
+                <input type="text" id="field-title" class="input-premium" placeholder="כותרת המשרה">
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <input type="text" id="field-name" class="input-premium" placeholder="שם המפרסם">
+                <input type="text" id="field-city" class="input-premium" placeholder="מיקום/עיר">
+            </div>
+            <input type="tel" id="field-phone" class="input-premium" placeholder="טלפון לוואטסאפ (05x...)">
+            <textarea id="field-desc" class="input-premium h-32" placeholder="תיאור חופשי..."></textarea>
 
-        <div class="glass-morphism p-8 rounded-[40px] space-y-8 relative overflow-hidden">
-            <div class="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 blur-3xl rounded-full"></div>
-            
-            <div class="space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="space-y-2">
-                        <label class="text-[10px] font-black text-slate-500 uppercase mr-2 tracking-widest">סוג הפרסום</label>
-                        <select id="field-type" onchange="UI.toggleSmartQuiz()" class="input-premium bg-slate-900 font-bold">
-                            <option value="job">💼 אני מגייס עובדים (מעסיק)</option>
-                            <option value="worker">🙋‍♂️ אני מחפש עבודה (מועמד)</option>
-                        </select>
-                    </div>
-                    <div class="space-y-2">
-                        <label class="text-[10px] font-black text-slate-500 uppercase mr-2 tracking-widest">כותרת המודעה</label>
-                        <input type="text" id="field-title" class="input-premium" placeholder="למשל: נהג משאית C1">
-                    </div>
+            <div id="smart-quiz-builder" class="pt-6 border-t border-white/5">
+                <h4 class="font-black text-blue-400 mb-4">שאלון סינון חכם</h4>
+                <div id="quiz-inputs-container" class="space-y-3">
+                    <input type="text" class="quiz-q-input input-premium py-3 text-sm" placeholder="שאלה לדוגמה: האם יש לך רכב?">
                 </div>
-
-                <div class="grid grid-cols-2 gap-6">
-                    <div class="space-y-2">
-                        <label class="text-[10px] font-black text-slate-500 uppercase mr-2 tracking-widest">שם המפרסם</label>
-                        <input type="text" id="field-name" class="input-premium" placeholder="חברה או שם">
-                    </div>
-                    <div class="space-y-2">
-                        <label class="text-[10px] font-black text-slate-500 uppercase mr-2 tracking-widest">מיקום</label>
-                        <input type="text" id="field-city" class="input-premium" placeholder="עיר/אזור">
-                    </div>
-                </div>
-
-                <div class="space-y-2">
-                    <label class="text-[10px] font-black text-slate-500 uppercase mr-2 tracking-widest">טלפון ליצירת קשר (WhatsApp)</label>
-                    <input type="tel" id="field-phone" class="input-premium font-mono" placeholder="05x-xxxxxxx">
-                </div>
-
-                <div class="space-y-2">
-                    <label class="text-[10px] font-black text-slate-500 uppercase mr-2 tracking-widest">תיאור מורחב</label>
-                    <textarea id="field-desc" class="input-premium h-40 resize-none" placeholder="פרט כאן על המשרה או על הניסיון שלך..."></textarea>
-                </div>
-
-                <div id="smart-quiz-builder" class="pt-8 border-t border-white/5">
-                    <div class="flex items-center justify-between mb-6">
-                        <div>
-                            <h4 class="font-black text-blue-400">שאלון סינון חכם</h4>
-                            <p class="text-[9px] text-slate-500 font-bold uppercase tracking-tighter">AI Candidate Screening</p>
-                        </div>
-                        <span class="px-3 py-1 bg-blue-500/10 text-blue-500 text-[10px] font-black rounded-lg">BETA</span>
-                    </div>
-                    <div id="quiz-inputs-container" class="space-y-3">
-                        <input type="text" class="quiz-q-input input-premium py-4 text-sm" placeholder="שאלה 1: האם יש לך רישיון בתוקף?">
-                    </div>
-                    <button onclick="UI.addNewQuizField()" class="w-full mt-4 py-4 border-2 border-dashed border-white/5 rounded-2xl text-[10px] font-black text-slate-500 hover:text-white transition-all uppercase tracking-[0.2em]">
-                        + הוסף שאלת סינון
-                    </button>
-                </div>
+                <button onclick="UI.addNewQuizField()" class="w-full mt-4 py-2 border border-dashed border-white/20 rounded-xl text-xs uppercase opacity-60 hover:opacity-100">+ הוסף שאלה</button>
             </div>
 
-            <button onclick="Data.handlePublish()" class="btn-neo w-full py-6 text-xl shadow-2xl shadow-blue-500/20">
-                פרסם מודעה עכשיו 🚀
-            </button>
+            <button onclick="Data.handlePublish()" class="btn-neo w-full py-5 text-xl">פרסם עכשיו 🚀</button>
         </div>
     </section>
 
     <section id="view-admin" class="view-section max-w-2xl mx-auto">
         <div id="auth-panel" class="py-12">
-            <div class="text-center mb-12">
-                <div class="w-24 h-24 bg-blue-500/10 rounded-[35px] flex items-center justify-center text-4xl mx-auto mb-6 border border-blue-500/20">🔐</div>
-                <h2 class="text-4xl font-black italic">כניסת <span class="text-blue-500">מנהלים</span></h2>
-                <p class="text-slate-500 font-bold mt-2">נהל את המודעות והפניות שלך</p>
+            <div class="text-center mb-10">
+                <h2 class="text-4xl font-black italic mb-2">כניסת <span class="text-blue-500">מנהלים</span></h2>
             </div>
-            
-            <div class="glass-morphism p-10 rounded-[45px] space-y-6">
-                <input type="email" id="auth-email" class="input-premium" placeholder="דואר אלקטרוני">
+            <div class="glass-morphism p-8 rounded-[40px] space-y-4">
+                <input type="email" id="auth-email" class="input-premium" placeholder="אימייל">
                 <input type="password" id="auth-pass" class="input-premium" placeholder="סיסמה">
-                <button onclick="Auth.process('login')" class="btn-neo w-full py-5 text-lg">כניסה למערכת</button>
-                <div class="relative py-4 flex items-center gap-4">
-                    <div class="flex-1 h-px bg-white/5"></div>
-                    <span class="text-[10px] font-black text-slate-600 uppercase">או</span>
-                    <div class="flex-1 h-px bg-white/5"></div>
-                </div>
-                <button onclick="Auth.process('signup')" class="w-full text-blue-400 font-black text-xs uppercase tracking-widest hover:text-white transition-colors">יצירת חשבון חדש</button>
+                <button onclick="Auth.process('login')" class="btn-neo w-full py-4">כניסה</button>
+                <button onclick="Auth.process('signup')" class="w-full text-blue-400 text-xs font-bold uppercase mt-4">צור חשבון חדש</button>
             </div>
         </div>
 
-        <div id="dashboard-panel" class="hidden space-y-12 py-6">
-            <div class="flex justify-between items-end border-b border-white/5 pb-8">
-                <div>
-                    <h2 class="text-4xl font-black italic">הניהול <span class="text-blue-500">שלי</span></h2>
-                    <p class="text-slate-500 font-bold uppercase text-[10px] tracking-widest mt-1">Control Center</p>
-                </div>
-                <button onclick="Auth.logout()" class="px-6 py-3 bg-red-500/10 text-red-500 text-[10px] font-black rounded-xl uppercase border border-red-500/20 hover:bg-red-500 hover:text-white transition-all">התנתק 🚪</button>
+        <div id="dashboard-panel" class="hidden space-y-10">
+            <div class="flex justify-between items-center">
+                <h2 class="text-3xl font-black italic">הניהול <span class="text-blue-500">שלי</span></h2>
+                <button onclick="Auth.logout()" class="text-red-500 text-xs font-black uppercase">התנתק 🚪</button>
             </div>
-
             <div>
-                <h3 class="text-xs font-black text-blue-500 uppercase tracking-[0.3em] mb-6 flex items-center gap-2">
-                    <span class="w-2 h-2 bg-blue-500 rounded-full animate-ping"></span> מודעות פעילות
-                </h3>
-                <div id="my-listings-grid" class="space-y-4"></div>
+                <h3 class="text-xs font-black text-blue-500 uppercase tracking-widest mb-4">מודעות פעילות</h3>
+                <div id="my-listings-grid" class="space-y-3"></div>
             </div>
-
             <div>
-                <h3 class="text-xs font-black text-green-500 uppercase tracking-[0.3em] mb-6 flex items-center gap-2">
-                    <span class="w-2 h-2 bg-green-500 rounded-full"></span> פניות ממועמדים
-                </h3>
-                <div id="my-leads-grid" class="space-y-6"></div>
+                <h3 class="text-xs font-black text-green-500 uppercase tracking-widest mb-4">פניות ממועמדים</h3>
+                <div id="my-leads-grid" class="space-y-4"></div>
             </div>
         </div>
     </section>
 
     <nav class="bottom-nav glass-morphism border-white/10 shadow-2xl">
-        <div class="nav-link active" id="nav-feed" onclick="Router.go('feed')">
-            <span class="text-2xl">🏠</span>
-            <span class="text-[9px] font-black uppercase mt-1">לוח</span>
-        </div>
-        <div class="nav-link" id="nav-post" onclick="Router.go('post')">
-            <span class="text-2xl">➕</span>
-            <span class="text-[9px] font-black uppercase mt-1">פרסם</span>
-        </div>
-        <div class="nav-link" id="nav-admin" onclick="Router.go('admin')">
-            <span class="text-2xl">📊</span>
-            <span class="text-[9px] font-black uppercase mt-1">ניהול</span>
-        </div>
-        <div class="nav-link" onclick="UI.showAppInfo()">
-            <span class="text-2xl">⚙️</span>
-            <span class="text-[9px] font-black uppercase mt-1">מידע</span>
-        </div>
+        <div class="nav-link active" id="nav-feed" onclick="Router.go('feed')"><span>🏠</span><span class="text-[9px] font-black uppercase mt-1">לוח</span></div>
+        <div class="nav-link" id="nav-post" onclick="Router.go('post')"><span>➕</span><span class="text-[9px] font-black uppercase mt-1">פרסם</span></div>
+        <div class="nav-link" id="nav-admin" onclick="Router.go('admin')"><span>📊</span><span class="text-[9px] font-black uppercase mt-1">ניהול</span></div>
+        <div class="nav-link" onclick="UI.showAppInfo()"><span>⚙️</span><span class="text-[9px] font-black uppercase mt-1">מידע</span></div>
     </nav>
-<script type="module">
-    // ייבוא תשתיות הליבה של Firebase
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, collection, addDoc, getDocs, query, where, orderBy, serverTimestamp, deleteDoc, doc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    // קונפיגורציית פרויקט matchme-32bcf
-    const firebaseConfig = {
-        apiKey: "AIzaSyD0hsz8SOI1OG2Fh-DBy1SHeabPaEKZx-Y",
-        authDomain: "matchme-32bcf.firebaseapp.com",
-        projectId: "matchme-32bcf",
-        storageBucket: "matchme-32bcf.appspot.com",
-        appId: "1:1082863959305:web:f888f4df815598696c601f"
-    };
-
-    // אתחול Instance גלובלי
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-
-    /**
-     * GLOBAL STATE MANAGEMENT
-     * ניהול מצב האפליקציה בזיכרון המערכת
-     */
-    const GlobalState = {
-        user: null,
-        posts: [],
-        filteredPosts: [],
-        currentView: 'feed',
-        lastUpdate: null,
-        isSyncing: false
-    };
-
-    /**
-     * ADVANCED ROUTER SYSTEM
-     * ניהול ניווט דפים חכם
-     */
-    const Router = {
-        go(viewId) {
-            console.log(`%c [Router] Navigating to: ${viewId} `, 'background: #222; color: #bada55');
-            
-            // עדכון ויזואלי של דפים
-            document.querySelectorAll('.view-section').forEach(section => {
-                section.classList.remove('active');
-            });
-            
-            const target = document.getElementById(`view-${viewId}`);
-            if (target) {
-                target.classList.add('active');
-            }
-
-            // עדכון מצב כפתורי הניווט
-            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
-            const activeLink = document.getElementById(`nav-${viewId}`);
-            if (activeLink) activeLink.classList.add('active');
-
-            GlobalState.currentView = viewId;
-
-            // לוגיקת טעינה ייעודית לפי דף
-            if (viewId === 'feed') Data.sync();
-            if (viewId === 'admin') UI.refreshDashboard();
-
-            // גלילה חלקה לראש הדף
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-    };
-
-    /**
-     * DATA ACCESS LAYER (DAL)
-     * פונקציות לתקשורת מול ה-Database
-     */
-    const Data = {
-        // סנכרון נתונים מהענן
-        async sync() {
-            if (GlobalState.isSyncing) return;
-            GlobalState.isSyncing = true;
-            UI.toggleLoader(true);
-
-            try {
-                const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
-                const querySnapshot = await getDocs(q);
-                
-                GlobalState.posts = querySnapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                }));
-                
-                GlobalState.filteredPosts = [...GlobalState.posts];
-                UI.renderFeed(GlobalState.filteredPosts);
-                GlobalState.lastUpdate = new Date();
-                
-            } catch (error) {
-                console.error("Sync Error:", error);
-                Toast.error("תקלה בסנכרון הנתונים. נסה שוב.");
-            } finally {
-                UI.toggleLoader(false);
-                GlobalState.isSyncing = false;
-            }
-        },
-
-        // פרסום מודעה חדשה
-        async handlePublish() {
-            const title = document.getElementById('field-title').value.trim();
-            const phone = document.getElementById('field-phone').value.trim();
-            const name = document.getElementById('field-name').value.trim();
-            const type = document.getElementById('field-type').value;
-            const city = document.getElementById('field-city').value.trim();
-            const desc = document.getElementById('field-desc').value.trim();
-
-            if (!title || !phone || !name) {
-                return Toast.warning("נא למלא שדות חובה: כותרת, שם וטלפון");
-            }
-
-            UI.toggleLoader(true);
-
-            // איסוף שאלות שאלון
-            const questions = Array.from(document.querySelectorAll('.quiz-q-input'))
-                .map(input => input.value.trim())
-                .filter(val => val !== "");
-
-            try {
-                const postData = {
-                    type,
-                    title,
-                    name,
-                    city: city || "כל הארץ",
-                    phone: phone.replace(/\D/g, ''),
-                    desc,
-                    questions: type === 'job' ? questions : [],
-                    owner: GlobalState.user ? GlobalState.user.uid : "guest",
-                    stats: { views: 0, leads: 0 },
-                    createdAt: serverTimestamp()
-                };
-
-                await addDoc(collection(db, "posts"), postData);
-                
-                Toast.success("המודעה פורסמה בהצלחה! 🚀");
-                this.resetForm();
-                Router.go('feed');
-                
-            } catch (error) {
-                console.error("Publish Error:", error);
-                Toast.error("שגיאה בפרסום. וודא שאתה מחובר.");
-            } finally {
-                UI.toggleLoader(false);
-            }
-        },
-
-        // מחיקת מודעה
-        async deletePost(postId) {
-            if (!confirm("למחוק את המודעה לצמיתות?")) return;
-            
-            UI.toggleLoader(true);
-            try {
-                await deleteDoc(doc(db, "posts", postId));
-                Toast.success("המודעה הוסרה");
-                UI.refreshDashboard();
-            } catch (e) {
-                Toast.error("שגיאה במחיקה");
-            } finally {
-                UI.toggleLoader(false);
-            }
-        },
-
-        resetForm() {
-            ['field-title', 'field-name', 'field-city', 'field-phone', 'field-desc'].forEach(id => {
-                document.getElementById(id).value = "";
-            });
-            document.getElementById('quiz-inputs-container').innerHTML = `
-                <input type="text" class="quiz-q-input input-premium py-4 text-sm" placeholder="שאלה 1: האם יש לך רישיון בתוקף?">
-            `;
-        }
-    };
-
-    // חשיפת אובייקטים לחלון הגלובלי (לשימוש ב-HTML)
-    window.Router = Router;
-    window.Data = Data;
-    window.GlobalState = GlobalState;
-    window.db = db;
-    window.auth = auth;
-    /**
-     * UI & UX ENGINE
-     * ניהול התצוגה, הרינדור והאינטראקציות
-     */
-    const UI = {
-        // ניהול מסך טעינה עם מנגנון הגנה
-        toggleLoader(show) {
-            const loader = document.getElementById('master-loader');
-            if (show) {
-                loader.style.display = 'flex';
-                loader.style.opacity = '1';
-                // הגנת "דף שחור" - אם השרת לא עונה תוך 4 שניות, שחרר את המסך
-                setTimeout(() => {
-                    if(loader.style.opacity === '1') this.toggleLoader(false);
-                }, 4000);
-            } else {
-                loader.style.opacity = '0';
-                setTimeout(() => loader.style.display = 'none', 500);
-            }
-        },
-
-        // רינדור לוח המודעות (פיד)
-        renderFeed(list) {
-            const container = document.getElementById('feed-container');
-            if (!list || list.length === 0) {
-                container.innerHTML = `
-                    <div class="py-20 text-center animate-fade-in">
-                        <div class="text-6xl mb-6 opacity-20">🔎</div>
-                        <h3 class="text-xl font-bold opacity-40">לא נמצאו תוצאות תואמות</h3>
-                        <p class="text-sm opacity-30 mt-2">נסה לשנות את מילות החיפוש</p>
-                    </div>`;
-                return;
-            }
-
-            container.innerHTML = list.map((item, index) => {
-                const isJob = item.type === 'job';
-                return `
-                <div class="feed-card animate-fade-in ${!isJob ? 'worker-post' : ''}" 
-                     style="animation-delay: ${index * 0.05}s"
-                     onclick="App.engage('${item.id}')">
-                    <div class="flex justify-between items-start mb-4">
-                        <span class="px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${isJob ? 'bg-blue-500/10 text-blue-500' : 'bg-emerald-500/10 text-emerald-500'}">
-                            ${isJob ? '💼 דרושים' : '🙋‍♂️ מחפש עבודה'}
-                        </span>
-                        <span class="text-[11px] font-bold text-slate-500 opacity-60">📍 ${item.city}</span>
-                    </div>
-                    <h3 class="text-2xl font-black tracking-tight text-white mb-1">${item.title}</h3>
-                    <p class="text-blue-400 font-bold text-sm mb-4">${item.name}</p>
-                    <div class="flex items-center justify-between pt-4 border-t border-white/5 mt-2">
-                        <div class="flex -space-x-2 rtl:space-x-reverse">
-                            <div class="w-7 h-7 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-[10px]">✨</div>
-                        </div>
-                        <span class="text-[10px] font-black text-slate-400 uppercase tracking-tighter hover:text-blue-500 transition-colors">
-                            ${isJob ? 'בדוק התאמה והגש מועמדות >' : 'צפה בפרטים וצור קשר >'}
-                        </span>
-                    </div>
-                </div>`;
-            }).join('');
-        },
-
-        // חיפוש חכם בזמן אמת
-        handleSearch(val) {
-            const term = val.toLowerCase().trim();
-            GlobalState.filteredPosts = GlobalState.posts.filter(p => 
-                p.title.toLowerCase().includes(term) || 
-                p.city.toLowerCase().includes(term) || 
-                p.name.toLowerCase().includes(term)
-            );
-            this.renderFeed(GlobalState.filteredPosts);
-        },
-
-        // רענון דשבורד הניהול
-        async refreshDashboard() {
-            if (!GlobalState.user) {
-                document.getElementById('auth-panel').classList.remove('hidden');
-                document.getElementById('dashboard-panel').classList.add('hidden');
-                return;
-            }
-
-            document.getElementById('auth-panel').classList.add('hidden');
-            const dash = document.getElementById('dashboard-panel');
-            dash.classList.remove('hidden');
-
-            try {
-                // שליפת מודעות המשתמש
-                const pSnap = await getDocs(query(collection(db, "posts"), where("owner", "==", GlobalState.user.uid)));
-                const listingsGrid = document.getElementById('my-listings-grid');
-                listingsGrid.innerHTML = pSnap.docs.map(d => `
-                    <div class="glass-morphism p-5 rounded-2xl flex justify-between items-center group">
-                        <div>
-                            <p class="font-black text-white">${d.data().title}</p>
-                            <p class="text-[10px] text-slate-500 font-bold uppercase mt-1">פורסם ב-${new Date(d.data().createdAt?.toDate()).toLocaleDateString('he-IL')}</p>
-                        </div>
-                        <button onclick="Data.deletePost('${d.id}')" class="w-10 h-10 rounded-xl bg-red-500/10 text-red-500 opacity-0 group-hover:opacity-100 transition-all hover:bg-red-500 hover:text-white">🗑️</button>
-                    </div>
-                `).join('') || '<p class="text-sm text-slate-600 italic">טרם פרסמת מודעות...</p>';
-
-                // שליפת לידים (פניות)
-                const lSnap = await getDocs(query(collection(db, "leads"), where("bossID", "==", GlobalState.user.uid), orderBy("createdAt", "desc")));
-                const leadsGrid = document.getElementById('my-leads-grid');
-                leadsGrid.innerHTML = lSnap.docs.map(d => {
-                    const l = d.data();
-                    return `
-                    <div class="glass-morphism p-6 rounded-[30px] border-r-4 border-emerald-500 relative overflow-hidden">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h4 class="font-black text-xl text-white">${l.candidateName}</h4>
-                                <p class="text-[10px] font-bold text-blue-400 uppercase tracking-widest">${l.jobTitle}</p>
-                            </div>
-                            <div class="bg-emerald-500/20 text-emerald-400 px-3 py-2 rounded-2xl font-black text-sm">
-                                ${l.matchScore}% התאמה
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-3 mt-6">
-                            <a href="https://api.whatsapp.com/send?phone=972${l.candidatePhone.substring(1)}" target="_blank" class="py-3 bg-emerald-600 text-white rounded-xl text-center text-[10px] font-black uppercase">WhatsApp</a>
-                            <a href="tel:${l.candidatePhone}" class="py-3 bg-slate-700 text-white rounded-xl text-center text-[10px] font-black uppercase">התקשר</a>
-                        </div>
-                    </div>`;
-                }).join('') || '<p class="text-sm text-slate-600 italic text-center py-10">אין פניות חדשות כרגע</p>';
-
-            } catch (e) { console.error("Dash Error:", e); }
-        },
-
-                addNewQuizField() {
-            const container = document.getElementById('quiz-inputs-container');
-            const input = document.createElement('input');
-            input.className = "quiz-q-input input-premium py-4 text-sm animate-fade-in mt-2";
-            input.placeholder = `שאלה ${container.children.length + 1}: הקלד שאלת כן/לא...`;
-            container.appendChild(input);
-        },
-
-        toggleSmartQuiz() {
-            const isJob = document.getElementById('field-type').value === 'job';
-            const quizBuilder = document.getElementById('smart-quiz-builder');
-            if (quizBuilder) {
-                quizBuilder.style.display = isJob ? 'block' : 'none';
-            }
-        },
-
-        showAppInfo() {
-            alert("MatchMe Pro v3.0\nמערכת גיוס וניהול משרות מתקדמת\n2026 Enterprise Edition\nנבנה לביצועים מקסימליים וניהול לידים חכם.");
-        }
-    };
-
-    /**
-     * MATCHING ENGINE (The "Brain")
-     * לוגיקת החיבור בין מועמדים למשרות וחישוב ציוני התאמה
-     */
-    const App = {
-        async engage(postId) {
-            const post = GlobalState.posts.find(p => p.id === postId);
-            if (!post) return;
-
-            // אם המודעה היא מסוג "דרושים" - המשתמש הנוכחי הוא מועמד
-            if (post.type === 'job') {
-                const name = prompt("הכנס שם מלא להגשת מועמדות:");
-                if (!name) return;
-                
-                const phone = prompt("מה מספר הטלפון שלך (בוואטסאפ)?");
-                if (!phone || phone.length < 9) return Toast.warning("נא להזין טלפון תקין ליצירת קשר");
-
-                let score = 100;
-                // הרצת שאלון סינון אם קיים
-                if (post.questions && post.questions.length > 0) {
-                    let correct = 0;
-                    alert("המעסיק הגדיר שאלות סינון קצרות. נא ענה בכן/לא.");
-                    for (const q of post.questions) {
-                        if (confirm(`${q}\n\n(אישור = כן | ביטול = לא)`)) {
-                            correct++;
-                        }
-                    }
-                    score = Math.round((correct / post.questions.length) * 100);
-                }
-
-                // שמירת הליד ב-Database כדי שהמעסיק יראה אותו בדשבורד
-                try {
-                    UI.toggleLoader(true);
-                    await addDoc(collection(db, "leads"), {
-                        bossID: post.owner,
-                        jobTitle: post.title,
-                        candidateName: name,
-                        candidatePhone: phone.replace(/\D/g, ''),
-                        matchScore: score,
-                        createdAt: serverTimestamp()
-                    });
-                    
-                    Toast.success("המועמדות נשלחה למעסיק!");
-                    this.sendToWhatsApp(post, name, score);
-                } catch (e) { 
-                    console.error(e);
-                    Toast.error("תקלה בשמירת הפנייה"); 
-                }
-                UI.toggleLoader(false);
-
-            } else {
-                // אם המודעה היא מסוג "מחפש עבודה" - המשתמש הנוכחי הוא מעסיק
-                this.sendToWhatsApp(post, "מעסיק מ-MatchMe", 100);
-            }
-        },
-
-        sendToWhatsApp(post, senderName, score) {
-            const cleanPhone = post.phone.startsWith('0') ? '972' + post.phone.substring(1) : post.phone;
-            const msg = `היי ${post.name},\nאני פונה אליך לגבי המודעה: "${post.title}" ב-MatchMe.\nשמי: ${senderName}\nציון התאמה: ${score}%\nנשמח לדבר!`;
-            const url = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(msg)}`;
-            window.open(url, '_blank');
-        }
-    };
-
-    /**
-     * AUTHENTICATION MODULE
-     * ניהול הרשאות וכניסה
-     */
-    const Auth = {
-        async process(mode) {
-            const email = document.getElementById('auth-email').value;
-            const pass = document.getElementById('auth-pass').value;
-            
-            if (!email || pass.length < 6) {
-                return Toast.warning("נא להזין אימייל תקין וסיסמה בת 6 תווים לפחות");
-            }
-
-            UI.toggleLoader(true);
-            try {
-                if (mode === 'login') {
-                    await signInWithEmailAndPassword(auth, email, pass);
-                    Toast.success("ברוך השב למערכת!");
-                } else {
-                    await createUserWithEmailAndPassword(auth, email, pass);
-                    Toast.success("חשבון מנהל נוצר בהצלחה!");
-                }
-                Router.go('admin');
-            } catch (e) { 
-                console.error(e);
-                Toast.error("שגיאה: " + (e.code === 'auth/user-not-found' ? "משתמש לא קיים" : "פרטים שגויים")); 
-            }
-            UI.toggleLoader(false);
-        },
-
-        logout() {
-            if (confirm("האם אתה בטוח שברצונך להתנתק?")) {
-                signOut(auth).then(() => location.reload());
-            }
-        }
-    };
-
-    /**
-     * TOAST SYSTEM
-     */
-    const Toast = {
-        show(msg, type = 'info') {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            const colors = {
-                success: 'border-emerald-500 bg-emerald-500/10 text-emerald-400',
-                error: 'border-red-500 bg-red-500/10 text-red-400',
-                warning: 'border-amber-500 bg-amber-500/10 text-amber-400'
-            };
-            toast.className = `glass-morphism p-5 rounded-2xl border-r-4 shadow-2xl animate-fade-in ${colors[type] || 'border-blue-500 text-blue-400'}`;
-            toast.innerHTML = `<p class="font-bold text-sm">${msg}</p>`;
-            container.appendChild(toast);
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                setTimeout(() => toast.remove(), 500);
-            }, 3500);
-        },
-        success(m) { this.show(m, 'success'); },
-        error(m) { this.show(m, 'error'); },
-        warning(m) { this.show(m, 'warning'); }
-    };
-
-    // האזנה למצב המשתמש בזמן אמת
-    onAuthStateChanged(auth, (user) => {
-        GlobalState.user = user;
-        if (GlobalState.currentView === 'admin') UI.refreshDashboard();
-        // הסרת הלואדר הראשוני רק אחרי בדיקת ה-Auth
-        setTimeout(() => UI.toggleLoader(false), 800);
-    });
-
-    // חשיפת פונקציות גלובליות
-    window.UI = UI;
-    window.Auth = Auth;
-    window.App = App;
-    window.Toast = Toast;
-
-    // אתחול האפליקציה
-    document.addEventListener('DOMContentLoaded', () => {
-        Data.sync();
-        UI.toggleSmartQuiz();
-    });
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
@@ -883,23 +203,14 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    const GlobalState = {
-        user: null,
-        posts: [],
-        currentView: 'feed',
-        isSyncing: false
-    };
+    const GlobalState = { user: null, posts: [], currentView: 'feed', isSyncing: false };
 
     const Router = {
         go(viewId) {
             document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
-            const target = document.getElementById(`view-${viewId}`);
-            if (target) target.classList.add('active');
-            
+            document.getElementById(`view-${viewId}`).classList.add('active');
             document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-            const link = document.getElementById(`nav-${viewId}`);
-            if (link) link.classList.add('active');
-
+            document.getElementById(`nav-${viewId}`)?.classList.add('active');
             GlobalState.currentView = viewId;
             if (viewId === 'feed') Data.sync();
             if (viewId === 'admin') UI.refreshDashboard();
@@ -917,55 +228,34 @@
                 const snap = await getDocs(q);
                 GlobalState.posts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 UI.renderFeed(GlobalState.posts);
-            } catch (e) {
-                console.error(e);
-                Toast.error("שגיאת סנכרון. בדוק Rules ב-Firebase.");
-            } finally {
-                UI.toggleLoader(false);
-                GlobalState.isSyncing = false;
-            }
+            } catch (e) { Toast.error("שגיאת סנכרון"); }
+            finally { UI.toggleLoader(false); GlobalState.isSyncing = false; }
         },
 
         async handlePublish() {
-            const title = document.getElementById('field-title').value.trim();
-            const phone = document.getElementById('field-phone').value.trim();
-            const name = document.getElementById('field-name').value.trim();
-            const type = document.getElementById('field-type').value;
-            const city = document.getElementById('field-city').value.trim() || "כל הארץ";
-            const desc = document.getElementById('field-desc').value.trim();
-
+            const title = document.getElementById('field-title').value;
+            const phone = document.getElementById('field-phone').value;
+            const name = document.getElementById('field-name').value;
             if (!title || !phone || !name) return Toast.warning("מלא שדות חובה");
 
             UI.toggleLoader(true);
             try {
-                // איסוף שאלות שאלון
                 const questions = Array.from(document.querySelectorAll('.quiz-q-input'))
-                    .map(input => input.value.trim())
-                    .filter(val => val !== "");
+                    .map(i => i.value.trim()).filter(v => v !== "");
 
                 await addDoc(collection(db, "posts"), {
-                    type, title, name, phone, city, desc,
-                    questions: type === 'job' ? questions : [],
-                    owner: GlobalState.user ? GlobalState.user.uid : "guest",
+                    type: document.getElementById('field-type').value,
+                    title, name, phone, 
+                    city: document.getElementById('field-city').value || "כל הארץ",
+                    desc: document.getElementById('field-desc').value,
+                    questions,
+                    owner: GlobalState.user?.uid || "guest",
                     createdAt: serverTimestamp()
                 });
                 Toast.success("פורסם בהצלחה!");
                 Router.go('feed');
-            } catch (e) {
-                console.error(e);
-                Toast.error("שגיאה בפרסום. וודא שביצעת Publish ל-Rules.");
-            } finally {
-                UI.toggleLoader(false);
-            }
-        },
-
-        async deletePost(postId) {
-            if (!confirm("למחוק את המודעה?")) return;
-            try {
-                await deleteDoc(doc(db, "posts", postId));
-                Toast.success("המודעה נמחקה");
-                UI.refreshDashboard();
-            } catch (e) { Toast.error("תקלה במחיקה"); }
+            } catch (e) { Toast.error("שגיאה בפרסום"); }
+            finally { UI.toggleLoader(false); }
         }
     };
 
@@ -974,37 +264,28 @@
             const post = GlobalState.posts.find(p => p.id === postId);
             if (!post) return;
 
-            const candidateName = prompt("הכנס שם מלא להגשת מועמדות:");
-            if (!candidateName) return;
-            const candidatePhone = prompt("מה מספר הטלפון שלך?");
-            if (!candidatePhone) return;
+            const cName = prompt("מה שמך המלא?");
+            const cPhone = prompt("מה הטלפון שלך?");
+            if (!cName || !cPhone) return;
 
             let score = 100;
-            if (post.questions && post.questions.length > 0) {
+            if (post.questions?.length > 0) {
                 let correct = 0;
-                for (const q of post.questions) {
-                    if (confirm(`${q}\n\n(אישור=כן, ביטול=לא)`)) correct++;
-                }
+                for (const q of post.questions) { if (confirm(`${q}\n(אישור=כן, ביטול=לא)`)) correct++; }
                 score = Math.round((correct / post.questions.length) * 100);
             }
 
             try {
                 UI.toggleLoader(true);
                 await addDoc(collection(db, "leads"), {
-                    bossID: post.owner,
-                    jobTitle: post.title,
-                    candidateName,
-                    candidatePhone,
-                    matchScore: score,
-                    createdAt: serverTimestamp()
+                    bossID: post.owner, jobTitle: post.title,
+                    candidateName: cName, candidatePhone: cPhone,
+                    matchScore: score, createdAt: serverTimestamp()
                 });
-                
-                Toast.success("הפנייה נשלחה!");
                 
                 let num = post.phone.replace(/\D/g, '');
                 if (num.startsWith('0')) num = '972' + num.substring(1);
-                const msg = encodeURIComponent(`היי ${post.name}, פניתי למשרה "${post.title}". שמי ${candidateName}, התאמה: ${score}%`);
-                window.location.href = `https://wa.me/${num}?text=${msg}`;
+                window.location.href = `https://wa.me/${num}?text=${encodeURIComponent(`היי ${post.name}, פניתי למשרה "${post.title}". שמי ${cName}, התאמה: ${score}%`)}`;
             } catch (e) { Toast.error("תקלה בשליחה"); }
             finally { UI.toggleLoader(false); }
         }
@@ -1012,51 +293,37 @@
 
     const UI = {
         toggleLoader(s) { document.getElementById('master-loader').style.display = s ? 'flex' : 'none'; },
-        
         renderFeed(list) {
-            const container = document.getElementById('feed-container');
-            container.innerHTML = list.map(item => `
+            document.getElementById('feed-container').innerHTML = list.map(item => `
                 <div class="feed-card animate-fade-in ${item.type !== 'job' ? 'worker-post' : ''}" onclick="App.engage('${item.id}')">
                     <h3 class="text-2xl font-black">${item.title}</h3>
                     <p class="text-blue-400 font-bold">${item.name} | ${item.city}</p>
                     <p class="text-slate-400 text-sm mt-2 opacity-80">${item.desc || ''}</p>
-                    <div class="mt-4 pt-3 border-t border-white/5 text-[10px] font-black uppercase text-blue-500">
-                        ${item.type === 'job' ? 'לחץ להגשת מועמדות >' : 'לחץ ליצירת קשר >'}
-                    </div>
                 </div>
             `).join('');
         },
-
         handleSearch(val) {
-            const term = val.toLowerCase();
-            const filtered = GlobalState.posts.filter(p => p.title.toLowerCase().includes(term) || p.city.toLowerCase().includes(term));
+            const filtered = GlobalState.posts.filter(p => p.title.toLowerCase().includes(val.toLowerCase()));
             this.renderFeed(filtered);
         },
-
         async refreshDashboard() {
-            if (!GlobalState.user) {
-                document.getElementById('auth-panel').classList.remove('hidden');
-                document.getElementById('dashboard-panel').classList.add('hidden');
-                return;
-            }
+            if (!GlobalState.user) return;
             document.getElementById('auth-panel').classList.add('hidden');
             document.getElementById('dashboard-panel').classList.remove('hidden');
 
-            // טעינת מודעות שלי
             const pSnap = await getDocs(query(collection(db, "posts"), where("owner", "==", GlobalState.user.uid)));
             document.getElementById('my-listings-grid').innerHTML = pSnap.docs.map(d => `
-                <div class="glass-morphism p-4 rounded-xl flex justify-between items-center mb-2">
+                <div class="glass-morphism p-4 rounded-xl flex justify-between items-center">
                     <span class="font-bold">${d.data().title}</span>
                     <button onclick="Data.deletePost('${d.id}')" class="text-red-500">🗑️</button>
                 </div>
             `).join('') || 'אין מודעות';
 
-            // טעינת פניות (Leads)
             const lSnap = await getDocs(query(collection(db, "leads"), where("bossID", "==", GlobalState.user.uid)));
             document.getElementById('my-leads-grid').innerHTML = lSnap.docs.map(d => {
                 const l = d.data();
                 return `
-                <div class="glass-morphism p-4 rounded-2xl border-r-4 border-green-500 mb-4">
+                <div class="glass-morphism p-4 rounded-2xl border-r-4 border-green-500">
                     <h4 class="font-black">${l.candidateName}</h4>
                     <p class="text-xs text-blue-400">${l.jobTitle} | ${l.matchScore}% התאמה</p>
                     <div class="flex gap-2 mt-3">
@@ -1064,34 +331,29 @@
                         <a href="tel:${l.candidatePhone}" class="bg-slate-700 px-3 py-1 rounded-lg text-[10px] font-black">התקשר</a>
                     </div>
                 </div>`;
-            }).join('') || 'אין פניות כרגע';
+            }).join('') || 'אין פניות';
         },
-        
         addNewQuizField() {
-            const container = document.getElementById('quiz-inputs-container');
-            const input = document.createElement('input');
-            input.className = "quiz-q-input input-premium py-4 text-sm mt-2";
-            input.placeholder = `שאלה ${container.children.length + 1}...`;
-            container.appendChild(input);
+            const i = document.createElement('input');
+            i.className = "quiz-q-input input-premium py-3 text-sm mt-2";
+            i.placeholder = "הקלד שאלה...";
+            document.getElementById('quiz-inputs-container').appendChild(i);
         },
         toggleSmartQuiz() {
-            const isJob = document.getElementById('field-type').value === 'job';
-            document.getElementById('smart-quiz-builder').style.display = isJob ? 'block' : 'none';
+            document.getElementById('smart-quiz-builder').style.display = document.getElementById('field-type').value === 'job' ? 'block' : 'none';
         },
-        showAppInfo() { alert("MatchMe Pro 2026\nמערכת גיוס חכמה"); }
+        showAppInfo() { alert("MatchMe Pro 2026"); }
     };
 
     const Auth = {
         async process(mode) {
-            const email = document.getElementById('auth-email').value;
-            const pass = document.getElementById('auth-pass').value;
-            if (!email || pass.length < 6) return Toast.warning("פרטים לא תקינים");
+            const e = document.getElementById('auth-email').value, p = document.getElementById('auth-pass').value;
             UI.toggleLoader(true);
             try {
-                if (mode === 'login') await signInWithEmailAndPassword(auth, email, pass);
-                else await createUserWithEmailAndPassword(auth, email, pass);
+                if (mode === 'login') await signInWithEmailAndPassword(auth, e, p);
+                else await createUserWithEmailAndPassword(auth, e, p);
                 Router.go('admin');
-            } catch (e) { Toast.error("שגיאה בחשבון"); }
+            } catch (err) { Toast.error("שגיאה בחשבון"); }
             finally { UI.toggleLoader(false); }
         },
         logout() { signOut(auth).then(() => location.reload()); }
@@ -1099,11 +361,10 @@
 
     const Toast = {
         show(m, type) {
-            const container = document.getElementById('toast-container');
             const t = document.createElement('div');
             t.className = `glass-morphism p-4 rounded-xl border-r-4 ${type === 'success' ? 'border-green-500' : 'border-red-500'}`;
             t.innerHTML = `<p class="font-bold text-sm">${m}</p>`;
-            container.appendChild(t);
+            document.getElementById('toast-container').appendChild(t);
             setTimeout(() => t.remove(), 3000);
         },
         success(m) { this.show(m, 'success'); },
@@ -1111,15 +372,9 @@
         warning(m) { this.show(m, 'error'); }
     };
 
-    onAuthStateChanged(auth, u => {
-        GlobalState.user = u;
-        if (GlobalState.currentView === 'admin') UI.refreshDashboard();
-        UI.toggleLoader(false);
-    });
-
+    onAuthStateChanged(auth, u => { GlobalState.user = u; UI.toggleLoader(false); });
     window.Router = Router; window.Data = Data; window.UI = UI; window.Auth = Auth; window.App = App;
     Data.sync();
-    UI.toggleSmartQuiz();
 </script>
 </body>
 </html>
