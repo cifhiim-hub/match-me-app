@@ -1,23 +1,200 @@
-window.apply = (id) => {
-    const p = allPosts.find(x => x.id === id);
-    let bonus = "";
-    
-    // אם יש שאלות סינון, נשאל אותן קודם
-    if(p.questions && p.questions.length > 0) {
-        let score = 0;
-        alert("המעסיק מבקש לוודא התאמה:");
-        p.questions.forEach(q => { if(confirm(q)) score++; });
-        bonus = ` | התאמה לשאלות המעסיק: ${Math.round((score/p.questions.length)*100)}%`;
-    }
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MatchMe - חיבור מקצועי</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Assistant', sans-serif; background-color: #020617; color: #f8fafc; margin: 0; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); }
+        .card { border-radius: 20px; transition: all 0.3s ease; }
+        .view-section { display: none; }
+        .view-section.active { display: block; animation: slideUp 0.4s ease; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        #modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
+        #modal.active { display: flex; }
+    </style>
+</head>
+<body>
 
-    // כאן שיניתי את השאלה שתהיה יותר הגיונית
-    const senderInfo = prompt("הכנס שם וניסיון בקצרה כדי שהמעסיק יחזור אליך:"); 
-    if(!senderInfo) return;
+    <div id="modal" onclick="UI.closeModal()">
+        <div class="glass w-full max-w-sm p-8 rounded-[35px]" onclick="event.stopPropagation()">
+            <div id="modal-content"></div>
+            <button onclick="UI.closeModal()" class="w-full mt-4 py-3 text-slate-400 text-sm font-bold">סגור</button>
+        </div>
+    </div>
 
-    let num = p.phone.replace(/\D/g,'');
-    if(num.startsWith('0')) num = '972' + num.substring(1);
-    
-    // בניית ההודעה בצורה מקצועית
-    const msg = encodeURIComponent(`שלום, אני פונה לגבי המשרה: "${p.title}".\nפרטים עלי: ${senderInfo}${bonus}`);
-    window.open(`https://api.whatsapp.com/send?phone=${num}&text=${msg}`, '_blank');
-};
+    <header class="p-6 flex justify-between items-center max-w-xl mx-auto">
+        <div>
+            <h1 class="text-2xl font-black italic tracking-tighter">MATCH<span class="text-blue-500">ME</span></h1>
+        </div>
+        <div id="status-tag" class="text-[10px] bg-white/5 border border-white/10 px-3 py-1 rounded-full opacity-60">אורח</div>
+    </header>
+
+    <section id="view-feed" class="view-section active p-4 max-w-xl mx-auto pb-32">
+        <div class="mb-6"><input type="text" oninput="UI.filter(this.value)" class="w-full bg-slate-900 border border-white/10 p-4 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500" placeholder="חפש לפי תפקיד או עיר..."></div>
+        <div id="feed-container" class="space-y-4"></div>
+    </section>
+
+    <section id="view-post" class="view-section p-4 max-w-xl mx-auto pb-32">
+        <div class="glass p-6 rounded-[30px] space-y-4">
+            <h2 class="text-xl font-bold">פרסום מודעה</h2>
+            <select id="f-type" class="w-full bg-slate-800 p-4 rounded-xl border-none text-white">
+                <option value="job">💼 אני מחפש עובד</option>
+                <option value="worker">🙋‍♂️ אני מחפש עבודה</option>
+            </select>
+            <input id="f-title" type="text" placeholder="כותרת המודעה" class="w-full bg-slate-800 p-4 rounded-xl border-none">
+            <input id="f-name" type="text" placeholder="שם שלך / שם העסק" class="w-full bg-slate-800 p-4 rounded-xl border-none">
+            <input id="f-city" type="text" placeholder="עיר" class="w-full bg-slate-800 p-4 rounded-xl border-none">
+            <input id="f-phone" type="tel" placeholder="מספר וואטסאפ" class="w-full bg-slate-800 p-4 rounded-xl border-none">
+            <button onclick="Data.save()" class="w-full bg-blue-600 py-4 rounded-xl font-bold shadow-lg">פרסם בלוח</button>
+        </div>
+    </section>
+
+    <section id="view-admin" class="view-section p-4 max-w-xl mx-auto pb-32">
+        <div id="auth-ui" class="glass p-8 rounded-[30px]">
+            <h3 class="text-xl font-bold mb-6 text-center">כניסה למערכת</h3>
+            <input type="email" id="auth-e" class="w-full bg-slate-800 p-4 rounded-xl mb-3" placeholder="אימייל">
+            <input type="password" id="auth-p" class="w-full bg-slate-800 p-4 rounded-xl mb-6" placeholder="סיסמה">
+            <div class="grid grid-cols-2 gap-3">
+                <button onclick="Auth.login()" class="bg-blue-600 py-3 rounded-xl font-bold">התחבר</button>
+                <button onclick="Auth.register()" class="bg-slate-700 py-3 rounded-xl font-bold text-sm">הרשמה</button>
+            </div>
+        </div>
+        <div id="dash-ui" class="hidden glass p-6 rounded-[30px]">
+            <h3 class="font-bold mb-2">שלום,</h3>
+            <p id="user-mail" class="text-blue-400 text-sm mb-6"></p>
+            <button onclick="Auth.logout()" class="text-red-400 text-xs underline">התנתק</button>
+        </div>
+    </section>
+
+    <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[85%] max-w-xs glass h-16 rounded-full flex justify-around items-center px-4 z-50 shadow-2xl">
+        <div onclick="Router.go('feed')" class="cursor-pointer text-xl opacity-50 hover:opacity-100">🏠</div>
+        <div onclick="Router.go('post')" class="cursor-pointer bg-blue-600 w-12 h-12 rounded-full flex items-center justify-center -mt-8 border-4 border-slate-950 text-white font-bold text-xl">+</div>
+        <div onclick="Router.go('admin')" class="cursor-pointer text-xl opacity-50 hover:opacity-100">👤</div>
+    </nav>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, getDocs, query, orderBy, serverTimestamp, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyD0hsz8SOI1OG2Fh-DBy1SHeabPaEKZx-Y",
+        authDomain: "matchme-32bcf.firebaseapp.com",
+        projectId: "matchme-32bcf",
+        storageBucket: "matchme-32bcf.appspot.com",
+        appId: "1:1082863959305:web:f888f4df815598696c601f"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const ADMIN = "cifhiim@gmail.com";
+    let currentUser = null;
+    let posts = [];
+
+    const Router = {
+        go(id) {
+            document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+            document.getElementById(`view-${id}`).classList.add('active');
+            if(id === 'feed') Data.load();
+        }
+    };
+
+    const UI = {
+        openModal(id) {
+            const p = posts.find(x => x.id === id);
+            document.getElementById('modal-content').innerHTML = `
+                <div class="text-center">
+                    <span class="text-[10px] font-bold px-3 py-1 rounded-full bg-blue-500/20 text-blue-400 uppercase">פרטי מודעה</span>
+                    <h2 class="text-2xl font-bold mt-4">${p.title}</h2>
+                    <p class="text-slate-400 mb-6">${p.name} • ${p.city}</p>
+                    <button onclick="window.toWhatsapp('${p.phone}', '${p.title}')" class="w-full bg-emerald-600 py-4 rounded-2xl font-bold shadow-lg shadow-emerald-600/20">דבר איתי בוואטסאפ 💬</button>
+                </div>
+            `;
+            document.getElementById('modal').classList.add('active');
+        },
+        closeModal() { document.getElementById('modal').classList.remove('active'); },
+        render(list) {
+            const cont = document.getElementById('feed-container');
+            cont.innerHTML = list.map(p => `
+                <div onclick="UI.openModal('${p.id}')" class="glass p-5 card ${p.type === 'job' ? 'border-r-4 border-blue-500' : 'border-r-4 border-emerald-500'}">
+                    <div class="flex justify-between items-start">
+                        <h3 class="font-bold text-lg">${p.title}</h3>
+                        ${(currentUser && (currentUser.uid === p.owner || currentUser.email === ADMIN)) ? `<button onclick="window.delPost(event, '${p.id}')" class="text-red-500 text-[10px] font-bold">מחק</button>` : ''}
+                    </div>
+                    <p class="text-xs text-slate-400">${p.name} | ${p.city}</p>
+                </div>
+            `).join('');
+        },
+        filter(v) {
+            const filtered = posts.filter(p => p.title.includes(v) || p.city.includes(v));
+            this.render(filtered);
+        }
+    };
+
+    const Data = {
+        async save() {
+            const title = document.getElementById('f-title').value;
+            const phone = document.getElementById('f-phone').value;
+            if(!title || !phone) return alert("מלא כותרת וטלפון");
+            try {
+                await addDoc(collection(db, "posts"), {
+                    title, phone, name: document.getElementById('f-name').value || "אנונימי",
+                    city: document.getElementById('f-city').value || "ישראל",
+                    type: document.getElementById('f-type').value,
+                    owner: currentUser ? currentUser.uid : "guest",
+                    createdAt: serverTimestamp()
+                });
+                alert("פורסם!"); Router.go('feed');
+            } catch(e) { alert("שגיאה! וודא שעשית Publish ל-Rules"); }
+        },
+        async load() {
+            const snap = await getDocs(query(collection(db, "posts"), orderBy("createdAt", "desc")));
+            posts = snap.docs.map(d => ({id: d.id, ...d.data()}));
+            UI.render(posts);
+        }
+    };
+
+    const Auth = {
+        async login() {
+            try { await signInWithEmailAndPassword(auth, document.getElementById('auth-e').value, document.getElementById('auth-p').value); } 
+            catch(e) { alert("טעות בפרטים"); }
+        },
+        async register() {
+            try { await createUserWithEmailAndPassword(auth, document.getElementById('auth-e').value, document.getElementById('auth-p').value); } 
+            catch(e) { alert("שגיאה (סיסמה לפחות 6 תווים)"); }
+        },
+        logout() { signOut(auth).then(() => location.reload()); }
+    };
+
+    window.toWhatsapp = (phone, title) => {
+        let num = phone.replace(/\D/g,'');
+        if(num.startsWith('0')) num = '972' + num.substring(1);
+        window.open(`https://api.whatsapp.com/send?phone=${num}&text=${encodeURIComponent('היי, אני פונה לגבי המודעה: ' + title)}`, '_blank');
+    };
+
+    window.delPost = async (e, id) => {
+        e.stopPropagation();
+        if(confirm("למחוק?")) { await deleteDoc(doc(db, "posts", id)); Data.load(); }
+    };
+
+    onAuthStateChanged(auth, u => {
+        currentUser = u;
+        if(u) {
+            document.getElementById('auth-ui').classList.add('hidden');
+            document.getElementById('dash-ui').classList.remove('hidden');
+            document.getElementById('user-mail').innerText = u.email;
+            document.getElementById('status-tag').innerText = u.email === ADMIN ? "מנהל" : "מחובר";
+        }
+        Data.load();
+    });
+
+    window.UI = UI; window.Router = Router; window.Data = Data; window.Auth = Auth;
+</script>
+</body>
+</html>
