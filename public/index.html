@@ -699,5 +699,172 @@
             } catch (e) { console.error("Dash Error:", e); }
         },
 
-        addNewQuizField() {
-            const container = document.getElementById('quiz
+                addNewQuizField() {
+            const container = document.getElementById('quiz-inputs-container');
+            const input = document.createElement('input');
+            input.className = "quiz-q-input input-premium py-4 text-sm animate-fade-in mt-2";
+            input.placeholder = `שאלה ${container.children.length + 1}: הקלד שאלת כן/לא...`;
+            container.appendChild(input);
+        },
+
+        toggleSmartQuiz() {
+            const isJob = document.getElementById('field-type').value === 'job';
+            const quizBuilder = document.getElementById('smart-quiz-builder');
+            if (quizBuilder) {
+                quizBuilder.style.display = isJob ? 'block' : 'none';
+            }
+        },
+
+        showAppInfo() {
+            alert("MatchMe Pro v3.0\nמערכת גיוס וניהול משרות מתקדמת\n2026 Enterprise Edition\nנבנה לביצועים מקסימליים וניהול לידים חכם.");
+        }
+    };
+
+    /**
+     * MATCHING ENGINE (The "Brain")
+     * לוגיקת החיבור בין מועמדים למשרות וחישוב ציוני התאמה
+     */
+    const App = {
+        async engage(postId) {
+            const post = GlobalState.posts.find(p => p.id === postId);
+            if (!post) return;
+
+            // אם המודעה היא מסוג "דרושים" - המשתמש הנוכחי הוא מועמד
+            if (post.type === 'job') {
+                const name = prompt("הכנס שם מלא להגשת מועמדות:");
+                if (!name) return;
+                
+                const phone = prompt("מה מספר הטלפון שלך (בוואטסאפ)?");
+                if (!phone || phone.length < 9) return Toast.warning("נא להזין טלפון תקין ליצירת קשר");
+
+                let score = 100;
+                // הרצת שאלון סינון אם קיים
+                if (post.questions && post.questions.length > 0) {
+                    let correct = 0;
+                    alert("המעסיק הגדיר שאלות סינון קצרות. נא ענה בכן/לא.");
+                    for (const q of post.questions) {
+                        if (confirm(`${q}\n\n(אישור = כן | ביטול = לא)`)) {
+                            correct++;
+                        }
+                    }
+                    score = Math.round((correct / post.questions.length) * 100);
+                }
+
+                // שמירת הליד ב-Database כדי שהמעסיק יראה אותו בדשבורד
+                try {
+                    UI.toggleLoader(true);
+                    await addDoc(collection(db, "leads"), {
+                        bossID: post.owner,
+                        jobTitle: post.title,
+                        candidateName: name,
+                        candidatePhone: phone.replace(/\D/g, ''),
+                        matchScore: score,
+                        createdAt: serverTimestamp()
+                    });
+                    
+                    Toast.success("המועמדות נשלחה למעסיק!");
+                    this.sendToWhatsApp(post, name, score);
+                } catch (e) { 
+                    console.error(e);
+                    Toast.error("תקלה בשמירת הפנייה"); 
+                }
+                UI.toggleLoader(false);
+
+            } else {
+                // אם המודעה היא מסוג "מחפש עבודה" - המשתמש הנוכחי הוא מעסיק
+                this.sendToWhatsApp(post, "מעסיק מ-MatchMe", 100);
+            }
+        },
+
+        sendToWhatsApp(post, senderName, score) {
+            const cleanPhone = post.phone.startsWith('0') ? '972' + post.phone.substring(1) : post.phone;
+            const msg = `היי ${post.name},\nאני פונה אליך לגבי המודעה: "${post.title}" ב-MatchMe.\nשמי: ${senderName}\nציון התאמה: ${score}%\nנשמח לדבר!`;
+            const url = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(msg)}`;
+            window.open(url, '_blank');
+        }
+    };
+
+    /**
+     * AUTHENTICATION MODULE
+     * ניהול הרשאות וכניסה
+     */
+    const Auth = {
+        async process(mode) {
+            const email = document.getElementById('auth-email').value;
+            const pass = document.getElementById('auth-pass').value;
+            
+            if (!email || pass.length < 6) {
+                return Toast.warning("נא להזין אימייל תקין וסיסמה בת 6 תווים לפחות");
+            }
+
+            UI.toggleLoader(true);
+            try {
+                if (mode === 'login') {
+                    await signInWithEmailAndPassword(auth, email, pass);
+                    Toast.success("ברוך השב למערכת!");
+                } else {
+                    await createUserWithEmailAndPassword(auth, email, pass);
+                    Toast.success("חשבון מנהל נוצר בהצלחה!");
+                }
+                Router.go('admin');
+            } catch (e) { 
+                console.error(e);
+                Toast.error("שגיאה: " + (e.code === 'auth/user-not-found' ? "משתמש לא קיים" : "פרטים שגויים")); 
+            }
+            UI.toggleLoader(false);
+        },
+
+        logout() {
+            if (confirm("האם אתה בטוח שברצונך להתנתק?")) {
+                signOut(auth).then(() => location.reload());
+            }
+        }
+    };
+
+    /**
+     * TOAST SYSTEM
+     */
+    const Toast = {
+        show(msg, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const colors = {
+                success: 'border-emerald-500 bg-emerald-500/10 text-emerald-400',
+                error: 'border-red-500 bg-red-500/10 text-red-400',
+                warning: 'border-amber-500 bg-amber-500/10 text-amber-400'
+            };
+            toast.className = `glass-morphism p-5 rounded-2xl border-r-4 shadow-2xl animate-fade-in ${colors[type] || 'border-blue-500 text-blue-400'}`;
+            toast.innerHTML = `<p class="font-bold text-sm">${msg}</p>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 500);
+            }, 3500);
+        },
+        success(m) { this.show(m, 'success'); },
+        error(m) { this.show(m, 'error'); },
+        warning(m) { this.show(m, 'warning'); }
+    };
+
+    // האזנה למצב המשתמש בזמן אמת
+    onAuthStateChanged(auth, (user) => {
+        GlobalState.user = user;
+        if (GlobalState.currentView === 'admin') UI.refreshDashboard();
+        // הסרת הלואדר הראשוני רק אחרי בדיקת ה-Auth
+        setTimeout(() => UI.toggleLoader(false), 800);
+    });
+
+    // חשיפת פונקציות גלובליות
+    window.UI = UI;
+    window.Auth = Auth;
+    window.App = App;
+    window.Toast = Toast;
+
+    // אתחול האפליקציה
+    document.addEventListener('DOMContentLoaded', () => {
+        Data.sync();
+        UI.toggleSmartQuiz();
+    });
+</script>
+</body>
+</html>
