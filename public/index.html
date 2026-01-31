@@ -15,7 +15,529 @@
         .card-job { border-right: 4px solid var(--primary); }
         .card-worker { border-right: 4px solid var(--accent); }
         .btn-grad { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: white; font-weight: 800; border-radius: 14px; padding: 16px; width: 100%; border: none; }
-        .input-box { background: #334155; border: 2px solid transparent; border-radius: 12px; padding: 14px; width: 100%; color: white; margin-bottom: 12px; outline: none; }
+        .input-box { background: #334155; border: 2px solid transparent; border-radius: 12px; padding: 14px; width: 100%; co<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>MatchMe | Ultimate</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;800&family=Rubik:wght@900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-color: #1e293b;
+            --primary: #3b82f6;
+            --accent: #10b981;
+        }
+
+        body {
+            font-family: 'Assistant', sans-serif;
+            background-color: var(--bg-color);
+            color: #f1f5f9;
+            margin: 0;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* אנימציות מעבר דפים */
+        .page {
+            display: none;
+            min-height: 100vh;
+            padding: 20px 20px 100px 20px;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .page.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* עיצוב כרטיסיות */
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-job { border-right: 4px solid var(--primary); }
+        .card-worker { border-right: 4px solid var(--accent); }
+
+        /* כפתורים ואינפוטים */
+        .btn-grad {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+            font-weight: 800;
+            border-radius: 14px;
+            padding: 16px;
+            width: 100%;
+            border: none;
+            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
+            transition: transform 0.2s;
+        }
+        .btn-grad:active { transform: scale(0.97); }
+
+        .input-box {
+            background: #334155;
+            border: 2px solid transparent;
+            border-radius: 12px;
+            padding: 14px;
+            width: 100%;
+            color: white;
+            margin-bottom: 12px;
+            outline: none;
+            transition: 0.3s;
+        }
+        .input-box:focus { border-color: var(--primary); background: #1e293b; }
+
+        /* ניווט תחתון */
+        .nav-bar {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(12px);
+            height: 80px;
+            display: flex; justify-content: space-around; align-items: center;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            z-index: 50;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        .nav-item { text-align: center; color: #64748b; font-size: 11px; font-weight: bold; transition: 0.3s; }
+        .nav-item.active { color: var(--primary); transform: translateY(-2px); }
+        .nav-icon { font-size: 24px; display: block; margin-bottom: 2px; }
+
+        /* מסך טעינה */
+        #loader {
+            position: fixed; inset: 0; background: var(--bg-color); z-index: 9999;
+            display: none; justify-content: center; align-items: center; flex-direction: column;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loader">
+        <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500 mb-4"></div>
+        <p class="text-blue-400 font-bold tracking-widest">טוען נתונים...</p>
+    </div>
+
+    <div id="page-feed" class="page active">
+        <header class="flex justify-between items-center mb-6 pt-2">
+            <h1 style="font-family: 'Rubik', sans-serif;" class="text-3xl italic tracking-tighter">
+                MATCH<span class="text-blue-500">ME</span>
+            </h1>
+            <div id="user-indicator" class="w-3 h-3 rounded-full bg-red-500"></div>
+        </header>
+
+        <div class="flex gap-3 mb-6 overflow-x-auto pb-2 no-scrollbar">
+            <button onclick="UI.filter('all')" class="bg-slate-700 px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap">הכל</button>
+            <button onclick="UI.filter('job')" class="bg-blue-900/50 text-blue-300 border border-blue-800 px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap">💼 משרות</button>
+            <button onclick="UI.filter('worker')" class="bg-green-900/50 text-green-300 border border-green-800 px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap">🙋‍♂️ עובדים</button>
+        </div>
+
+        <div id="feed-list" class="space-y-4 pb-20">
+            </div>
+    </div>
+
+    <div id="page-post" class="page">
+        <h2 class="text-2xl font-black mb-6">יצירת פרסום חדש</h2>
+        
+        <div class="grid grid-cols-2 gap-4 mb-6">
+            <div onclick="UI.setPostType('job')" id="btn-type-job" class="glass-card text-center cursor-pointer border-2 border-blue-500">
+                <span class="text-3xl">🏢</span>
+                <p class="font-bold mt-2 text-sm">אני מחפש עובד</p>
+            </div>
+            <div onclick="UI.setPostType('worker')" id="btn-type-worker" class="glass-card text-center cursor-pointer border-2 border-transparent">
+                <span class="text-3xl">👷</span>
+                <p class="font-bold mt-2 text-sm">אני מחפש עבודה</p>
+            </div>
+        </div>
+
+        <div class="space-y-2">
+            <input type="text" id="p-title" placeholder="כותרת (למשל: נהג חלוקה / חשמלאי מוסמך)" class="input-box">
+            <input type="text" id="p-name" placeholder="שם מלא / שם העסק" class="input-box">
+            <div class="flex gap-2">
+                <input type="text" id="p-city" placeholder="עיר" class="input-box">
+                <input type="tel" id="p-phone" placeholder="טלפון (05...)" class="input-box">
+            </div>
+            <textarea id="p-desc" placeholder="פירוט נוסף..." class="input-box h-32"></textarea>
+
+            <div id="questions-section" class="glass-card bg-slate-800/50 mt-4">
+                <p class="text-xs text-blue-400 font-bold mb-3 uppercase">שאלות סינון למועמדים (כן/לא):</p>
+                <div id="q-container" class="space-y-2">
+                    <input type="text" class="q-input input-box py-2 text-sm mb-0" placeholder="למשל: האם יש לך רישיון?">
+                </div>
+                <button onclick="UI.addQuestion()" class="text-blue-500 text-xs font-bold mt-2">+ הוסף שאלה</button>
+            </div>
+
+            <button onclick="Data.savePost()" class="btn-grad mt-4">פרסם בלוח 🚀</button>
+        </div>
+    </div>
+
+    <div id="page-admin" class="page">
+        <div id="login-screen">
+            <div class="text-center py-10">
+                <span class="text-5xl">🔐</span>
+                <h2 class="text-2xl font-black mt-4">אזור אישי</h2>
+                <p class="text-slate-400 text-sm">נהל את המודעות שלך וצפה בפניות</p>
+            </div>
+            <input type="email" id="email" placeholder="אימייל" class="input-box">
+            <input type="password" id="password" placeholder="סיסמה (6 תווים לפחות)" class="input-box">
+            <button onclick="Auth.action('login')" class="btn-grad mb-3">התחבר</button>
+            <button onclick="Auth.action('signup')" class="w-full text-slate-500 font-bold py-3 text-sm">אין לך חשבון? הירשם כאן</button>
+        </div>
+
+        <div id="dashboard-screen" class="hidden">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-2xl font-black">המודעות שלי</h2>
+                <button onclick="Auth.logout()" class="text-red-400 text-xs font-bold bg-red-900/20 px-3 py-1 rounded-full">התנתק</button>
+            </div>
+            <div id="my-posts-list" class="mb-8"></div>
+            
+            <h2 class="text-2xl font-black mb-4 border-t border-slate-800 pt-6">לידים ופניות</h2>
+            <div id="leads-list" class="space-y-3"></div>
+        </div>
+    </div>
+
+    <div id="page-quiz" class="page text-center flex flex-col justify-center h-screen">
+        <div class="max-w-xs mx-auto w-full">
+            <div class="w-full bg-slate-800 h-2 rounded-full mb-8 overflow-hidden">
+                <div id="quiz-bar" class="bg-blue-500 h-full w-0 transition-all duration-300"></div>
+            </div>
+            <h2 id="quiz-text" class="text-2xl font-black mb-12 leading-tight"></h2>
+            <div class="grid grid-cols-2 gap-4">
+                <button onclick="App.answer(true)" class="btn-grad text-xl py-6">כן</button>
+                <button onclick="App.answer(false)" class="bg-slate-700 rounded-xl font-bold text-xl py-6">לא</button>
+            </div>
+            <button onclick="Nav.go('feed')" class="mt-8 text-slate-500 text-sm">ביטול ויציאה</button>
+        </div>
+    </div>
+
+    <nav class="nav-bar">
+        <div onclick="Nav.go('feed')" class="nav-item active" id="nav-feed">
+            <span class="nav-icon">🏠</span><span>לוח</span>
+        </div>
+        <div onclick="Nav.go('post')" class="nav-item" id="nav-post">
+            <span class="nav-icon">➕</span><span>פרסם</span>
+        </div>
+        <div onclick="Nav.go('admin')" class="nav-item" id="nav-admin">
+            <span class="nav-icon">👤</span><span>אישי</span>
+        </div>
+    </nav>
+
+<script type="module">
+    // ייבוא Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, getDocs, query, where, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    // --- הגדרות Firebase ---
+    // חובה להחליף את ה-API Key כאן!
+    const firebaseConfig = { 
+        apiKey: "הדבק_כאן_את_ה_API_KEY_שלך", 
+        authDomain: "matchme-32bcf.firebaseapp.com", 
+        projectId: "matchme-32bcf", 
+        storageBucket: "matchme-32bcf.appspot.com", 
+        messagingSenderId: "1082863959305", 
+        appId: "1:1082863959305:web:f888f4df815598696c601f" 
+    };
+
+    // אתחול המערכת
+    let app, auth, db;
+    try {
+        app = initializeApp(firebaseConfig);
+        auth = getAuth(app);
+        db = getFirestore(app);
+    } catch (e) {
+        console.error("Firebase Init Error:", e);
+        alert("שגיאה בהגדרות Firebase. וודא שה-API Key נכון.");
+    }
+
+    // ניהול מצב (State)
+    const State = {
+        user: null,
+        posts: [],
+        currentType: 'job',
+        quiz: { data: [], index: 0, score: 0, job: null },
+        applicant: { name: '', phone: '' }
+    };
+
+    // --- ניווט וממשק ---
+    const Nav = {
+        go(pageId) {
+            document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+            document.getElementById(`page-${pageId}`).classList.add('active');
+            
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            const activeNav = document.getElementById(`nav-${pageId}`);
+            if(activeNav) activeNav.classList.add('active');
+
+            if(pageId === 'feed') Data.fetchPosts();
+            if(pageId === 'admin') UI.renderDashboard();
+            window.scrollTo(0,0);
+        }
+    };
+
+    const UI = {
+        loader(show) { document.getElementById('loader').style.display = show ? 'flex' : 'none'; },
+        
+        // פרסום: החלפה בין עובד למעסיק
+        setPostType(type) {
+            State.currentType = type;
+            const isJob = type === 'job';
+            document.getElementById('btn-type-job').style.borderColor = isJob ? '#3b82f6' : 'transparent';
+            document.getElementById('btn-type-worker').style.borderColor = !isJob ? '#10b981' : 'transparent';
+            document.getElementById('questions-section').style.display = isJob ? 'block' : 'none';
+        },
+
+        addQuestion() {
+            const input = document.createElement('input');
+            input.className = "q-input input-box py-2 text-sm mb-0 mt-2";
+            input.placeholder = "שאלה נוספת...";
+            document.getElementById('q-container').appendChild(input);
+        },
+
+        // סינון הלוח
+        filter(type) {
+            const list = type === 'all' ? State.posts : State.posts.filter(p => p.type === type);
+            UI.renderFeed(list);
+        },
+
+        // הצגת הפוסטים (פתרון ה-Undefined והוואטסאפ)
+        renderFeed(list) {
+            const container = document.getElementById('feed-list');
+            if(!list.length) { container.innerHTML = '<div class="text-center opacity-30 mt-10">אין תוצאות להצגה</div>'; return; }
+
+            container.innerHTML = list.map(item => {
+                // ניקוי מספר טלפון
+                const cleanPhone = (item.phone || '').replace(/\D/g, '');
+                const waLink = `https://wa.me/972${cleanPhone.substring(1)}`;
+                
+                // ברירות מחדל למניעת undefined
+                const title = item.title || 'ללא כותרת';
+                const name = item.name || 'משתמש אנונימי';
+                const city = item.city || 'כל הארץ';
+                const badge = item.type === 'job' ? '💼 משרה' : '🙋‍♂️ עובד';
+                const styleClass = item.type === 'job' ? 'card-job' : 'card-worker';
+                const btnText = item.type === 'job' ? 'הגש מועמדות' : 'שלח הודעה';
+
+                return `
+                <div class="glass-card ${styleClass}">
+                    <div class="flex justify-between mb-2">
+                        <span class="text-xs font-bold px-2 py-1 rounded bg-slate-700 text-white">${badge}</span>
+                        <span class="text-xs text-slate-400">📍 ${city}</span>
+                    </div>
+                    <h3 class="text-xl font-bold mb-1">${title}</h3>
+                    <p class="text-sm text-blue-400 font-bold mb-3">${name}</p>
+                    <p class="text-slate-300 text-sm mb-4 line-clamp-3">${item.desc || ''}</p>
+                    
+                    <button onclick="App.handleContact('${item.id}')" class="w-full py-3 rounded-xl bg-slate-800 border border-slate-600 font-bold text-sm hover:bg-slate-700 transition">
+                        ${btnText}
+                    </button>
+                </div>`;
+            }).join('');
+        },
+
+        // הצגת הדשבורד (אזור אישי)
+        async renderDashboard() {
+            if(!State.user) {
+                document.getElementById('login-screen').classList.remove('hidden');
+                document.getElementById('dashboard-screen').classList.add('hidden');
+                return;
+            }
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('dashboard-screen').classList.remove('hidden');
+
+            // שליפת הפוסטים שלי
+            const myPostsSnap = await getDocs(query(collection(db, "posts"), where("owner", "==", State.user.uid)));
+            document.getElementById('my-posts-list').innerHTML = myPostsSnap.docs.map(d => 
+                `<div class="p-3 bg-slate-800 rounded-lg mb-2 text-sm flex justify-between border-r-2 border-blue-500">
+                    <span>${d.data().title}</span>
+                    <span class="opacity-50">${d.data().type === 'job' ? 'משרה' : 'עובד'}</span>
+                </div>`
+            ).join('') || '<p class="text-sm opacity-30">לא פרסמת כלום עדיין</p>';
+
+            // שליפת לידים
+            const leadsSnap = await getDocs(query(collection(db, "leads"), where("bossID", "==", State.user.uid), orderBy("createdAt", "desc")));
+            document.getElementById('leads-list').innerHTML = leadsSnap.docs.map(d => {
+                const l = d.data();
+                return `
+                <div class="bg-slate-800 p-4 rounded-xl flex justify-between items-center">
+                    <div>
+                        <div class="font-bold">${l.candidateName}</div>
+                        <div class="text-xs opacity-50">למשרת: ${l.jobTitle}</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-green-400 font-bold text-lg">${l.matchScore}%</div>
+                        <a href="https://wa.me/972${l.candidatePhone.substring(1)}" class="text-xs bg-blue-600 px-2 py-1 rounded text-white">וואטסאפ</a>
+                    </div>
+                </div>`;
+            }).join('') || '<p class="text-sm opacity-30">אין פניות חדשות</p>';
+        }
+    };
+
+    // --- לוגיקה עסקית ---
+    const Data = {
+        async fetchPosts() {
+            UI.loader(true);
+            try {
+                const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
+                const snap = await getDocs(q);
+                State.posts = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                UI.renderFeed(State.posts);
+            } catch(e) { console.error(e); }
+            UI.loader(false);
+        },
+
+        async savePost() {
+            const title = document.getElementById('p-title').value.trim();
+            const phone = document.getElementById('p-phone').value.trim();
+            
+            if(!title || phone.length < 9) return alert("חובה למלא כותרת וטלפון תקין");
+
+            UI.loader(true);
+            try {
+                const questions = State.currentType === 'job' 
+                    ? Array.from(document.querySelectorAll('.q-input')).map(i => i.value).filter(v => v)
+                    : [];
+
+                await addDoc(collection(db, "posts"), {
+                    type: State.currentType,
+                    title, 
+                    phone: phone.replace(/\D/g, ''),
+                    name: document.getElementById('p-name').value.trim() || "לא צוין",
+                    city: document.getElementById('p-city').value.trim() || "לא צוין",
+                    desc: document.getElementById('p-desc').value.trim(),
+                    questions,
+                    owner: State.user ? State.user.uid : "guest",
+                    createdAt: serverTimestamp()
+                });
+                Nav.go('feed');
+            } catch(e) { 
+                console.error(e); 
+                alert("שגיאה בפרסום. וודא שאתה מחובר או נסה שוב."); 
+            }
+            UI.loader(false);
+        }
+    };
+
+    const App = {
+        // טיפול בלחיצה על כפתור קשר/הגשה
+        handleContact(postId) {
+            const post = State.posts.find(p => p.id === postId);
+            const phone = post.phone.replace(/\D/g, '');
+            
+            // אם זה עובד - פשוט פותחים וואטסאפ
+            if(post.type === 'worker') {
+                window.location.href = `https://wa.me/972${phone.substring(1)}`;
+                return;
+            }
+
+            // אם זו משרה - מתחילים תהליך הגשה
+            const userName = prompt("מה שמך המלא?");
+            if(!userName) return;
+            const userPhone = prompt("מה הנייד שלך?");
+            if(!userPhone) return;
+
+            State.applicant = { name: userName, phone: userPhone.replace(/\D/g, '') };
+
+            // אם יש שאלות סינון - עוברים לשאלון
+            if(post.questions && post.questions.length > 0) {
+                State.quiz = { data: post.questions, index: 0, score: 0, job: post };
+                Nav.go('quiz');
+                App.renderQuiz();
+            } else {
+                // אם אין שאלות - שולחים ישר
+                App.finishApplication(100, post);
+            }
+        },
+
+        renderQuiz() {
+            const q = State.quiz.data[State.quiz.index];
+            document.getElementById('quiz-text').innerText = q;
+            const progress = ((State.quiz.index) / State.quiz.data.length) * 100;
+            document.getElementById('quiz-bar').style.width = `${progress}%`;
+        },
+
+        answer(isYes) {
+            if(isYes) State.quiz.score += (100 / State.quiz.data.length);
+            State.quiz.index++;
+            
+            if(State.quiz.index < State.quiz.data.length) {
+                App.renderQuiz();
+            } else {
+                App.finishApplication(Math.round(State.quiz.score), State.quiz.job);
+            }
+        },
+
+        async finishApplication(score, job) {
+            UI.loader(true);
+            try {
+                // שמירת הליד (גם אם לא קיים BossID, המערכת לא תקרוס)
+                await addDoc(collection(db, "leads"), {
+                    bossID: job.owner || 'unknown',
+                    jobTitle: job.title,
+                    candidateName: State.applicant.name,
+                    candidatePhone: State.applicant.phone,
+                    matchScore: score,
+                    createdAt: serverTimestamp()
+                });
+                
+                // מעבר לוואטסאפ
+                const msg = `היי, שמי ${State.applicant.name}. אני מעוניין במשרת ${job.title}. התאמה: ${score}%`;
+                window.location.href = `https://wa.me/972${job.phone.substring(1)}?text=${encodeURIComponent(msg)}`;
+            } catch(e) {
+                console.error(e);
+                alert("תקלה בשליחת הנתונים, מעביר לוואטסאפ בכל זאת...");
+                window.location.href = `https://wa.me/972${job.phone.substring(1)}`;
+            }
+            UI.loader(false);
+        }
+    };
+
+    const Auth = {
+        async action(type) {
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('password').value;
+            
+            // ולידציה לסיסמה (פותר את צילום המסך של שגיאת Firebase)
+            if(pass.length < 6) {
+                alert("הסיסמה חייבת להיות באורך 6 תווים לפחות");
+                return;
+            }
+
+            UI.loader(true);
+            try {
+                if(type === 'login') await signInWithEmailAndPassword(auth, email, pass);
+                else await createUserWithEmailAndPassword(auth, email, pass);
+            } catch(e) {
+                alert("שגיאה בהתחברות: בדוק פרטים או חיבור רשת");
+            }
+            UI.loader(false);
+        },
+        logout() { signOut(auth).then(() => location.reload()); }
+    };
+
+    // האזנה למצב התחברות
+    onAuthStateChanged(auth, user => {
+        State.user = user;
+        document.getElementById('user-indicator').className = user ? 'w-3 h-3 rounded-full bg-green-500' : 'w-3 h-3 rounded-full bg-red-500';
+        if(user) Nav.go('feed'); // רענון נתונים בכניסה
+    });
+
+    // חשיפה ל-Global Scope
+    window.UI = UI; window.Nav = Nav; window.Data = Data; window.Auth = Auth; window.App = App;
+
+</script>
+</body>
+</html>
+lor: white; margin-bottom: 12px; outline: none; }
         .input-box:focus { border-color: var(--primary); }
         .nav-bar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(12px); height: 80px; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid rgba(255,255,255,0.1); z-index: 50; padding-bottom: env(safe-area-inset-bottom); }
         .nav-item { text-align: center; color: #64748b; font-size: 11px; font-weight: bold; }
