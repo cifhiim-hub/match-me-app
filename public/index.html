@@ -462,18 +462,27 @@
     /**
      * המשך מנוע הנתונים (Data) - טעינה וניהול
      */
+    /**
+     * --- חלק 3 המעודכן: ניהול נתונים, רינדור וסינון ---
+     */
+
+    // 1. טעינת לוח המודעות הכללי
     window.Data.loadFeed = async function() {
         const container = document.getElementById('feed-list');
-        container.innerHTML = `<div class="py-20 text-center opacity-20 animate-pulse">מחפש מודעות חדשות...</div>`;
+        container.innerHTML = `<div class="py-20 text-center opacity-20 animate-pulse font-bold text-xl">מעדכן לוח...</div>`;
         
         try {
             const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
             const snap = await getDocs(q);
             st.posts = snap.docs.map(d => ({id: d.id, ...d.data()}));
             UI.renderList(st.posts, 'feed-list');
-        } catch (e) { console.error(e); }
+        } catch (e) { 
+            console.error("Feed Error:", e);
+            container.innerHTML = `<div class="py-20 text-center opacity-50">שגיאה בטעינת הנתונים</div>`;
+        }
     };
 
+    // 2. טעינת "הכרטיסים שלי" (היסטוריה אישית)
     window.Data.loadHistory = async function() {
         if (!st.user) return;
         const container = document.getElementById('my-history');
@@ -482,10 +491,78 @@
             const q = query(collection(db, "posts"), where("ownerId", "==", st.user.uid), orderBy("createdAt", "desc"));
             const snap = await getDocs(q);
             st.myPosts = snap.docs.map(d => ({id: d.id, ...d.data()}));
-            UI.renderList(st.myPosts, 'my-history', true);
-        } catch (e) { console.error(e); }
+            UI.renderList(st.myPosts, 'my-history', true); 
+        } catch (e) { 
+            console.error("History Error:", e);
+            container.innerHTML = `<p class="text-center py-10 opacity-30 text-xs italic">לא נמצאה היסטוריית פרסומים</p>`;
+        }
     };
 
+    // 3. מנוע הסינון בדף הבית
+    window.UI.filterFeed = function(type) {
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.classList.remove('bg-blue-600', 'opacity-100');
+            btn.classList.add('bg-transparent', 'opacity-40');
+        });
+        
+        const activeBtn = event.currentTarget;
+        activeBtn.classList.remove('bg-transparent', 'opacity-40');
+        activeBtn.classList.add('bg-blue-600', 'opacity-100');
+
+        if (type === 'all') {
+            UI.renderList(st.posts, 'feed-list');
+        } else {
+            const filtered = st.posts.filter(p => p.type === type);
+            UI.renderList(filtered, 'feed-list');
+        }
+    };
+
+    // 4. פתרון וואטסאפ אוניברסלי (מתקן בעיית Business)
+    window.UI.contactWA = function(phone, title, isBiz) {
+        let clean = phone.replace(/\D/g, '');
+        if (clean.startsWith('0')) clean = '972' + clean.substring(1);
+        
+        const msg = encodeURIComponent(isBiz 
+            ? `היי, ראיתי את המשרה שפרסמת ב-MatchMe: *${title}*. אשמח לקבל פרטים!` 
+            : `היי, ראיתי את הפרופיל שלך ב-MatchMe כ-*${title}*. האם אתה עדיין מחפש?`
+        );
+
+        const finalUrl = `https://api.whatsapp.com/send?phone=${clean}&text=${msg}`;
+        window.open(finalUrl, '_blank');
+    };
+
+    // 5. רינדור רשימת המודעות
+    window.UI.renderList = function(list, containerId, isHistory = false) {
+        const container = document.getElementById(containerId);
+        if (!list || list.length === 0) {
+            container.innerHTML = `<div class="p-10 text-center opacity-30 italic text-sm">אין מודעות להצגה</div>`;
+            return;
+        }
+
+        container.innerHTML = list.map(item => {
+            const isBiz = item.type === 'biz';
+            return `
+                <div onclick="UI.openFullCard('${item.id}', ${isHistory})" 
+                     class="glass p-5 border-r-4 ${isBiz ? 'border-blue-500 bg-blue-500/5' : 'border-emerald-500 bg-emerald-500/5'} 
+                            active:scale-95 transition-all cursor-pointer relative group mb-4 shadow-lg shadow-black/20">
+                    <div class="flex justify-between items-start">
+                        <div class="space-y-1">
+                            <span class="text-[9px] font-black uppercase px-2 py-0.5 rounded ${isBiz ? 'bg-blue-500/20 text-blue-400' : 'bg-emerald-500/20 text-emerald-400'}">
+                                ${isBiz ? '💼 דרוש עובד' : '🙋‍♂️ מחפש עבודה'}
+                            </span>
+                            <h3 class="text-lg font-black text-white leading-tight">${item.title}</h3>
+                            <p class="text-xs font-bold text-slate-400">${isBiz ? item.company : (item.name || 'אנונימי')} | ${item.location}</p>
+                        </div>
+                        <div class="h-10 w-10 flex items-center justify-center opacity-10 group-hover:opacity-100 transition-opacity">
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    };
+
+    // 6. מחיקת מודעה
     window.Data.deletePost = async function(id) {
         if (!confirm("למחוק את המודעה לצמיתות?")) return;
         try {
@@ -495,109 +572,17 @@
         } catch (e) { alert("שגיאה במחיקה"); }
     };
 
-    /**
-     * המשך מנוע הממשק (UI) - רינדור כרטיסים ומודאלים
-     */
-    window.UI.renderList = function(list, containerId, isHistory = false) {
-        const container = document.getElementById(containerId);
-        if (list.length === 0) {
-            container.innerHTML = `<p class="text-center py-10 opacity-30 text-xs italic">לא נמצאו מודעות</p>`;
-            return;
-        }
-
-        container.innerHTML = list.map(item => {
-            const isBiz = item.type === 'biz';
-            return `
-                <div onclick="UI.openFullCard('${item.id}', ${isHistory})" 
-                     class="glass p-5 border-r-4 ${isBiz ? 'border-blue-500 bg-blue-500/5' : 'border-emerald-500 bg-emerald-500/5'} 
-                            hover:scale-[1.02] active:scale-95 transition-all cursor-pointer relative overflow-hidden group">
-                    <div class="flex justify-between items-start">
-                        <div class="space-y-1">
-                            <span class="text-[9px] font-black uppercase px-2 py-0.5 rounded-md ${isBiz ? 'bg-blue-500/20 text-blue-400' : 'bg-emerald-500/20 text-emerald-400'}">
-                                ${isBiz ? 'משרה פתוחה' : 'מועמד זמין'}
-                            </span>
-                            <h3 class="text-lg font-black text-white leading-tight">${item.title}</h3>
-                            <p class="text-xs font-bold text-slate-400">${isBiz ? item.company : item.name} | ${item.location}</p>
-                        </div>
-                        <i class="fa-solid fa-chevron-left opacity-20 group-hover:opacity-100 transition-opacity"></i>
-                    </div>
-                </div>
-            `;
-        }).join('');
+    // 7. חיפוש מהיר
+    document.getElementById('search-input').oninput = (e) => {
+        const val = e.target.value.toLowerCase();
+        const filtered = st.posts.filter(p => 
+            p.title.toLowerCase().includes(val) || 
+            p.location.toLowerCase().includes(val) ||
+            (p.company && p.company.toLowerCase().includes(val))
+        );
+        UI.renderList(filtered, 'feed-list');
     };
 
-    window.UI.openFullCard = function(id, isHistory = false) {
-        const item = (isHistory ? st.myPosts : st.posts).find(x => x.id === id);
-        if (!item) return;
-
-        const isBiz = item.type === 'biz';
-        const area = document.getElementById('modal-render-area');
-        st.modalOpen = true;
-
-        area.innerHTML = `
-            <div class="text-right">
-                <div class="flex items-center gap-4 mb-6">
-                    <div class="w-14 h-14 glass flex items-center justify-center text-2xl">${isBiz ? '🏢' : '👤'}</div>
-                    <div>
-                        <h2 class="text-2xl font-black text-white leading-tight">${item.title}</h2>
-                        <p class="text-blue-400 font-bold">${isBiz ? item.company : item.name}</p>
-                    </div>
-                </div>
-
-                <div class="space-y-6">
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="glass bg-white/5 p-3 rounded-2xl"><p class="text-[10px] opacity-40 uppercase font-bold">מיקום</p><p class="text-sm font-bold">${item.location}</p></div>
-                        <div class="glass bg-white/5 p-3 rounded-2xl"><p class="text-[10px] opacity-40 uppercase font-bold">טלפון</p><p class="text-sm font-bold font-mono">${item.phone}</p></div>
-                    </div>
-
-                    <div class="glass bg-white/5 p-4 rounded-2xl">
-                        <p class="text-[10px] text-blue-400 font-black mb-2 uppercase">${isBiz ? 'תיאור המשרה' : 'קצת עלי'}</p>
-                        <p class="text-sm leading-relaxed">${isBiz ? item.desc : item.bio}</p>
-                    </div>
-
-                    ${!isBiz && item.demands ? `
-                        <div class="glass bg-emerald-500/5 border-emerald-500/20 p-4 rounded-2xl">
-                            <p class="text-[10px] text-emerald-400 font-black mb-2 uppercase">דרישות המועמד</p>
-                            <p class="text-sm leading-relaxed">${item.demands}</p>
-                        </div>
-                    ` : ''}
-
-                    ${isBiz && item.questions && item.questions.length > 0 ? `
-                        <button onclick="UI.openQuestions('${id}')" class="w-full py-4 rounded-2xl border-2 border-dashed border-blue-500/30 text-blue-400 font-black text-sm hover:bg-blue-500/5 transition-all">
-                            <i class="fa-solid fa-clipboard-question ml-2"></i> לחץ לצפייה בשאלון התאמה
-                        </button>
-                    ` : ''}
-
-                    <div class="pt-4 space-y-3">
-                        <button onclick="UI.contactWA('${item.phone}', '${item.title}', ${isBiz})" class="wa-float w-full">
-                            <i class="fa-brands fa-whatsapp text-2xl"></i>
-                            פנה בוואטסאפ עכשיו
-                        </button>
-                        ${isHistory || (st.user && st.user.email === 'cifhiim@gmail.com') ? `
-                            <button onclick="Data.deletePost('${item.id}')" class="w-full py-3 text-red-500 text-[10px] font-black uppercase opacity-50">מחיקת מודעה</button>
-                        ` : ''}
-                    </div>
-                </div>
-            </div>
-        `;
-
-        document.getElementById('modal-full').classList.add('active');
-        document.body.style.overflow = 'hidden';
-    };
-
-    window.UI.openQuestions = function(id) {
-        const item = st.posts.find(x => x.id === id);
-        if (!item || !item.questions) return;
-
-        const body = document.getElementById('q-modal-body');
-        body.innerHTML = item.questions.map((q, i) => `
-            <div class="bg-white/5 p-4 rounded-2xl border border-white/5 flex gap-3">
-                <span class="text-blue-500 font-black opacity-40">${i + 1}.</span>
-                <p class="text-sm font-bold text-slate-200">${q}</p>
-            </div>
-        `).join('');
-
-        document.getElementById('modal-questions').classList.add('active');
     };
 
     /**
