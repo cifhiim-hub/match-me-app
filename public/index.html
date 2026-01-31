@@ -10,10 +10,10 @@
     
     <style>
         /* =========================================
-           מערכת משתנים גלובלית (Design System)
+           Design System & Variables
            ========================================= */
         :root {
-            --bg-main: #020617; /* צבע רקע עמוק מאוד */
+            --bg-main: #020617;
             --bg-card: #0f172a;
             --bg-card-hover: #1e293b;
             --primary: #3b82f6;
@@ -26,126 +26,104 @@
             --text-dim: #94a3b8;
             --nav-height: 80px;
             --safe-area-inset-bottom: env(safe-area-inset-bottom);
+            --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         /* =========================================
-           אתחול ועיצוב בסיסי
+           Core Reset & Scroll
            ========================================= */
         * {
             box-sizing: border-box;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            margin: 0; padding: 0;
         }
 
         body {
             font-family: 'Assistant', sans-serif;
             background-color: var(--bg-main);
             color: var(--text-main);
-            margin: 0;
-            padding: 0;
             overflow-x: hidden;
+            line-height: 1.6;
             user-select: none;
-            line-height: 1.5;
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* מניעת גלילה כאשר מודאל פתוח */
-        body.modal-open {
-            overflow: hidden;
-        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-main); }
+        ::-webkit-scrollbar-thumb { background: var(--bg-card-hover); border-radius: 10px; }
 
         /* =========================================
-           מחלקות עזר לעיצוב (Utility Classes)
+           Utility Classes
            ========================================= */
         .glass {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.08);
             box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
         }
 
         .glass-dark {
-            background: rgba(15, 23, 42, 0.9);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(25px);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .input-modern {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 18px;
+            padding: 16px 20px;
+            color: white;
+            font-size: 16px;
+            font-weight: 500;
+            transition: var(--transition-smooth);
+            outline: none;
+        }
+
+        .input-modern:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+            background: var(--bg-card);
         }
 
         .btn-premium {
             background: linear-gradient(135deg, var(--primary-dark), var(--primary));
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
+            color: white;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-radius: 20px;
+            padding: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: var(--transition-smooth);
+            cursor: pointer;
+            box-shadow: 0 10px 20px -5px rgba(29, 78, 216, 0.4);
         }
 
-        .btn-premium::after {
-            content: '';
-            position: absolute;
-            top: 0; left: -100%;
-            width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: 0.5s;
-        }
-
-        .btn-premium:hover::after {
-            left: 100%;
-        }
-
-        .btn-premium:active {
-            transform: scale(0.96);
-        }
+        .btn-premium:active { transform: scale(0.96); opacity: 0.9; }
 
         /* =========================================
-           אנימציות (Core Animations)
+           Navigation Component
            ========================================= */
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes slideInRight {
-            from { transform: translateX(100%); }
-            to { transform: translateX(0); }
-        }
-
-        @keyframes pulse-soft {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
-        }
-
-        .animate-fade-in { animation: fadeInUp 0.5s ease forwards; }
-        .animate-slide-right { animation: slideInRight 0.3s ease-out forwards; }
-
-        /* =========================================
-           רכיבי UI מורכבים
-           ========================================= */
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 4px;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: var(--bg-main);
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: var(--primary);
-            border-radius: 10px;
-        }
-
-        /* עיצוב שורת הניווט הצפה */
         .main-nav {
             position: fixed;
-            bottom: calc(20px + var(--safe-area-inset-bottom));
+            bottom: calc(24px + var(--safe-area-inset-bottom));
             left: 50%;
             transform: translateX(-50%);
-            width: calc(100% - 40px);
-            max-width: 500px;
-            height: 70px;
-            z-index: 2000;
+            width: calc(100% - 48px);
+            max-width: 480px;
+            height: 76px;
+            z-index: 5000;
             display: grid;
             grid-template-cols: repeat(4, 1fr);
-            padding: 0 10px;
-            border-radius: 35px;
+            border-radius: 38px;
+            padding: 0 8px;
         }
 
         .nav-item {
@@ -154,271 +132,335 @@
             align-items: center;
             justify-content: center;
             color: var(--text-dim);
-            transition: 0.3s all;
+            transition: var(--transition-smooth);
             position: relative;
+            cursor: pointer;
         }
 
-        .nav-item.active {
-            color: var(--primary-light);
-        }
-
-        .nav-item.active::after {
-            content: '';
+        .nav-item.active { color: var(--primary-light); }
+        .nav-item.active .nav-icon { transform: translateY(-4px); }
+        
+        .nav-dot {
             position: absolute;
-            top: 10px;
+            bottom: 12px;
             width: 4px;
             height: 4px;
             background: var(--primary-light);
             border-radius: 50%;
-            box-shadow: 0 0 10px var(--primary-light);
+            opacity: 0;
+            transition: var(--transition-smooth);
+        }
+        .nav-item.active .nav-dot { opacity: 1; transform: scale(1.5); }
+
+        /* =========================================
+           Animations
+           ========================================= */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        /* עיצוב כרטיסי המשרות */
-        .job-card {
-            transition: all 0.3s ease;
-            cursor: pointer;
-            border: 1px solid rgba(255,255,255,0.03);
+        @keyframes pulse-soft {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
         }
 
-        .job-card:hover {
-            transform: translateY(-4px);
-            background: var(--bg-card-hover);
-            border-color: rgba(59, 130, 246, 0.3);
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
         }
 
-        /* מערכת ה-Toast */
-        #toast-wrapper {
+        .animate-fade-in { animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        
+        /* =========================================
+           Page States
+           ========================================= */
+        .page-content {
+            display: none;
+            min-height: 100vh;
+            padding-bottom: 140px;
+            opacity: 0;
+        }
+
+        .page-content.active {
+            display: block;
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        /* =========================================
+           Skeleton & Loader
+           ========================================= */
+        #app-loader {
             position: fixed;
-            top: 20px;
-            left: 20px;
-            right: 20px;
+            inset: 0;
             z-index: 9999;
-            pointer-events: none;
+            background: var(--bg-main);
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
+        }
+
+        .loader-circle {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(59, 130, 246, 0.1);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* =========================================
+           Job Cards System
+           ========================================= */
+        .job-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(255,255,255,0.03);
+            border-radius: 28px;
+            padding: 24px;
+            transition: var(--transition-smooth);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .job-card:hover {
+            background: var(--bg-card-hover);
+            transform: translateY(-5px);
+            border-color: rgba(59, 130, 246, 0.2);
+        }
+
+        .job-card::before {
+            content: '';
+            position: absolute;
+            top: 0; right: 0; width: 4px; height: 100%;
+            background: var(--primary);
+            opacity: 0.7;
+        }
+
+        .job-card.worker-type::before { background: var(--accent); }
+
+        .badge {
+            font-size: 10px;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-blue { background: rgba(59, 130, 246, 0.15); color: var(--primary-light); }
+        .badge-green { background: rgba(16, 185, 129, 0.15); color: var(--accent); }
+
+        /* =========================================
+           Toast System
+           ========================================= */
+        #toast-wrapper {
+            position: fixed;
+            top: 24px; left: 24px; right: 24px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            pointer-events: none;
         }
 
         .toast-item {
             pointer-events: auto;
-            min-width: 280px;
-            margin-bottom: 12px;
-            padding: 16px 24px;
-            border-radius: 16px;
-            color: white;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
-            animation: toastIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-        }
+            background: rgba(15,
+<body class="custom-scrollbar">
 
-        @keyframes toastIn {
-            from { opacity: 0; transform: translateY(-40px) scale(0.9); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
+    <div id="app-loader">
+        <div class="loader-circle"></div>
+        <div class="mt-6 text-center">
+            <h2 class="text-xl font-black tracking-tighter text-blue-500 italic">MATCHME PRO</h2>
+            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-[0.3em] mt-1">Connecting Talent</p>
+        </div>
+    </div>
 
-        /* לואדר מרכזי */
-        .loading-overlay {
-            position: fixed;
-            inset: 0;
-            background: var(--bg-main);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            transition: opacity 0.6s ease;
-        }
-    <//* עיצוב שדות קלט מודרניים */
-.input-modern {
-    width: 100%;
-    background: #0f172a;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
-    padding: 14px 18px;
-    color: white;
-    font-size: 16px;
-    transition: all 0.3s ease;
-    outline: none;
-}
+    <div id="toast-wrapper"></div>
 
-.input-modern:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
-    background: #1e293b;
-}
-
-/* עיצוב הלואדר (Loading) */
-#app-loader {
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-    background: var(--bg-main);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
-
-.spinner {
-    width: 50px;
-    height: 50px;
-    border: 3px solid rgba(59, 130, 246, 0.1);
-    border-top: 3px solid var(--primary);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
->
-</head>
-<body>
-    ```
-
-**להמשיך לחלק 2 (ה-HTML המורחב של הדפים והמודאלים)?** (כל חלק יהיה ארוך ומפורט כפי שביקשת).
-    <section id="view-feed" class="page-content active px-5 pt-8 pb-32">
-        <header class="flex justify-between items-center mb-8">
+    <section id="view-feed" class="page-content active px-6 pt-10">
+        <header class="flex justify-between items-end mb-10">
             <div class="animate-fade-in">
-                <p class="text-xs font-bold text-blue-400 uppercase tracking-widest opacity-70">ברוכים הבאים,</p>
-                <h1 class="text-4xl font-black tracking-tighter" id="display-user-name">אורח/ת</h1>
+                <p class="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em] mb-1 opacity-80">ברוכים הבאים למערכת</p>
+                <h1 class="text-5xl font-black tracking-tighter" id="display-user-name">אורח/ת</h1>
             </div>
-            <div onclick="Router.go('admin')" class="w-14 h-14 glass flex items-center justify-center text-2xl cursor-pointer active:scale-90 transition-all border-2 border-blue-500/30 rounded-full hover:bg-blue-500/10">
+            <div onclick="Router.go('admin')" class="w-16 h-16 glass flex items-center justify-center text-3xl cursor-pointer active:scale-90 transition-all border-2 border-blue-500/20 rounded-[22px] hover:bg-blue-500/10">
                 👤
             </div>
         </header>
 
-        <div class="relative mb-8 group">
+        <div class="relative mb-10 group animate-fade-in" style="animation-delay: 0.1s">
             <input type="text" id="search-input" oninput="UI.doSearch(this.value)" 
-                   class="input-modern pr-12 focus:ring-2 focus:ring-blue-500/50 transition-all" 
-                   placeholder="חפש משרה, עיר או חברה...">
-            <span class="absolute right-4 top-1/2 -translate-y-1/2 opacity-30 group-focus-within:opacity-100 transition-opacity">🔍</span>
+                   class="input-modern pr-14 h-16 shadow-2xl shadow-blue-900/10" 
+                   placeholder="חפש תפקיד, עיר או חברה...">
+            <span class="absolute right-5 top-1/2 -translate-y-1/2 text-xl opacity-30 group-focus-within:opacity-100 transition-opacity">🔍</span>
         </div>
 
-        <div id="feed-container" class="space-y-6">
-            <div class="text-center py-20 opacity-20">
-                <div class="animate-pulse">טוען נתונים מהשרת...</div>
+        <div id="feed-container" class="space-y-6 animate-fade-in" style="animation-delay: 0.2s">
+            <div class="flex flex-col items-center justify-center py-24 space-y-4 opacity-20">
+                <div class="loader-circle scale-75"></div>
+                <p class="font-bold italic">מרענן נתונים מהענן...</p>
             </div>
         </div>
     </section>
 
-    <section id="view-post" class="page-content px-5 pt-8 pb-32">
-        <div class="flex items-center gap-3 mb-6">
-            <div class="w-2 h-8 bg-blue-500 rounded-full"></div>
-            <h2 class="text-3xl font-black">פרסם מודעה</h2>
+    <section id="view-post" class="page-content px-6 pt-10">
+        <div class="flex items-center gap-4 mb-8">
+            <div class="w-2.5 h-10 bg-blue-500 rounded-full shadow-[0_0_15px_rgba(59,130,246,0.5)]"></div>
+            <h2 class="text-4xl font-black tracking-tighter">פרסם מודעה</h2>
         </div>
         
-        <div class="glass p-6 space-y-5 rounded-[32px]">
-            <div>
-                <label class="block text-[10px] font-black uppercase text-blue-400 mb-2 mr-1">סוג המודעה</label>
-                <select id="inp-type" onchange="UI.toggleQuizBuilder()" class="input-modern font-bold bg-slate-900 border-none ring-1 ring-white/10">
+        <div class="glass p-8 space-y-6 rounded-[35px] shadow-2xl">
+            <div class="space-y-2">
+                <label class="block text-[10px] font-black uppercase text-blue-400 mr-1 tracking-widest">סוג המודעה שלך</label>
+                <select id="inp-type" onchange="UI.toggleQuizBuilder()" class="input-modern font-bold bg-slate-900/50 appearance-none border-none ring-1 ring-white/10">
                     <option value="job">💼 אני מחפש עובד (מעסיק)</option>
                     <option value="worker">🙋‍♂️ אני מחפש עבודה (עובד)</option>
                 </select>
             </div>
 
-            <div class="space-y-4">
-                <input type="text" id="inp-title" class="input-modern" placeholder="כותרת המודעה (למשל: נהג משאית)">
-                <input type="text" id="inp-name" class="input-modern" placeholder="שם העסק או שמך המלא">
-                <input type="text" id="inp-city" class="input-modern" placeholder="עיר / מיקום">
-                <input type="tel" id="inp-phone" class="input-modern" placeholder="מספר טלפון (וואטסאפ)">
-                <textarea id="inp-desc" class="input-modern h-32 resize-none" placeholder="תאר בקצרה מה אתה מחפש..."></textarea>
+            <div class="grid grid-cols-1 gap-5">
+                <div class="space-y-2">
+                    <label class="block text-[10px] font-black uppercase text-slate-500 mr-1">כותרת המודעה</label>
+                    <input type="text" id="inp-title" class="input-modern" placeholder="למשל: נהג משאית עד 12 טון">
+                </div>
+                <div class="space-y-2">
+                    <label class="block text-[10px] font-black uppercase text-slate-500 mr-1">שם העסק / מפרסם</label>
+                    <input type="text" id="inp-name" class="input-modern" placeholder="שם החברה או השם שלך">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black uppercase text-slate-500 mr-1">מיקום / עיר</label>
+                        <input type="text" id="inp-city" class="input-modern" placeholder="למשל: תל אביב">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black uppercase text-slate-500 mr-1">טלפון (WhatsApp)</label>
+                        <input type="tel" id="inp-phone" class="input-modern" placeholder="05XXXXXXXX">
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <label class="block text-[10px] font-black uppercase text-slate-500 mr-1">תיאור התפקיד</label>
+                    <textarea id="inp-desc" class="input-modern h-36 resize-none" placeholder="פרט כאן על המשרה, תנאים, שכר וכו'..."></textarea>
+                </div>
             </div>
             
-            <div id="quiz-section" class="pt-4 border-t border-white/5">
-                <div class="flex justify-between items-center mb-3">
-                    <p class="text-[10px] font-black uppercase text-blue-400">שאלות סינון למועמד (כן/לא)</p>
-                    <span class="text-[9px] bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full">אופציונלי</span>
+            <div id="quiz-section" class="pt-6 border-t border-white/5">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <p class="text-[11px] font-black uppercase text-blue-400">שאלות סינון למועמדים</p>
+                        <p class="text-[9px] text-slate-500 font-bold uppercase">Candidate Screening (Optional)</p>
+                    </div>
+                    <span class="text-[9px] bg-blue-500/10 text-blue-400 px-3 py-1 rounded-full font-black">AI SMART</span>
                 </div>
                 <div id="quiz-list" class="space-y-3">
-                    <input type="text" class="q-input input-modern py-3 text-sm" placeholder="למשל: האם יש לך ניסיון של שנה?">
+                    <input type="text" class="q-input input-modern py-4 text-sm" placeholder="שאלה 1: האם יש לך ניסיון של שנתיים לפחות?">
                 </div>
-                <button onclick="UI.addQField()" class="w-full py-3 mt-2 border-2 border-dashed border-white/10 rounded-xl text-xs font-bold text-slate-400 hover:text-white hover:border-blue-500/50 transition-all">
-                    + הוסף שאלה נוספת
+                <button onclick="UI.addQField()" class="w-full py-4 mt-3 border-2 border-dashed border-white/5 rounded-2xl text-[10px] font-black text-slate-500 hover:text-white hover:border-blue-500/30 transition-all uppercase tracking-widest">
+                    + הוסף שאלה נוספת לסינון
                 </button>
             </div>
 
-            <button onclick="Data.publish()" class="btn-premium w-full py-5 rounded-2xl font-black text-lg shadow-2xl shadow-blue-500/20">
-                פרסם בלוח כעת 🚀
+            <button onclick="Data.publish()" class="btn-premium w-full py-6 rounded-2xl font-black text-xl shadow-2xl shadow-blue-500/30 group">
+                פרסם בלוח כעת
+                <span class="group-hover:translate-x-[-10px] transition-transform">🚀</span>
             </button>
         </div>
     </section>
 
-    <section id="view-admin" class="page-content px-5 pt-8 pb-32">
+    <section id="view-admin" class="page-content px-6 pt-10">
         <div id="auth-ui" class="animate-fade-in">
-            <div class="text-center mb-10">
-                <div class="inline-block p-4 bg-blue-500/10 rounded-full mb-4">🔐</div>
-                <h2 class="text-3xl font-black">אזור אישי</h2>
-                <p class="text-slate-400 text-sm">התחבר כדי לנהל את המודעות והפניות שלך</p>
+            <div class="text-center mb-12">
+                <div class="inline-block p-6 bg-blue-500/10 rounded-[30px] mb-6 shadow-inner">
+                    <span class="text-5xl">🔐</span>
+                </div>
+                <h2 class="text-4xl font-black tracking-tighter">אזור ניהול</h2>
+                <p class="text-slate-500 text-sm font-bold mt-2">נהל את המודעות והפניות שלך בזמן אמת</p>
             </div>
             
-            <div class="glass p-8 space-y-4 rounded-[32px]">
-                <input type="email" id="auth-email" class="input-modern" placeholder="דואר אלקטרוני">
-                <input type="password" id="auth-pass" class="input-modern" placeholder="סיסמה">
-                <button onclick="Auth.handle('login')" class="btn-premium w-full py-4 rounded-xl font-bold text-lg">התחברות</button>
-                <div class="flex items-center gap-4 py-2">
+            <div class="glass p-10 space-y-5 rounded-[40px] shadow-2xl border-white/10">
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-slate-500 mr-1 uppercase">דואר אלקטרוני</label>
+                    <input type="email" id="auth-email" class="input-modern" placeholder="email@example.com">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-slate-500 mr-1 uppercase">סיסמה אישית</label>
+                    <input type="password" id="auth-pass" class="input-modern" placeholder="••••••••">
+                </div>
+                <button onclick="Auth.handle('login')" class="btn-premium w-full py-5 rounded-2xl font-black text-lg mt-4">כניסה למערכת</button>
+                <div class="flex items-center gap-4 py-4">
                     <div class="flex-1 h-px bg-white/5"></div>
-                    <span class="text-[10px] font-bold text-slate-500 uppercase">או</span>
+                    <span class="text-[10px] font-black text-slate-600 uppercase">או</span>
                     <div class="flex-1 h-px bg-white/5"></div>
                 </div>
-                <button onclick="Auth.handle('signup')" class="w-full py-3 text-slate-400 text-sm font-bold hover:text-white transition-colors">יצירת חשבון חדש</button>
+                <button onclick="Auth.handle('signup')" class="w-full py-4 text-blue-400 text-xs font-black uppercase tracking-widest hover:text-white transition-colors">יצירת חשבון מעסיק/עובד חדש</button>
             </div>
         </div>
 
         <div id="dash-ui" class="hidden">
-            <div class="flex justify-between items-end mb-10 animate-fade-in">
+            <div class="flex justify-between items-end mb-12 animate-fade-in">
                 <div>
-                    <h2 class="text-3xl font-black tracking-tighter">הניהול שלי</h2>
-                    <p class="text-blue-400 text-xs font-bold uppercase tracking-widest mt-1">לוח בקרה אישי</p>
+                    <h2 class="text-4xl font-black tracking-tighter">הניהול שלי</h2>
+                    <p class="text-blue-400 text-[10px] font-black uppercase tracking-[0.2em] mt-1">Control Panel</p>
                 </div>
-                <button onclick="Auth.logout()" class="px-4 py-2 bg-red-500/10 text-red-500 text-[10px] font-black rounded-lg uppercase border border-red-500/20 active:scale-95 transition-all">יציאה</button>
+                <button onclick="Auth.logout()" class="px-5 py-2.5 bg-red-500/10 text-red-500 text-[10px] font-black rounded-xl uppercase border border-red-500/20 active:scale-95 transition-all">התנתק 🚪</button>
             </div>
 
-            <div class="space-y-10">
+            <div class="space-y-12">
                 <section>
-                    <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 mr-1">המודעות שפרסמת</h3>
-                    <div id="my-posts" class="space-y-3 italic">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-1.5 h-6 bg-blue-500 rounded-full"></div>
+                        <h3 class="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">המודעות הפעילות שלך</h3>
+                    </div>
+                    <div id="my-posts" class="space-y-4">
                         </div>
                 </section>
 
                 <section>
-                    <h3 class="text-[10px] font-black text-green-400 uppercase tracking-[0.2em] mb-4 mr-1">פניות חדשות (לידים)</h3>
-                    <div id="my-leads" class="space-y-4">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-1.5 h-6 bg-green-500 rounded-full"></div>
+                        <h3 class="text-[11px] font-black text-green-400 uppercase tracking-[0.2em]">פניות ולידים חדשים</h3>
+                    </div>
+                    <div id="my-leads" class="space-y-5">
                         </div>
                 </section>
             </div>
         </div>
     </section>
 
-    <nav class="main-nav glass-dark">
+    <nav class="main-nav glass-dark shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
         <div class="nav-item active" id="nav-feed" onclick="Router.go('feed')">
-            <span class="text-xl">🏠</span>
-            <span class="mt-1">לוח</span>
+            <span class="text-2xl nav-icon transition-transform duration-300">🏠</span>
+            <span class="text-[9px] font-black uppercase mt-1 tracking-tighter">לוח משרות</span>
+            <div class="nav-dot"></div>
         </div>
         <div class="nav-item" id="nav-post" onclick="Router.go('post')">
-            <span class="text-xl">➕</span>
-            <span class="mt-1">פרסם</span>
+            <span class="text-2xl nav-icon transition-transform duration-300">➕</span>
+            <span class="text-[9px] font-black uppercase mt-1 tracking-tighter">פרסום חדש</span>
+            <div class="nav-dot"></div>
         </div>
         <div class="nav-item" id="nav-admin" onclick="Router.go('admin')">
-            <span class="text-xl">📊</span>
-            <span class="mt-1">ניהול</span>
+            <span class="text-2xl nav-icon transition-transform duration-300">📊</span>
+            <span class="text-[9px] font-black uppercase mt-1 tracking-tighter">אזור אישי</span>
+            <div class="nav-dot"></div>
         </div>
         <div class="nav-item" onclick="UI.showInfo()">
-            <span class="text-xl">ℹ️</span>
-            <span class="mt-1">מידע</span>
+            <span class="text-2xl nav-icon transition-transform duration-300">ℹ️</span>
+            <span class="text-[9px] font-black uppercase mt-1 tracking-tighter">מידע עלינו</span>
+            <div class="nav-dot"></div>
         </div>
     </nav>
 <script type="module">
-    // ייבוא מודולים של Firebase מה-CDN הרשמי
+    // ייבוא מודולים רשמיים של Firebase מה-CDN
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { getFirestore, collection, addDoc, getDocs, query, where, orderBy, serverTimestamp, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    // הגדרות הפרויקט - וודא שה-API Key תואם להגדרות ה-Authentication ב-Console
+    // הגדרות Firebase - מותאם לפרויקט matchme-32bcf
     const firebaseConfig = {
         apiKey: "AIzaSyD0hsz8SOI1OG2Fh-DBy1SHeabPaEKZx-Y",
         authDomain: "matchme-32bcf.firebaseapp.com",
@@ -427,175 +469,274 @@
         appId: "1:1082863959305:web:f888f4df815598696c601f"
     };
 
-    // אתחול מערכות
+    // אתחול Instance של Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // ניהול מצב גלובלי
-    let GlobalState = {
+    // ניהול מצב גלובלי (State Management)
+    const GlobalState = {
         user: null,
         posts: [],
-        currentView: 'feed'
+        filteredPosts: [],
+        currentView: 'feed',
+        isLoading: false
     };
 
-    // --- מערכת ניתוב (Router) ---
+    /**
+     * מערכת הניתוב (Router)
+     * אחראית על מעבר חלק בין דפים וניהול ה-URL הווירטואלי
+     */
     const Router = {
         go(viewId) {
-            // עדכון UI של הדפים
-            document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
-            const target = document.getElementById(`view-${viewId}`);
-            if (target) target.classList.add('active');
+            console.log(`Navigating to: ${viewId}`);
+            
+            // עדכון UI של הדפים - העלמה והופעה
+            document.querySelectorAll('.page-content').forEach(p => {
+                p.classList.remove('active');
+            });
+            
+            const targetPage = document.getElementById(`view-${viewId}`);
+            if (targetPage) {
+                targetPage.classList.add('active');
+            }
 
-            // עדכון UI של הניווט
+            // עדכון מצב כפתורי הניווט (Active State)
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            const navBtn = document.getElementById(`nav-${viewId}`);
-            if (navBtn) navBtn.classList.add('active');
+            const activeNav = document.getElementById(`nav-${viewId}`);
+            if (activeNav) activeNav.classList.add('active');
 
             GlobalState.currentView = viewId;
             
-            // טעינה מותאמת אישית לכל דף
+            // לוגיקת טעינה ייעודית לפי דף
             if(viewId === 'feed') Data.load();
             if(viewId === 'admin') UI.refreshDash();
             
+            // גלילה אוטומטית לראש הדף
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     };
 
-    // --- ניהול נתונים (Data) ---
+    /**
+     * ניהול נתונים (Data Layer)
+     * כל הפונקציות שמתקשרות ישירות עם Firestore
+     */
     const Data = {
-        // טעינת הלוח הראשי
+        // טעינת כל המודעות מהשרת
         async load() {
+            if (GlobalState.isLoading) return;
             UI.loader(true);
+            GlobalState.isLoading = true;
+
             try {
-                const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
-                const snap = await getDocs(q);
-                GlobalState.posts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                UI.renderFeed(GlobalState.posts);
-            } catch (err) {
-                console.error("טעינה נכשלה:", err);
-                Toast.show("שגיאה בחיבור למסד הנתונים");
+                const q = query(
+                    collection(db, "posts"), 
+                    orderBy("createdAt", "desc")
+                );
+                
+                const querySnapshot = await getDocs(q);
+                GlobalState.posts = querySnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+                
+                GlobalState.filteredPosts = [...GlobalState.posts];
+                UI.renderFeed(GlobalState.filteredPosts);
+            } catch (error) {
+                console.error("Data Load Error:", error);
+                Toast.show("שגיאה בסנכרון הנתונים. נסה שוב מאוחר יותר.");
+            } finally {
+                UI.loader(false);
+                GlobalState.isLoading = false;
             }
-            UI.loader(false);
         },
 
-        // פרסום מודעה
+        // פרסום מודעה חדשה (מעסיק או עובד)
         async publish() {
             const title = document.getElementById('inp-title').value.trim();
             const phone = document.getElementById('inp-phone').value.trim();
             const type = document.getElementById('inp-type').value;
+            const name = document.getElementById('inp-name').value.trim();
+            const city = document.getElementById('inp-city').value.trim();
+            const desc = document.getElementById('inp-desc').value.trim();
 
-            if(!title || phone.length < 9) return Toast.show("נא למלא כותרת וטלפון תקין");
+            // וולידציה בסיסית
+            if(!title || phone.length < 9 || !name) {
+                return Toast.show("נא למלא את כל שדות החובה (כותרת, שם וטלפון תקין)");
+            }
 
             UI.loader(true);
+
+            // איסוף שאלות השאלון (רק אם זה סוג "מעסיק")
             const questions = Array.from(document.querySelectorAll('.q-input'))
-                                 .map(i => i.value.trim())
-                                 .filter(v => v !== "");
+                                 .map(input => input.value.trim())
+                                 .filter(val => val !== "");
+
             try {
-                await addDoc(collection(db, "posts"), {
+                const newDoc = {
                     type,
                     title,
-                    name: document.getElementById('inp-name').value.trim() || "מפרסם",
-                    city: document.getElementById('inp-city').value.trim() || "כל הארץ",
-                    phone: phone.replace(/\D/g, ''), // ניקוי תווים מהטלפון
-                    desc: document.getElementById('inp-desc').value.trim(),
+                    name,
+                    city: city || "כל הארץ",
+                    phone: phone.replace(/\D/g, ''), // ניקוי תווים שהם לא ספרות
+                    desc: desc,
                     questions: type === 'job' ? questions : [],
                     owner: GlobalState.user ? GlobalState.user.uid : "guest",
-                    createdAt: serverTimestamp()
-                });
+                    createdAt: serverTimestamp(),
+                    viewCount: 0
+                };
+
+                await addDoc(collection(db, "posts"), newDoc);
+                
                 Toast.show("המודעה פורסמה בהצלחה! 🚀");
+                
+                // איפוס טופס
+                document.getElementById('inp-title').value = "";
+                document.getElementById('inp-desc').value = "";
+                
                 Router.go('feed');
-            } catch (err) {
-                Toast.show("שגיאה בפרסום. וודא שאתה מחובר.");
+            } catch (error) {
+                console.error("Publish Error:", error);
+                Toast.show("תקלה בפרסום. וודא שאתה מחובר לאינטרנט.");
+            } finally {
+                UI.loader(false);
             }
-            UI.loader(false);
         },
 
-        // מחיקת מודעה
+        // מחיקת מודעה מהדשבורד
         async deletePost(id) {
-            if(!confirm("להסיר את המודעה לצמיתות?")) return;
+            if(!confirm("האם אתה בטוח שברצונך למחוק את המודעה לצמיתות?")) return;
+            
+            UI.loader(true);
             try {
                 await deleteDoc(doc(db, "posts", id));
-                Toast.show("המודעה נמחקה");
-                UI.refreshDash();
-            } catch (e) { Toast.show("שגיאה במחיקה"); }
+                Toast.show("המודעה הוסרה בהצלחה");
+                UI.refreshDash(); // רענון תצוגת הניהול
+            } catch (error) {
+                Toast.show("שגיאה במחיקת המודעה");
+            } finally {
+                UI.loader(false);
+            }
         }
     };
 
-    // --- ממשק משתמש (UI) ---
+    // חשיפת אובייקטים לחלון הגלובלי לצורך שימוש ב-HTML
+    window.Router = Router;
+    window.Data = Data;
+    window.GlobalState = GlobalState;
+    window.auth = auth;
+    window.db = db;
+    /**
+     * ממשק משתמש (UI Layer)
+     * אחראי על הפיכת הנתונים לאלמנטים ויזואליים
+     */
     const UI = {
-        loader(show) { document.getElementById('app-loader').style.display = show ? 'flex' : 'none'; },
+        // שליטה על הצגת הלואדר
+        loader(show) {
+            const loader = document.getElementById('app-loader');
+            if (show) {
+                loader.style.display = 'flex';
+                loader.style.opacity = '1';
+            } else {
+                loader.style.opacity = '0';
+                setTimeout(() => loader.style.display = 'none', 400);
+            }
+        },
 
-        // תיקון: הצגת מודעות עם הבחנה בין עובד למעסיק
+        // רינדור לוח המודעות
         renderFeed(list) {
             const container = document.getElementById('feed-container');
-            if(list.length === 0) {
-                container.innerHTML = `<div class="text-center py-20 opacity-30 font-bold italic">אין מודעות להצגה כרגע...</div>`;
+            if (list.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-20 opacity-40 animate-fade-in">
+                        <div class="text-6xl mb-4">🔍</div>
+                        <p class="font-bold">לא נמצאו מודעות תואמות...</p>
+                        <button onclick="Data.load()" class="text-blue-500 text-xs mt-2 underline">רענן הכל</button>
+                    </div>`;
                 return;
             }
 
-            container.innerHTML = list.map(item => {
+            container.innerHTML = list.map((item, index) => {
                 const isJob = item.type === 'job';
-                // תיקון 2: שינוי הטקסט לפי סוג המודעה
-                const actionText = isJob ? "הגשת מועמדות ובדיקת התאמה ✨" : "צפייה בפרטים ויצירת קשר 👤";
-                const borderClass = isJob ? "border-blue-500" : "border-green-500";
-                const tagText = isJob ? "💼 דרושים" : "👷 עובד זמין";
-                const tagClass = isJob ? "text-blue-400 bg-blue-500/10" : "text-green-400 bg-green-500/10";
-
+                const delay = (index % 10) * 0.05;
                 return `
-                <div class="glass p-6 border-r-4 ${borderClass} active:scale-[0.98] transition-all job-card rounded-2xl" 
+                <div class="job-card animate-fade-in ${!isJob ? 'worker-type' : ''}" 
+                     style="animation-delay: ${delay}s"
                      onclick="App.handleAction('${item.id}')">
-                    <div class="flex justify-between items-center mb-3">
-                        <span class="text-[10px] font-black px-2 py-1 rounded-md ${tagClass}">${tagText}</span>
-                        <span class="text-xs text-slate-500 font-bold">📍 ${item.city}</span>
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="badge ${isJob ? 'badge-blue' : 'badge-green'}">
+                            ${isJob ? '💼 דרושים' : '🙋‍♂️ מחפש עבודה'}
+                        </span>
+                        <span class="text-[11px] font-bold text-slate-500">📍 ${item.city || 'ארצי'}</span>
                     </div>
-                    <h3 class="text-xl font-bold mb-1">${item.title}</h3>
-                    <p class="text-sm text-blue-400 font-bold mb-3">${item.name}</p>
-                    <div class="flex items-center text-[11px] font-black uppercase tracking-wider text-blue-500/80">
-                        ${actionText}
+                    <h3 class="text-2xl font-black mb-1 text-white tracking-tight">${item.title}</h3>
+                    <p class="text-blue-400 font-bold text-sm mb-4">${item.name}</p>
+                    <div class="flex items-center gap-2 pt-4 border-t border-white/5 mt-auto">
+                        <div class="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center text-xs">✨</div>
+                        <span class="text-[11px] font-black uppercase text-slate-400 tracking-wider">
+                            ${isJob ? 'בדוק התאמה והגש מועמדות' : 'צפה בפרטים וצור קשר'}
+                        </span>
                     </div>
                 </div>`;
             }).join('');
         },
 
-        // רענון דשבורד הניהול
-        async refreshDash() {
-            if(!GlobalState.user) return;
-            document.getElementById('auth-ui').classList.add('hidden');
-            document.getElementById('dash-ui').classList.remove('hidden');
+        // חיפוש דינמי בזמן אמת
+        doSearch(val) {
+            const term = val.toLowerCase().trim();
+            GlobalState.filteredPosts = GlobalState.posts.filter(p => 
+                p.title.toLowerCase().includes(term) || 
+                p.city.toLowerCase().includes(term) || 
+                p.name.toLowerCase().includes(term)
+            );
+            this.renderFeed(GlobalState.filteredPosts);
+        },
 
-            // טעינת מודעות שלי
+        // רענון דשבורד הניהול האישי
+        async refreshDash() {
+            if (!GlobalState.user) return;
+            document.getElementById('auth-ui').classList.add('hidden');
+            const dash = document.getElementById('dash-ui');
+            dash.classList.remove('hidden');
+
             try {
+                // משיכת מודעות שפרסמתי
                 const pSnap = await getDocs(query(collection(db, "posts"), where("owner", "==", GlobalState.user.uid)));
                 const myPosts = document.getElementById('my-posts');
                 myPosts.innerHTML = pSnap.docs.map(d => `
-                    <div class="p-4 bg-slate-800/50 rounded-2xl flex justify-between items-center border border-white/5">
-                        <span class="font-bold text-sm truncate ml-4">${d.data().title}</span>
-                        <button onclick="Data.deletePost('${d.id}')" class="text-red-400 text-[10px] font-black bg-red-500/10 px-3 py-2 rounded-xl border border-red-500/20">מחק</button>
+                    <div class="glass p-5 flex justify-between items-center rounded-2xl border-white/5">
+                        <div>
+                            <p class="font-black text-sm">${d.data().title}</p>
+                            <p class="text-[10px] text-slate-500 font-bold uppercase">${new Date(d.data().createdAt?.toDate()).toLocaleDateString('he-IL')}</p>
+                        </div>
+                        <button onclick="Data.deletePost('${d.id}')" class="w-10 h-10 flex items-center justify-center bg-red-500/10 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all">🗑️</button>
                     </div>
-                `).join('') || '<p class="text-xs opacity-30 italic">טרם פרסמת מודעות...</p>';
+                `).join('') || '<div class="glass p-8 text-center rounded-2xl opacity-30 italic text-sm">טרם פרסמת מודעות</div>';
 
-                // טעינת לידים (פניות אלי)
+                // משיכת פניות שקיבלתי (Leads)
                 const lSnap = await getDocs(query(collection(db, "leads"), where("bossID", "==", GlobalState.user.uid), orderBy("createdAt", "desc")));
                 const leads = document.getElementById('my-leads');
                 leads.innerHTML = lSnap.docs.map(d => {
                     const l = d.data();
                     return `
-                    <div class="glass p-5 border-r-4 border-green-500 animate-fade-in rounded-2xl">
+                    <div class="glass p-6 border-r-4 border-green-500 rounded-2xl animate-fade-in">
                         <div class="flex justify-between items-start mb-4">
                             <div>
-                                <div class="font-bold text-lg">${l.candidateName}</div>
-                                <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">${l.jobTitle}</div>
+                                <h4 class="font-black text-lg">${l.candidateName}</h4>
+                                <p class="text-[10px] font-bold text-blue-400 uppercase tracking-widest">${l.jobTitle}</p>
                             </div>
-                            <div class="bg-green-500/20 text-green-400 px-3 py-1 rounded-full font-black text-xl">${l.matchScore}%</div>
+                            <div class="bg-green-500/20 text-green-400 w-12 h-12 rounded-full flex items-center justify-center font-black shadow-lg shadow-green-900/20">
+                                ${l.matchScore}%
+                            </div>
                         </div>
                         <div class="grid grid-cols-2 gap-3">
-                            <a href="https://api.whatsapp.com/send?phone=972${l.candidatePhone.substring(1)}" class="text-center py-3 bg-green-600 text-white rounded-xl text-xs font-bold shadow-lg shadow-green-900/20">WhatsApp</a>
-                            <a href="tel:${l.candidatePhone}" class="text-center py-3 bg-slate-700 text-white rounded-xl text-xs font-bold">התקשר</a>
+                            <a href="https://api.whatsapp.com/send?phone=972${l.candidatePhone.substring(1)}" target="_blank" class="flex items-center justify-center py-3 bg-green-600 text-white rounded-xl text-[10px] font-black uppercase">WhatsApp</a>
+                            <a href="tel:${l.candidatePhone}" class="flex items-center justify-center py-3 bg-slate-700 text-white rounded-xl text-[10px] font-black uppercase tracking-widest">Call Now</a>
                         </div>
                     </div>`;
-                }).join('') || '<p class="text-xs opacity-30 italic">אין פניות חדשות כרגע</p>';
-            } catch (e) { console.error("שגיאה בטעינת דשבורד", e); }
+                }).join('') || '<div class="glass p-8 text-center rounded-2xl opacity-30 italic text-sm">אין פניות חדשות כרגע</div>';
+
+            } catch (e) { console.error("Dash Refresh Error:", e); }
         },
 
         toggleQuizBuilder() {
@@ -604,196 +745,134 @@
         },
 
         addQField() {
-            const list = document.getElementById('quiz-list');
-            const inp = document.createElement('input');
-            inp.className = "q-input input-modern py-3 text-sm animate-fade-in";
-            inp.placeholder = "שאלה נוספת (למשל: האם יש לך רכב?)";
-            list.appendChild(inp);
+            const container = document.getElementById('quiz-list');
+            const input = document.createElement('input');
+            input.className = "q-input input-modern py-4 text-sm animate-fade-in";
+            input.placeholder = "הוסף שאלת כן/לא נוספת...";
+            container.appendChild(input);
         },
-        
+
         showInfo() {
-            alert("MatchMe Pro v2.0\nמערכת התאמה חכמה בין מעסיקים לעובדים.\nנבנה עבור ביצועים מקסימליים.");
+            alert("MatchMe Pro v3.0\n------------------\nמערכת גיוס חכמה מבוססת AI והתאמה בוואטסאפ.\nנבנה עבור ביצועים מקסימליים.");
         }
     };
 
-    // המשך בחלק 4...
-    // --- לוגיקת האפליקציה המרכזית (App Logic) ---
+    /**
+     * לוגיקת האפליקציה (Application Logic)
+     */
     const App = {
-        // טיפול בלחיצה על מודעה - הבחנה בין עובד למעסיק
         async handleAction(postId) {
             const post = GlobalState.posts.find(p => p.id === postId);
-            if(!post) return;
+            if (!post) return;
 
-            // אם המפרסם הוא עובד (מחפש עבודה) - פונים אליו ישירות ללא שאלון
-            if(post.type === 'worker') {
-                this.sendToWhatsApp(post, 100, "אורח");
+            // אם זה עובד שמחפש עבודה - פונים אליו ישירות
+            if (post.type === 'worker') {
+                this.finalizeApplication(post, 100, "מנהל גיוס");
                 return;
             }
 
-            // אם המפרסם הוא מעסיק - מתחילים תהליך סינון ושאלון
-            this.startSmartApplication(post);
-        },
+            // אם זה מעסיק - מתחילים שאלון סינון
+            const name = prompt("הכנס את שמך המלא להתחלת התהליך:");
+            if (!name) return;
+            const phone = prompt("מה מספר הטלפון שלך?");
+            if (!phone || phone.length < 9) return Toast.show("טלפון לא תקין");
 
-        // מערכת הגשת מועמדות חכמה (למעסיקים)
-        async startSmartApplication(post) {
-            // איסוף פרטי מועמד (שומר בזיכרון מקומי לנוחות)
-            let name = localStorage.getItem('matchme_user_name') || prompt("מה שמך המלא?");
-            let phone = localStorage.getItem('matchme_user_phone') || prompt("מספר טלפון ליצירת קשר?");
-            
-            if(!name || !phone || phone.length < 9) {
-                Toast.show("חובה להזין פרטים תקינים כדי להמשיך");
-                return;
-            }
-
-            localStorage.setItem('matchme_user_name', name);
-            localStorage.setItem('matchme_user_phone', phone);
-
-            let score = 0;
-            const qs = post.questions || [];
-
-            // הרצת השאלון (אם הוגדר)
-            if(qs.length > 0) {
-                let correctAnswers = 0;
-                for(let q of qs) {
-                    if(confirm(`${q}\n\n(אישור = כן | ביטול = לא)`)) {
-                        correctAnswers++;
-                    }
+            let score = 100;
+            if (post.questions && post.questions.length > 0) {
+                let correct = 0;
+                for (const q of post.questions) {
+                    if (confirm(`${q}\n\n(אישור = כן | ביטול = לא)`)) correct++;
                 }
-                score = Math.round((correctAnswers / qs.length) * 100);
-            } else {
-                score = 100; // אין שאלות סינון
+                score = Math.round((correct / post.questions.length) * 100);
             }
 
-            // שמירת הליד במסד הנתונים כדי שהמעסיק יראה אותו
-            UI.loader(true);
+            // שמירת ליד למעסיק
             try {
+                UI.loader(true);
                 await addDoc(collection(db, "leads"), {
                     bossID: post.owner,
                     jobTitle: post.title,
                     candidateName: name,
-                    candidatePhone: phone.replace(/\D/g,''),
+                    candidatePhone: phone.replace(/\D/g, ''),
                     matchScore: score,
                     createdAt: serverTimestamp()
                 });
-                
-                this.sendToWhatsApp(post, score, name);
-            } catch (e) {
-                console.error("שגיאה בשמירת ליד:", e);
-                Toast.show("תקלה בשליחת הפנייה");
-            }
+                this.finalizeApplication(post, score, name);
+            } catch (e) { Toast.show("תקלה בשליחת המועמדות"); }
             UI.loader(false);
         },
 
-        // תיקון: שליחה לוואטסאפ באמצעות API אוניברסלי
-        sendToWhatsApp(post, score, name) {
-            const isJob = post.type === 'job';
+        finalizeApplication(post, score, name) {
             const cleanPhone = post.phone.startsWith('0') ? '972' + post.phone.substring(1) : post.phone;
-            
-            let message = "";
-            if(isJob) {
-                message = `היי, אני מעוניין במשרה שפרסמת: *${post.title}*. שמי ${name} וציון ההתאמה שלי לשאלון הוא *${score}%*. אשמח לפרטים.`;
-            } else {
-                message = `היי, ראיתי את הפרופיל שלך ב-MatchMe: *${post.title}*. אני מעוניין לבדוק אפשרות להעסקה שלך.`;
-            }
-
-            const encodedMsg = encodeURIComponent(message);
-            // שימוש ב-api.whatsapp.com כדי למנוע שגיאות של אפליקציית Business
-            const waUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodedMsg}`;
-            
-            window.open(waUrl, '_blank');
+            const msg = encodeURIComponent(`היי, אני פונה דרך MatchMe לגבי: ${post.title}.\nשמי: ${name}\nציון התאמה לשאלון: ${score}%`);
+            window.open(`https://api.whatsapp.com/send?phone=${cleanPhone}&text=${msg}`, '_blank');
         }
     };
 
-    // --- מערכת אימות משתמשים (Authentication) ---
+    /**
+     * אימות משתמשים (Auth)
+     */
     const Auth = {
         async handle(mode) {
-            const email = document.getElementById('auth-email').value.trim();
+            const email = document.getElementById('auth-email').value;
             const pass = document.getElementById('auth-pass').value;
-
-            if(!email || pass.length < 6) {
-                Toast.show("מייל לא תקין או סיסמה קצרה מדי (מינימום 6 תווים)");
-                return;
-            }
+            if (!email || pass.length < 6) return Toast.show("מייל לא תקין או סיסמה קצרה מדי");
 
             UI.loader(true);
             try {
-                if(mode === 'login') {
+                if (mode === 'login') {
                     await signInWithEmailAndPassword(auth, email, pass);
                     Toast.show("ברוך השב! ✨");
                 } else {
                     await createUserWithEmailAndPassword(auth, email, pass);
-                    Toast.show("החשבון נוצר בהצלחה! 🚀");
+                    Toast.show("ברוך הבא למשפחה! 🚀");
                 }
-                // הדף יתרענן דרך onAuthStateChanged
-            } catch (err) {
-                console.error("Auth Error:", err.code);
-                let msg = "שגיאה בתהליך";
-                if(err.code === 'auth/user-not-found') msg = "משתמש לא קיים";
-                if(err.code === 'auth/wrong-password') msg = "סיסמה שגויה";
-                if(err.code === 'auth/email-already-in-use') msg = "המייל כבר רשום במערכת";
-                if(err.code === 'auth/configuration-not-found') msg = "שגיאת הגדרת Firebase - בדוק API Key";
-                Toast.show(msg);
-            }
+                Router.go('admin');
+            } catch (e) { Toast.show("שגיאה: " + e.code); }
             UI.loader(false);
         },
-
         logout() {
-            if(confirm("להתנתק מהחשבון?")) {
-                signOut(auth).then(() => {
-                    location.reload();
-                });
-            }
+            if (confirm("להתנתק?")) signOut(auth).then(() => location.reload());
         }
     };
 
-    // --- מערכת התראות (Toast) ---
+    /**
+     * התראות (Toast)
+     */
     const Toast = {
         show(msg) {
-            const container = document.getElementById('toast-wrapper');
-            const id = 'toast-' + Date.now();
-            container.innerHTML += `
-                <div id="${id}" class="toast-item glass-dark border-r-4 border-blue-500">
-                    <span class="text-blue-500">🔔</span>
-                    <span class="text-sm">${msg}</span>
-                </div>
-            `;
+            const wrapper = document.getElementById('toast-wrapper');
+            const el = document.createElement('div');
+            el.className = "toast-item";
+            el.innerHTML = `<span>🔔</span><span class="text-sm font-bold">${msg}</span>`;
+            wrapper.appendChild(el);
             setTimeout(() => {
-                const el = document.getElementById(id);
-                if(el) el.style.opacity = '0';
-                setTimeout(() => el?.remove(), 500);
+                el.style.opacity = '0';
+                setTimeout(() => el.remove(), 500);
             }, 3500);
         }
     };
 
-    // --- אתחול והאזנה למצב המשתמש ---
+    // האזנה למצב המשתמש
     onAuthStateChanged(auth, (user) => {
         GlobalState.user = user;
         if (user) {
-            // משתמש מחובר
             document.getElementById('display-user-name').innerText = user.email.split('@')[0];
-            if(GlobalState.currentView === 'admin') UI.refreshDash();
+            if (GlobalState.currentView === 'admin') UI.refreshDash();
         } else {
-            // משתמש מנותק
             document.getElementById('display-user-name').innerText = "אורח/ת";
-            document.getElementById('auth-ui').classList.remove('hidden');
-            document.getElementById('dash-ui').classList.add('hidden');
         }
+        UI.loader(false);
     });
 
-    // טעינה ראשונית של הלוח
-    Data.load();
-
-    // חשיפת פונקציות לחלון הגלובלי (עבור onclick ב-HTML)
-    window.Router = Router;
+    // ייצוא פונקציות ל-DOM
     window.UI = UI;
-    window.Data = Data;
     window.Auth = Auth;
     window.App = App;
     window.Toast = Toast;
 
+    // אתחול ראשוני
+    Data.load();
 </script>
-
-<div id="toast-wrapper"></div>
-
 </body>
 </html>
