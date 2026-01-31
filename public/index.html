@@ -223,7 +223,29 @@
     // --- הגדרות Firebase ---
     // חובה להחליף את ה-API Key כאן!
     const firebaseConfig = { 
-        apiKey: "הדבק_כאן_את_ה_API_KEY_שלך", 
+        apiKey: "<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyD0hsz8SOI1OG2Fh-DBy1SHeabPaEKZx-Y",
+    authDomain: "matchme-32bcf.firebaseapp.com",
+    projectId: "matchme-32bcf",
+    storageBucket: "matchme-32bcf.firebasestorage.app",
+    messagingSenderId: "1082863959305",
+    appId: "1:1082863959305:web:d8da5ea69af003602c27d8",
+    measurementId: "G-62Y6QPMLGZ"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>", 
         authDomain: "matchme-32bcf.firebaseapp.com", 
         projectId: "matchme-32bcf", 
         storageBucket: "matchme-32bcf.appspot.com", 
