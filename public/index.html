@@ -3,80 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MatchMe - מקצוענות בחיבורים</title>
+    <title>MatchMe - תיקון אזור אישי</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Assistant', sans-serif; background-color: #020617; color: #f8fafc; margin: 0; }
-        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); }
         .view-section { display: none; }
         .view-section.active { display: block; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        #modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
-        #modal.active { display: flex; }
     </style>
 </head>
 <body>
 
-    <div id="modal" onclick="UI.closeModal()">
-        <div class="glass w-full max-w-sm p-8 rounded-[35px] text-center" onclick="event.stopPropagation()">
-            <div id="modal-content"></div>
-            <button onclick="UI.closeModal()" class="mt-6 text-slate-500 text-xs font-bold uppercase tracking-widest">סגור חלון</button>
-        </div>
-    </div>
-
     <header class="p-6 flex justify-between items-center max-w-xl mx-auto">
         <h1 class="text-2xl font-black italic">MATCH<span class="text-blue-500">ME</span></h1>
-        <div id="user-tag" class="text-[10px] bg-blue-500/10 text-blue-400 px-3 py-1 rounded-full border border-blue-500/20">אורח</div>
+        <div id="user-tag" class="text-[10px] bg-blue-500/10 text-blue-400 px-3 py-1 rounded-full border border-blue-500/20 font-bold">טוען...</div>
     </header>
 
     <section id="view-feed" class="view-section active p-4 max-w-xl mx-auto pb-32">
-        <div class="mb-6"><input type="text" oninput="UI.filter(this.value)" class="w-full bg-slate-900/50 border border-white/10 p-4 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500" placeholder="חפש משרה או עיר..."></div>
-        <div id="feed-container" class="space-y-4"></div>
+        <div id="feed-container" class="space-y-4 pt-4"></div>
     </section>
 
     <section id="view-post" class="view-section p-4 max-w-xl mx-auto pb-32">
         <div class="glass p-8 rounded-[35px] space-y-4">
-            <h2 class="text-xl font-extrabold mb-4">פרסום מודעה חדשה</h2>
-            <select id="f-type" class="w-full bg-slate-800 p-4 rounded-xl border-none">
-                <option value="job">💼 דרושים (מעסיק)</option>
-                <option value="worker">🙋‍♂️ מחפש עבודה (עובד)</option>
-            </select>
+            <h2 class="text-xl font-bold">פרסום מודעה</h2>
             <input id="f-title" type="text" placeholder="מה התפקיד?" class="w-full bg-slate-800 p-4 rounded-xl border-none">
-            <input id="f-name" type="text" placeholder="שם העסק / מפרסם" class="w-full bg-slate-800 p-4 rounded-xl border-none">
-            <input id="f-city" type="text" placeholder="באיזו עיר?" class="w-full bg-slate-800 p-4 rounded-xl border-none">
-            <input id="f-phone" type="tel" placeholder="מספר וואטסאפ (למשל: 0501234567)" class="w-full bg-slate-800 p-4 rounded-xl border-none">
-            <button onclick="Data.save()" class="w-full bg-blue-600 py-4 rounded-2xl font-black shadow-xl">פרסם עכשיו</button>
+            <input id="f-phone" type="tel" placeholder="וואטסאפ (למשל 0501234567)" class="w-full bg-slate-800 p-4 rounded-xl border-none">
+            <button onclick="Data.save()" class="w-full bg-blue-600 py-4 rounded-2xl font-bold">פרסם</button>
         </div>
     </section>
 
     <section id="view-admin" class="view-section p-4 max-w-xl mx-auto pb-32">
         <div id="auth-ui" class="glass p-10 rounded-[40px]">
-            <h3 class="text-center font-bold mb-8 text-xl">כניסת מנהלים / משתמשים</h3>
-            <input type="email" id="auth-e" class="w-full bg-slate-800 p-4 rounded-2xl mb-4 border-none" placeholder="אימייל">
-            <input type="password" id="auth-p" class="w-full bg-slate-800 p-4 rounded-2xl mb-8 border-none" placeholder="סיסמה (6 תווים לפחות)">
+            <h3 class="text-center font-bold mb-8 text-xl">כניסת משתמשים</h3>
+            <input type="email" id="auth-e" class="w-full bg-slate-800 p-4 rounded-2xl mb-4 border-none text-white" placeholder="אימייל">
+            <input type="password" id="auth-p" class="w-full bg-slate-800 p-4 rounded-2xl mb-8 border-none text-white" placeholder="סיסמה (מינימום 6 תווים)">
             <div class="grid grid-cols-2 gap-4">
-                <button onclick="Auth.login()" class="bg-blue-600 py-4 rounded-2xl font-bold">התחבר</button>
+                <button onclick="Auth.login()" class="bg-blue-600 py-4 rounded-2xl font-bold hover:bg-blue-500">התחבר</button>
                 <button onclick="Auth.register()" class="bg-slate-700 py-4 rounded-2xl font-bold text-sm">הרשמה</button>
             </div>
         </div>
+        
         <div id="dash-ui" class="hidden glass p-8 rounded-[40px] text-center">
-            <div class="w-20 h-20 bg-blue-600 rounded-full mx-auto mb-4 flex items-center justify-center text-3xl">👤</div>
-            <p id="user-info" class="font-bold text-lg mb-6"></p>
-            <button onclick="Auth.logout()" class="w-full bg-red-500/10 text-red-500 py-4 rounded-2xl font-bold border border-red-500/20">התנתק מהמערכת</button>
+            <div class="w-20 h-20 bg-blue-600 rounded-full mx-auto mb-4 flex items-center justify-center text-3xl shadow-lg shadow-blue-600/30">👤</div>
+            <h2 class="text-xl font-bold mb-1">שלום לך,</h2>
+            <p id="user-info" class="text-blue-400 text-sm mb-8 font-medium"></p>
+            <div class="border-t border-white/5 pt-6">
+                <button onclick="Auth.logout()" class="w-full bg-red-500/10 text-red-500 py-4 rounded-2xl font-bold border border-red-500/20 hover:bg-red-500/20 transition-all">התנתק מהמערכת</button>
+            </div>
         </div>
     </section>
 
     <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-sm glass h-20 rounded-[35px] flex justify-around items-center px-4 z-50">
         <div onclick="Router.go('feed')" class="cursor-pointer flex flex-col items-center"><span class="text-xl">🏠</span><p class="text-[9px] font-bold">לוח</p></div>
-        <div onclick="Router.go('post')" class="cursor-pointer bg-blue-600 w-14 h-14 rounded-full flex items-center justify-center -mt-10 border-4 border-slate-950 text-white text-2xl">+</div>
-        <div onclick="Router.go('admin')" class="cursor-pointer flex flex-col items-center"><span class="text-xl">👤</span><p class="text-[9px] font-bold">ניהול</p></div>
+        <div onclick="Router.go('post')" class="cursor-pointer bg-blue-600 w-14 h-14 rounded-full flex items-center justify-center -mt-10 border-4 border-slate-950 text-white text-2xl shadow-xl">+</div>
+        <div onclick="Router.go('admin')" class="cursor-pointer flex flex-col items-center"><span class="text-xl">👤</span><p class="text-[9px] font-bold">אזור אישי</p></div>
     </nav>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, collection, addDoc, getDocs, query, orderBy, serverTimestamp, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyD0hsz8SOI1OG2Fh-DBy1SHeabPaEKZx-Y",
@@ -92,7 +80,6 @@
 
     const ADMIN_MAIL = "cifhiim@gmail.com";
     let currentUser = null;
-    let allPosts = [];
 
     const Router = {
         go(id) {
@@ -102,95 +89,78 @@
         }
     };
 
-    const UI = {
-        openModal(id) {
-            const p = allPosts.find(x => x.id === id);
-            document.getElementById('modal-content').innerHTML = `
-                <h2 class="text-2xl font-black mb-2">${p.title}</h2>
-                <p class="text-slate-400 mb-6">${p.name} | ${p.city}</p>
-                <button onclick="window.toWA('${p.phone}', '${p.title}')" class="w-full bg-emerald-600 py-4 rounded-2xl font-bold shadow-lg shadow-emerald-600/20">פנה בוואטסאפ 💬</button>
-            `;
-            document.getElementById('modal').classList.add('active');
+    const Auth = {
+        async login() {
+            const e = document.getElementById('auth-e').value;
+            const p = document.getElementById('auth-p').value;
+            if(!e || !p) return alert("נא למלא אימייל וסיסמה");
+            try { await signInWithEmailAndPassword(auth, e, p); }
+            catch(e) { alert("פרטי כניסה שגויים או שהמשתמש לא קיים"); }
         },
-        closeModal() { document.getElementById('modal').classList.remove('active'); },
-        render(list) {
-            const cont = document.getElementById('feed-container');
-            cont.innerHTML = list.map(p => {
-                const isOwner = currentUser && (currentUser.uid === p.owner || currentUser.email === ADMIN_MAIL);
-                return `
-                <div onclick="UI.openModal('${p.id}')" class="glass p-6 rounded-3xl border-r-4 ${p.type === 'job' ? 'border-blue-500' : 'border-emerald-500'} relative">
-                    <div class="flex justify-between">
-                        <h3 class="font-bold text-lg">${p.title}</h3>
-                        ${isOwner ? `<button onclick="window.delP(event, '${p.id}')" class="text-red-500 text-[10px] font-bold bg-red-500/10 px-2 py-1 rounded">מחק</button>` : ''}
-                    </div>
-                    <p class="text-xs text-slate-400 mt-1">${p.name} • ${p.city}</p>
-                    <p class="text-[10px] text-blue-400 font-bold mt-4">לחץ לצפייה בפרטים ➜</p>
-                </div>`;
-            }).join('');
+        async register() {
+            const e = document.getElementById('auth-e').value;
+            const p = document.getElementById('auth-p').value;
+            if(p.length < 6) return alert("הסיסמה חייבת להיות לפחות 6 תווים");
+            try { await createUserWithEmailAndPassword(auth, e, p); alert("נרשמת בהצלחה!"); }
+            catch(e) { alert("שגיאה בהרשמה: " + e.message); }
         },
-        filter(v) { UI.render(allPosts.filter(p => p.title.includes(v) || p.city.includes(v))); }
+        logout() { signOut(auth).then(() => location.reload()); }
     };
 
     const Data = {
         async save() {
             const t = document.getElementById('f-title').value;
             const ph = document.getElementById('f-phone').value;
-            if(!t || !ph) return alert("חובה למלא כותרת וטלפון");
+            if(!t || !ph) return alert("מלא כותרת וטלפון");
             try {
                 await addDoc(collection(db, "posts"), {
-                    title: t, phone: ph, type: document.getElementById('f-type').value,
-                    name: document.getElementById('f-name').value || "אנונימי",
-                    city: document.getElementById('f-city').value || "ישראל",
+                    title: t, phone: ph,
                     owner: currentUser ? currentUser.uid : "guest",
                     createdAt: serverTimestamp()
                 });
-                alert("המודעה פורסמה!"); Router.go('feed');
-            } catch(e) { alert("שגיאה! בדוק את ה-Rules ב-Firebase."); }
+                alert("פורסם!"); Router.go('feed');
+            } catch(e) { alert("שגיאה! וודא שביצעת Publish ב-Firebase Rules"); }
         },
         async load() {
+            const cont = document.getElementById('feed-container');
+            cont.innerHTML = "<p class='text-center opacity-50'>טוען מודעות...</p>";
             try {
                 const snap = await getDocs(query(collection(db, "posts"), orderBy("createdAt", "desc")));
-                allPosts = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                UI.render(allPosts);
-            } catch(e) { console.error(e); }
+                const posts = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                cont.innerHTML = posts.map(p => `
+                    <div class="glass p-6 rounded-3xl">
+                        <h3 class="font-bold text-lg">${p.title}</h3>
+                        <button onclick="window.open('https://wa.me/${p.phone.replace(/\D/g,'')}')" class="text-blue-400 text-xs mt-2 font-bold uppercase tracking-wider">פנה בוואטסאפ ➜</button>
+                    </div>
+                `).join('');
+            } catch(e) { cont.innerHTML = "<p class='text-center text-red-400'>שגיאה בטעינת נתונים</p>"; }
         }
-    };
-
-    const Auth = {
-        async login() {
-            try { await signInWithEmailAndPassword(auth, document.getElementById('auth-e').value, document.getElementById('auth-p').value); }
-            catch(e) { alert("פרטים שגויים"); }
-        },
-        async register() {
-            try { await createUserWithEmailAndPassword(auth, document.getElementById('auth-e').value, document.getElementById('auth-p').value); }
-            catch(e) { alert("שגיאה בהרשמה (סיסמה חייבת להיות לפחות 6 תווים)"); }
-        },
-        logout() { signOut(auth).then(() => location.reload()); }
-    };
-
-    window.toWA = (ph, title) => {
-        let n = ph.replace(/\D/g,'');
-        if(n.startsWith('0')) n = '972' + n.substring(1);
-        window.open(`https://api.whatsapp.com/send?phone=${n}&text=${encodeURIComponent('היי, אני פונה לגבי: ' + title)}`, '_blank');
-    };
-
-    window.delP = async (e, id) => {
-        e.stopPropagation();
-        if(confirm("למחוק את המודעה?")) { await deleteDoc(doc(db, "posts", id)); Data.load(); }
     };
 
     onAuthStateChanged(auth, u => {
         currentUser = u;
+        const tag = document.getElementById('user-tag');
+        const authUi = document.getElementById('auth-ui');
+        const dashUi = document.getElementById('dash-ui');
+
         if(u) {
-            document.getElementById('auth-ui').classList.add('hidden');
-            document.getElementById('dash-ui').classList.remove('hidden');
+            tag.innerText = u.email === ADMIN_MAIL ? "מנהל מערכת" : "מחובר";
+            tag.classList.replace('bg-blue-500/10', 'bg-emerald-500/10');
+            tag.classList.replace('text-blue-400', 'text-emerald-400');
+            
+            // הצגת האזור האישי והסתרת טופס הכניסה
+            authUi.classList.add('hidden');
+            dashUi.classList.remove('hidden');
             document.getElementById('user-info').innerText = u.email;
-            document.getElementById('user-tag').innerText = u.email === ADMIN_MAIL ? "מנהל מערכת" : "מחובר";
+        } else {
+            tag.innerText = "אורח";
+            authUi.classList.remove('hidden');
+            dashUi.classList.add('hidden');
         }
         Data.load();
     });
 
-    window.UI = UI; window.Router = Router; window.Data = Data; window.Auth = Auth;
+    window.Auth = Auth; window.Data = Data; window.Router = Router;
 </script>
 </body>
 </html>
