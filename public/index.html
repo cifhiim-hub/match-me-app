@@ -348,7 +348,7 @@
                 </div>`).join('');
         }
     };
-    // המשך UI - פתיחת כרטיס מלא ושאלון
+        // המשך UI - פתיחת כרטיס מלא ושאלון (כולל כפתור התקשרות)
     window.UI.openFullCard = function(id, isHistory = false) {
         const item = (isHistory ? st.myPosts : st.posts).find(x => x.id === id);
         if (!item) return;
@@ -366,13 +366,22 @@
                 </div>
                 <div class="glass bg-white/5 p-4 rounded-2xl text-sm mb-6">
                     <p class="text-blue-400 text-[10px] font-black mb-2 uppercase">${isBiz ? 'תיאור המשרה' : 'על המועמד'}</p>
-                    ${isBiz ? item.desc : item.bio}
-                    ${!isBiz && item.demands ? `<hr class="my-3 opacity-10"><p class="text-emerald-400 text-[10px] font-black mb-1 uppercase">ציפיות מהמעסיק</p>${item.demands}` : ''}
+                    <div class="whitespace-pre-wrap">${isBiz ? item.desc : item.bio}</div>
+                    ${!isBiz && item.demands ? `<hr class="my-3 opacity-10"><p class="text-emerald-400 text-[10px] font-black mb-1 uppercase">ציפיות מהמעסיק</p><div class="whitespace-pre-wrap">${item.demands}</div>` : ''}
                 </div>
                 ${isBiz && item.questions?.length > 0 ? `
                     <button onclick="UI.openQuestions('${id}')" class="w-full py-4 mb-4 rounded-2xl border-2 border-dashed border-blue-500/30 text-blue-400 font-black text-sm"><i class="fa-solid fa-clipboard-question ml-2"></i> צפה בשאלון התאמה</button>
                 ` : ''}
-                <button onclick="UI.contactWA('${item.phone}', '${item.title}', ${isBiz})" class="wa-float w-full"><i class="fa-brands fa-whatsapp text-2xl"></i> פנה בוואטסאפ</button>
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <a href="tel:${item.phone}" class="flex items-center justify-center gap-2 bg-blue-600 text-white p-4 rounded-2xl font-black shadow-lg active:scale-95 transition-all">
+                        <i class="fa-solid fa-phone-flip"></i> התקשר
+                    </a>
+                    <button onclick="UI.contactWA('${item.phone}', '${item.title}')" class="wa-float active:scale-95 transition-all">
+                        <i class="fa-brands fa-whatsapp text-2xl"></i> וואטסאפ
+                    </button>
+                </div>
+
                 ${isHistory || (st.user?.email === 'cifhiim@gmail.com') ? `<button onclick="Data.deletePost('${item.id}')" class="w-full text-red-500 mt-6 text-[10px] font-black uppercase opacity-50">מחק מודעה</button>` : ''}
             </div>`;
         document.getElementById('modal-full').classList.add('active');
@@ -389,11 +398,22 @@
         document.getElementById('modal-questions').classList.add('active');
     };
 
-    window.UI.contactWA = function(p, t, b) {
+    // תיקון וואטסאפ - פתיחה ישירה למניעת שגיאת "עסקי"
+    window.UI.contactWA = function(p, t) {
         let clean = p.replace(/\D/g, '');
         if (clean.startsWith('0')) clean = '972' + clean.substring(1);
-        const msg = encodeURIComponent(`היי, אני פונה אליך מ-MatchMe לגבי: ${t}`);
-        window.open(`https://wa.me/${clean}?text=${msg}`, '_blank');
+        const msg = encodeURIComponent(`היי, אני פונה אליך מ-MatchMe לגבי: *${t}*. האם זה עדיין רלוונטי?`);
+        
+        // שימוש ב-Protocol ישיר לנייד
+        const waUrl = `whatsapp://send?phone=${clean}&text=${msg}`;
+        window.location.href = waUrl;
+
+        // גיבוי למחשב/דפדפנים שחוסמים קישור ישיר
+        setTimeout(() => {
+            if (!document.hidden) {
+                window.open(`https://wa.me/${clean}?text=${msg}`, '_blank');
+            }
+        }, 500);
     };
 
     window.UI.closeModal = () => { document.getElementById('modal-full').classList.remove('active'); st.modalOpen = false; };
@@ -414,7 +434,8 @@
 
             if (!data.title || !data.phone) return alert("חובה למלא כותרת וטלפון");
             btn.disabled = true;
-            try { await addDoc(collection(db, "posts"), data); alert("פורסם בהצלחה!"); location.reload(); } catch (e) { alert("שגיאה"); btn.disabled = false; }
+            btn.innerHTML = `<i class="fa-solid fa-circle-notch animate-spin"></i> מפרסם...`;
+            try { await addDoc(collection(db, "posts"), data); alert("פורסם בהצלחה!"); location.reload(); } catch (e) { alert("שגיאה"); btn.disabled = false; btn.innerText = "פרסם בלוח"; }
         },
         async loadFeed() {
             const snap = await getDocs(query(collection(db, "posts"), orderBy("createdAt", "desc")));
@@ -426,31 +447,34 @@
             st.myPosts = snap.docs.map(d => ({id: d.id, ...d.data()}));
             UI.renderList(st.myPosts, 'my-history', true);
         },
-        async deletePost(id) { if(confirm("למחוק?")) { await deleteDoc(doc(db, "posts", id)); location.reload(); } }
+        async deletePost(id) { if(confirm("למחוק את המודעה?")) { await deleteDoc(doc(db, "posts", id)); location.reload(); } }
     };
 
     // אימות (Auth)
     window.Auth = {
         async action(type) {
             const e = document.getElementById('auth-email').value, p = document.getElementById('auth-pass').value;
+            if(!e || p.length < 6) return alert("אימייל לא תקין או סיסמה קצרה מדי");
             try { 
                 if (type === 'login') await signInWithEmailAndPassword(auth, e, p);
-                else await createUserWithEmailAndPassword(auth, e, p);
+                else { await createUserWithEmailAndPassword(auth, e, p); alert("נרשמת בהצלחה!"); }
                 location.reload();
-            } catch (err) { alert("שגיאה בפרטים"); }
+            } catch (err) { alert("שגיאה: " + err.message); }
         },
         async forgotPassword() {
             const e = document.getElementById('auth-email').value;
-            if(e) { await sendPasswordResetEmail(auth, e); alert("מייל שחזור נשלח"); }
+            if(!e) return alert("הזן אימייל לשחזור");
+            await sendPasswordResetEmail(auth, e); alert("מייל שחזור נשלח!");
         },
-        async logout() { await signOut(auth); location.reload(); }
+        async logout() { if(confirm("להתנתק?")) { await signOut(auth); location.reload(); } }
     };
 
-    // מאזין חיבור וחיפוש
+    // מאזין חיבור
     onAuthStateChanged(auth, (user) => {
         st.user = user;
         if (user) {
             document.getElementById('u-badge').innerText = user.email === 'cifhiim@gmail.com' ? "מנהל" : "מחובר";
+            document.getElementById('u-badge').classList.replace('opacity-50', 'text-blue-400');
             document.getElementById('auth-box').classList.add('hidden');
             document.getElementById('profile-box').classList.remove('hidden');
             document.getElementById('user-display-email').innerText = user.email;
@@ -460,6 +484,7 @@
         Data.loadFeed();
     });
 
+    // חיפוש
     document.getElementById('search-input').oninput = (e) => {
         const val = e.target.value.toLowerCase();
         UI.renderList(st.posts.filter(p => p.title.toLowerCase().includes(val) || p.location.toLowerCase().includes(val) || (p.company && p.company.toLowerCase().includes(val))), 'feed-list');
