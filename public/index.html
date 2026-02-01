@@ -460,9 +460,7 @@
         }
     };
     /**
-     * המשך מנוע הנתונים (Data) - טעינה וניהול
-     */
-    /**
+     /**
      * --- חלק 3 המעודכן: ניהול נתונים, רינדור וסינון ---
      */
 
@@ -470,44 +468,34 @@
     window.Data.loadFeed = async function() {
         const container = document.getElementById('feed-list');
         container.innerHTML = `<div class="py-20 text-center opacity-20 animate-pulse font-bold text-xl">מעדכן לוח...</div>`;
-        
         try {
             const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
             const snap = await getDocs(q);
             st.posts = snap.docs.map(d => ({id: d.id, ...d.data()}));
             UI.renderList(st.posts, 'feed-list');
-        } catch (e) { 
-            console.error("Feed Error:", e);
-            container.innerHTML = `<div class="py-20 text-center opacity-50">שגיאה בטעינת הנתונים</div>`;
-        }
+        } catch (e) { console.error("Feed Error:", e); }
     };
 
-    // 2. טעינת "הכרטיסים שלי" (היסטוריה אישית)
+    // 2. טעינת "הכרטיסים שלי" 
     window.Data.loadHistory = async function() {
         if (!st.user) return;
-        const container = document.getElementById('my-history');
-        
         try {
             const q = query(collection(db, "posts"), where("ownerId", "==", st.user.uid), orderBy("createdAt", "desc"));
             const snap = await getDocs(q);
             st.myPosts = snap.docs.map(d => ({id: d.id, ...d.data()}));
             UI.renderList(st.myPosts, 'my-history', true); 
-        } catch (e) { 
-            console.error("History Error:", e);
-            container.innerHTML = `<p class="text-center py-10 opacity-30 text-xs italic">לא נמצאה היסטוריית פרסומים</p>`;
-        }
+        } catch (e) { console.error("History Error:", e); }
     };
 
-    // 3. מנוע הסינון בדף הבית
+    // 3. מנוע הסינון (משרה/עובד)
     window.UI.filterFeed = function(type) {
         document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.classList.remove('bg-blue-600', 'opacity-100');
-            btn.classList.add('bg-transparent', 'opacity-40');
+            btn.classList.replace('bg-blue-600', 'bg-transparent');
+            btn.classList.replace('opacity-100', 'opacity-40');
         });
-        
         const activeBtn = event.currentTarget;
-        activeBtn.classList.remove('bg-transparent', 'opacity-40');
-        activeBtn.classList.add('bg-blue-600', 'opacity-100');
+        activeBtn.classList.replace('bg-transparent', 'bg-blue-600');
+        activeBtn.classList.replace('opacity-40', 'opacity-100');
 
         if (type === 'all') {
             UI.renderList(st.posts, 'feed-list');
@@ -517,18 +505,15 @@
         }
     };
 
-    // 4. פתרון וואטסאפ אוניברסלי (מתקן בעיית Business)
+    // 4. פתרון וואטסאפ אוניברסלי (התיקון לביזנס)
     window.UI.contactWA = function(phone, title, isBiz) {
         let clean = phone.replace(/\D/g, '');
         if (clean.startsWith('0')) clean = '972' + clean.substring(1);
-        
         const msg = encodeURIComponent(isBiz 
-            ? `היי, ראיתי את המשרה שפרסמת ב-MatchMe: *${title}*. אשמח לקבל פרטים!` 
-            : `היי, ראיתי את הפרופיל שלך ב-MatchMe כ-*${title}*. האם אתה עדיין מחפש?`
+            ? `היי, ראיתי את המשרה שפרסמת ב-MatchMe: *${title}*. אשמח לפרטים!` 
+            : `היי, ראיתי את הפרופיל שלך ב-MatchMe כ-*${title}*. האם אתה פנוי לעבודה?`
         );
-
-        const finalUrl = `https://api.whatsapp.com/send?phone=${clean}&text=${msg}`;
-        window.open(finalUrl, '_blank');
+        window.open(`https://api.whatsapp.com/send?phone=${clean}&text=${msg}`, '_blank');
     };
 
     // 5. רינדור רשימת המודעות
@@ -538,81 +523,66 @@
             container.innerHTML = `<div class="p-10 text-center opacity-30 italic text-sm">אין מודעות להצגה</div>`;
             return;
         }
-
         container.innerHTML = list.map(item => {
             const isBiz = item.type === 'biz';
             return `
                 <div onclick="UI.openFullCard('${item.id}', ${isHistory})" 
-                     class="glass p-5 border-r-4 ${isBiz ? 'border-blue-500 bg-blue-500/5' : 'border-emerald-500 bg-emerald-500/5'} 
-                            active:scale-95 transition-all cursor-pointer relative group mb-4 shadow-lg shadow-black/20">
+                     class="glass p-5 border-r-4 ${isBiz ? 'border-blue-400 bg-blue-400/5' : 'border-emerald-400 bg-emerald-400/5'} 
+                            active:scale-95 transition-all mb-4">
                     <div class="flex justify-between items-start">
-                        <div class="space-y-1">
-                            <span class="text-[9px] font-black uppercase px-2 py-0.5 rounded ${isBiz ? 'bg-blue-500/20 text-blue-400' : 'bg-emerald-500/20 text-emerald-400'}">
-                                ${isBiz ? '💼 דרוש עובד' : '🙋‍♂️ מחפש עבודה'}
+                        <div>
+                            <span class="text-[9px] font-black uppercase px-2 py-0.5 rounded ${isBiz ? 'bg-blue-400/20 text-blue-400' : 'bg-emerald-400/20 text-emerald-400'}">
+                                ${isBiz ? '💼 משרה' : '🙋‍♂️ עובד'}
                             </span>
-                            <h3 class="text-lg font-black text-white leading-tight">${item.title}</h3>
-                            <p class="text-xs font-bold text-slate-400">${isBiz ? item.company : (item.name || 'אנונימי')} | ${item.location}</p>
+                            <h3 class="text-lg font-black text-white mt-1">${item.title}</h3>
+                            <p class="text-xs font-bold text-slate-400">${isBiz ? item.company : (item.name || 'מועמד')} | ${item.location}</p>
                         </div>
-                        <div class="h-10 w-10 flex items-center justify-center opacity-10 group-hover:opacity-100 transition-opacity">
-                            <i class="fa-solid fa-chevron-left"></i>
-                        </div>
+                        <i class="fa-solid fa-chevron-left opacity-20 mt-4"></i>
                     </div>
-                </div>
-            `;
+                </div>`;
         }).join('');
     };
 
-    // 6. מחיקת מודעה
+    // 6. פתיחת כרטיס מלא
+    window.UI.openFullCard = function(id, isHistory = false) {
+        const item = (isHistory ? st.myPosts : st.posts).find(x => x.id === id);
+        if (!item) return;
+        const isBiz = item.type === 'biz';
+        st.modalOpen = true;
+        document.getElementById('modal-render-area').innerHTML = `
+            <div class="text-right">
+                <h2 class="text-2xl font-black text-white">${item.title}</h2>
+                <p class="text-blue-400 font-bold mb-6">${isBiz ? item.company : (item.name || 'מועמד')}</p>
+                <div class="space-y-4">
+                    <div class="glass bg-white/5 p-4 rounded-2xl text-sm leading-relaxed">
+                        <p class="text-blue-400 font-black text-[10px] mb-2 uppercase">מיקום: ${item.location}</p>
+                        ${isBiz ? item.desc : item.bio}
+                    </div>
+                    <button onclick="UI.contactWA('${item.phone}', '${item.title}', ${isBiz})" class="wa-float w-full">
+                        <i class="fa-brands fa-whatsapp text-2xl"></i> פנה בוואטסאפ
+                    </button>
+                    ${isHistory || (st.user && st.user.email === 'cifhiim@gmail.com') ? `
+                        <button onclick="Data.deletePost('${item.id}')" class="w-full py-3 text-red-500 text-[10px] font-black uppercase opacity-50">מחיקת מודעה</button>
+                    ` : ''}
+                </div>
+            </div>`;
+        document.getElementById('modal-full').classList.add('active');
+    };
+
+    // 7. מחיקת מודעה וחיפוש
     window.Data.deletePost = async function(id) {
-        if (!confirm("למחוק את המודעה לצמיתות?")) return;
-        try {
-            await deleteDoc(doc(db, "posts", id));
-            UI.closeModal();
-            st.activeView === 'feed' ? this.loadFeed() : this.loadHistory();
-        } catch (e) { alert("שגיאה במחיקה"); }
+        if (!confirm("למחוק לצמיתות?")) return;
+        await deleteDoc(doc(db, "posts", id));
+        UI.closeModal();
+        st.activeView === 'feed' ? this.loadFeed() : this.loadHistory();
     };
 
-    // 7. חיפוש מהיר
     document.getElementById('search-input').oninput = (e) => {
         const val = e.target.value.toLowerCase();
-        const filtered = st.posts.filter(p => 
-            p.title.toLowerCase().includes(val) || 
-            p.location.toLowerCase().includes(val) ||
-            (p.company && p.company.toLowerCase().includes(val))
-        );
+        const filtered = st.posts.filter(p => p.title.toLowerCase().includes(val) || p.location.toLowerCase().includes(val));
         UI.renderList(filtered, 'feed-list');
     };
-
-    };
-
-    /**
-     * פתרון וואטסאפ מושלם
-     */
-    window.UI.contactWA = function(phone, title, isBiz) {
-        let clean = phone.replace(/\D/g, '');
-        if (clean.startsWith('0')) clean = '972' + clean.substring(1);
-        
-        const msg = encodeURIComponent(isBiz 
-            ? `היי, ראיתי את המשרה שפרסמת ב-MatchMe: *${title}*. אשמח לקבל פרטים נוספים!`
-            : `היי, פניתי אליך דרך MatchMe לגבי הפרופיל שלך: *${title}*. האם אתה עדיין מחפש?`
-        );
-        window.open(`https://wa.me/${clean}?text=${msg}`, '_blank');
-    };
-
-    // חיפוש מהיר
-    document.getElementById('search-input').oninput = (e) => {
-        const val = e.target.value.toLowerCase();
-        const filtered = st.posts.filter(p => 
-            p.title.toLowerCase().includes(val) || 
-            p.location.toLowerCase().includes(val) ||
-            (p.company && p.company.toLowerCase().includes(val))
-        );
-        UI.renderList(filtered, 'feed-list');
-    };
-    /**
-     * מנוע אימות (Authentication)
-     */
-    window.Auth = {
+   
         // התחברות או הרשמה
         async action(type) {
             const email = document.getElementById('auth-email').value.trim();
