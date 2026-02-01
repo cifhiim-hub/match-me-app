@@ -484,11 +484,35 @@
         Data.loadFeed();
     });
 
-    // חיפוש
-    document.getElementById('search-input').oninput = (e) => {
-        const val = e.target.value.toLowerCase();
-        UI.renderList(st.posts.filter(p => p.title.toLowerCase().includes(val) || p.location.toLowerCase().includes(val) || (p.company && p.company.toLowerCase().includes(val))), 'feed-list');
-    };
+    // חיפוש חי שמתחבר מחדש בכל טעינת נתונים
+    const searchInput = document.getElementById('search-input');
+    
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            const val = e.target.value.toLowerCase().trim();
+            
+            // אם התיבה ריקה, תחזיר את כל הרשימה המקורית
+            if (!val) {
+                UI.renderList(st.posts, 'feed-list');
+                return;
+            }
+
+            const filtered = st.posts.filter(p => {
+                const title = (p.title || "").toLowerCase();
+                const loc = (p.location || "").toLowerCase();
+                const comp = (p.company || "").toLowerCase();
+                const name = (p.name || "").toLowerCase();
+                
+                return title.includes(val) || 
+                       loc.includes(val) || 
+                       comp.includes(val) || 
+                       name.includes(val);
+            });
+            
+            UI.renderList(filtered, 'feed-list');
+        });
+    }
+
 </script>
 </body>
 </html>
