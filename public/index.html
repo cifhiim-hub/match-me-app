@@ -42,7 +42,49 @@
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
         .tab-active { background: #6366f1; color: white; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); }
-        .tab-inactive { background: rgba(255,255,255,0.05); color: #94a3b8; }
+       .tab-inactive { background: rgba(255,255,255,0.05); color: #94a3b8; }
+ /* אנימציות למודאלים החדשים */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-8px); }
+    75% { transform: translateX(8px); }
+}
+
+.apply-shake { 
+    animation: shake 0.2s ease-in-out 0s 2; 
+    border-color: #ef4444 !important; /* הופך את הגבול לאדום בזמן רעידה */
+}
+
+/* אפקט כניסה חלקה (Zoom & Fade) */
+.animate-in {
+    animation-duration: 0.3s;
+    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.zoom-in {
+    animation-name: zoomIn;
+}
+
+@keyframes zoomIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* עיצוב רשימת הצעות הערים (Autocomplete) */
+#city-suggestions {
+    max-height: 200px;
+    overflow-y: auto;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+}
+
+#city-suggestions div {
+    transition: all 0.2s ease;
+}
+
+#city-suggestions div:hover {
+    padding-right: 20px; /* אפקט קטן כשעוברים על עיר */
+}
+        
     </style>
 </head>
 <body>
@@ -205,6 +247,52 @@
         </button>
         <button onclick="Router.go('profile')" class="nav-btn text-slate-500 flex flex-col items-center gap-1 transition-all hover:text-white"><i class="fa-solid fa-user-circle text-xl"></i><span class="text-[9px] font-bold">אזור אישי</span></button>
     </nav>
+<div id="details-modal" class="fixed inset-0 z-[3000] hidden items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+    <div class="glass w-full max-w-sm overflow-hidden animate-in zoom-in duration-300 border border-white/10">
+        <div class="p-6">
+            <div id="details-badge" class="mb-4 inline-block px-3 py-1 rounded-full text-[10px] font-bold border"></div>
+            <h2 id="details-title" class="text-2xl font-black text-white mb-2 leading-tight"></h2>
+            
+            <div class="space-y-4 mt-6 text-sm">
+                <div class="flex items-center gap-3 text-slate-300 bg-white/5 p-3 rounded-xl">
+                    <i class="fa-solid fa-location-dot text-indigo-400"></i>
+                    <span id="details-loc"></span>
+                </div>
+                <div class="flex items-center gap-3 text-slate-300 bg-white/5 p-3 rounded-xl">
+                    <i class="fa-solid fa-shekel-sign text-indigo-400"></i>
+                    <span>שכר: <span id="details-salary" class="font-bold text-white"></span> לשעה</span>
+                </div>
+                <div class="flex items-center gap-3 text-slate-300 bg-white/5 p-3 rounded-xl">
+                    <i class="fa-solid fa-circle-exclamation text-indigo-400"></i>
+                    <span id="details-must"></span>
+                </div>
+            </div>
+            
+            <button onclick="document.getElementById('details-modal').classList.add('hidden')" 
+                    class="btn-main w-full mt-8 py-4 text-lg">סגור</button>
+        </div>
+    </div>
+</div>
+
+<div id="edit-prompt-modal" class="fixed inset-0 z-[3000] hidden items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+    <div class="glass w-full max-w-sm animate-in fade-in duration-300 border border-white/10 p-6 relative">
+        <h3 class="text-xl font-black text-white mb-2">עריכה חכמה ⚡</h3>
+        <p class="text-xs text-slate-400 mb-4">כתוב שינוי (למשל: "בתל אביב ב-60 שח") או בחר עיר:</p>
+        
+        <div class="relative w-full mb-6">
+            <input id="quick-edit-input" type="text" 
+                   class="w-full bg-black/40 border border-white/10 rounded-xl py-4 px-4 text-white focus:ring-2 ring-indigo-500 outline-none" 
+                   placeholder="מה תרצה לשנות?" autocomplete="off">
+            <div id="city-suggestions" class="absolute top-full left-0 right-0 bg-slate-900 border border-white/10 rounded-xl mt-1 hidden overflow-hidden z-[3100] shadow-2xl"></div>
+        </div>
+        
+        <div class="flex gap-3">
+            <button id="btn-quick-confirm" class="btn-main flex-1 py-3 text-sm">עדכן עכשיו</button>
+            <button onclick="document.getElementById('edit-prompt-modal').classList.add('hidden')" 
+                    class="flex-1 py-3 bg-white/5 rounded-xl text-sm font-bold border border-white/10">ביטול</button>
+        </div>
+    </div>
+</div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -429,40 +517,87 @@ let editModeId = null;
             editModeId = null;
         },
 
-        async editPost(p) {
-            const note = prompt("משהו ספציפי לתקן? (למשל: 'שכר 60', 'בירושלים')\nאו לחץ 'אישור' לעריכה ידנית מלאה:");
-            if (note === null) return;
-            if (note === "") { this.openFullEdit(p); return; }
-            let up = {}; let found = false;
-            const cities = ['ירושלים', 'תל אביב', 'חיפה', 'נתניה', 'ראשון לציון', 'אשקלון', 'פתח תקווה'];
-            const city = cities.find(c => note.includes(c));
-            if (city) { up.location = city; found = true; }
-            const num = note.match(/\d+/);
-            if (num && (note.includes("שכר") || note.includes("₪") || note.includes("שח"))) { up.maxSalary = num[0]; found = true; }
-            if (found) {
-                await updateDoc(doc(db, "smart_posts", p.id), up);
-                alert("מעדכן... בוצע! ✅");
-                this.loadPosts();
-            } else { this.openFullEdit(p); }
-        },
+                // רשימת ערים לזיהוי חכם (Autocomplete)
+        ISRAEL_CITIES: ['תל אביב', 'ירושלים', 'חיפה', 'ראשון לציון', 'פתח תקווה', 'אשדוד', 'נתניה', 'בני ברק', 'באר שבע', 'חולון', 'רמת גן', 'אשקלון', 'רחובות', 'בת ים', 'בית שמש', 'כפר סבא', 'הרצליה', 'חדרה', 'מודיעין', 'רעננה', 'רמלה', 'לוד', 'הוד השרון', 'גבעתיים'],
 
-        openFullEdit(p) {
-            editModeId = p.id;
-            Router.go('post');
-            document.querySelector('#v-post h2').innerText = "עריכת מודעה";
-            document.getElementById('btn-submit').innerText = "שמור שינויים ✅";
-            document.getElementById('p-title').value = p.title;
-            document.getElementById('p-location').value = p.location;
-            document.getElementById('p-phone').value = p.phone;
-            document.getElementById('p-salary-max').value = p.maxSalary;
-            document.getElementById('p-must-have').value = p.mustHave;
-            UI.togglePostType(p.postType);
-            window.scrollTo(0, 0);
+        async editPost(p) {
+            const modal = document.getElementById('edit-prompt-modal');
+            const input = document.getElementById('quick-edit-input');
+            const suggestions = document.getElementById('city-suggestions');
+            const confirmBtn = document.getElementById('btn-quick-confirm');
+            const modalContainer = modal.querySelector('.glass');
+            
+            input.value = '';
+            suggestions.classList.add('hidden');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+
+            // מנגנון הצעות ערים (Autocomplete)
+            input.oninput = () => {
+                const val = input.value.trim();
+                if (val.length < 2) { suggestions.classList.add('hidden'); return; }
+                const matches = this.ISRAEL_CITIES.filter(c => c.includes(val)).slice(0, 5);
+                if (matches.length > 0) {
+                    suggestions.innerHTML = matches.map(m => `<div class="p-3 hover:bg-indigo-600 text-white text-sm cursor-pointer border-b border-white/5">${m}</div>`).join('');
+                    suggestions.classList.remove('hidden');
+                    suggestions.querySelectorAll('div').forEach(div => {
+                        div.onclick = () => { input.value = div.innerText; suggestions.classList.add('hidden'); };
+                    });
+                } else suggestions.classList.add('hidden');
+            };
+
+            confirmBtn.onclick = async () => {
+                const note = input.value.trim();
+                if (note === "") {
+                    modalContainer.classList.add('apply-shake');
+                    setTimeout(() => modalContainer.classList.remove('apply-shake'), 400);
+                    return; 
+                }
+
+                modal.classList.add('hidden');
+                let up = {}; let found = false;
+
+                // 1. זיהוי שכר/שעות (מספר)
+                const numMatch = note.match(/\d+/);
+                if (numMatch && (note.includes("שכר") || note.includes("₪") || note.includes("שח") || note.includes("שעה"))) {
+                    up.maxSalary = numMatch[0];
+                    found = true;
+                }
+                // 2. זיהוי עיר מהרשימה
+                const city = this.ISRAEL_CITIES.find(c => note.includes(c));
+                if (city) { up.location = city; found = true; }
+                
+                // 3. זיהוי מילות מפתח למשמרות/דרישות
+                if (note.includes("בוקר") || note.includes("ערב") || note.includes("משמרת") || note.includes("זמין")) {
+                    up.mustHave = note;
+                    found = true;
+                }
+
+                if (found) {
+                    await updateDoc(doc(db, "smart_posts", p.id), up);
+                    this.loadPosts();
+                    if(this.loadMyHistory) this.loadMyHistory();
+                } else { 
+                    this.openFullEdit(p); // אם לא זיהינו משהו ספציפי, עוברים לעריכה המלאה
+                }
+            };
         },
 
         showDetails(p) {
-            alert(`📌 ${p.title}\n📍 ${p.location}\n💰 שכר: ${p.maxSalary} ₪\n⚠️ דרישות: ${p.mustHave || 'אין'}\n📞 ${p.phone}`);
+            const modal = document.getElementById('details-modal');
+            document.getElementById('details-title').innerText = p.title;
+            document.getElementById('details-loc').innerText = p.location || 'כל הארץ';
+            document.getElementById('details-salary').innerText = p.maxSalary || 'לא צוין';
+            document.getElementById('details-must').innerText = p.mustHave || 'אין דרישות מיוחדות';
+            
+            const badge = document.getElementById('details-badge');
+            badge.innerText = p.postType === 'user' ? '🙋‍♂️ מחפש עבודה' : '💼 משרה פתוחה';
+            badge.className = `mb-4 inline-block px-3 py-1 rounded-full text-[10px] font-bold border ${p.postType === 'user' ? 'bg-green-500/10 text-green-400 border-green-500/20' : 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'}`;
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
         },
+
 
         // שמירת ליד (פנייה)
         async saveLead(post, answers) {
