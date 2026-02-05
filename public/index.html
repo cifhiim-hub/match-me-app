@@ -110,10 +110,10 @@
                 <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-indigo-400 transition-colors"></i>
             </div>
             
-            <div class="flex gap-2 mb-6 overflow-x-auto pb-2 no-scrollbar">
-                <button onclick="Data.filterByCategory('all')" class="bg-indigo-600 text-white px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap shadow-lg shadow-indigo-500/30">✨ הכל</button>
-                <button onclick="Data.filterByCategory('biz')" class="bg-white/5 border border-white/10 px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap hover:bg-white/10">💼 משרות</button>
-                <button onclick="Data.filterByCategory('user')" class="bg-white/5 border border-white/10 px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap hover:bg-white/10">🙋‍♂️ עובדים</button>
+            <div class="flex gap-2 mb-6 overflow-x-auto pb-2 no-scrollbar" id="category-filters">
+                <button onclick="Data.filterByCategory(event, 'all')" class="bg-indigo-600 text-white px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap shadow-lg shadow-indigo-500/30">✨ הכל</button>
+                <button onclick="Data.filterByCategory(event, 'biz')" class="bg-white/5 border border-white/10 px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap hover:bg-white/10">💼 משרות</button>
+                <button onclick="Data.filterByCategory(event, 'user')" class="bg-white/5 border border-white/10 px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap hover:bg-white/10">🙋‍♂️ עובדים</button>
             </div>
             
             <div id="feed-list" class="space-y-4 pb-20">
@@ -317,48 +317,52 @@
     const db = getFirestore(app);
     let currentUser = null;
     let allPosts = [];
-let editModeId = null;
+    let editModeId = null;
 
     // --- UI MANAGER ---
-          // --- UI MANAGER ---
     window.UI = {
-        window.UI = {
         currentType: 'biz',
         selectedCategory: 'all',
-        searchTimeout: null, // משתנה שינהל את ההשהיה
+        searchTimeout: null, // משתנה לניהול ה-Debounce
 
-        filterByCategory(cat) {
-            this.selectedCategory = cat;
-            
-            // עדכון ויזואלי של הכפתורים
-            document.querySelectorAll('#v-feed button').forEach(btn => {
-                btn.className = "bg-white/5 border border-white/10 px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap hover:bg-white/10";
-            });
-            
-            // צביעת הכפתור הנבחר
-            if(event && event.currentTarget) {
+        // פונקציית הסינון שמתבצעת רק אחרי שמשתמשים בכפתור או כשיש חיפוש
+        filterByCategory(event, cat) {
+            // אם הפונקציה נקראה ללא event (למשל מקוד פנימי), נדלג על החלק הויזואלי
+            if (event) {
+                // ניקוי כל הכפתורים
+                const buttons = document.querySelectorAll('#category-filters button');
+                buttons.forEach(btn => {
+                    btn.className = "bg-white/5 border border-white/10 px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap hover:bg-white/10";
+                });
+                
+                // צביעת הכפתור שנלחץ
+                // currentTarget מבטיח שגם אם לחצו על האימוג'י בתוך הכפתור, הכפתור כולו יתקבל
                 event.currentTarget.className = "bg-indigo-600 text-white px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap shadow-lg shadow-indigo-500/30";
             }
+            
+            // שמירת הקטגוריה שנבחרה
+            if(cat) this.selectedCategory = cat;
+
             this.applyFilters();
         },
 
-        // פונקציה חדשה שמונעת מהחיפוש לקפוץ כל רגע
+        // פונקציית ה-Debounce: מונעת מהחיפוש לקפוץ כל רגע
         handleSearchInput() {
-            clearTimeout(this.searchTimeout);
+            clearTimeout(this.searchTimeout); // איפוס הטיימר בכל הקלדה חדשה
             this.searchTimeout = setTimeout(() => {
-                this.applyFilters();
-            }, 400); // יחכה 400 מילישניות מהלחיצה האחרונה לפני שיסנן
+                this.applyFilters(); // הפעלה רק אחרי 400ms של שקט
+            }, 400); 
         },
 
         applyFilters() {
             const searchTerm = document.getElementById('search-input').value.toLowerCase().trim();
             const filtered = allPosts.filter(p => {
-                // בדיקת חיפוש טקסטואלי
+                // 1. בדיקת טקסט
                 const matchesText = !searchTerm || 
                                    (p.title && p.title.toLowerCase().includes(searchTerm)) || 
                                    (p.location && p.location.toLowerCase().includes(searchTerm));
                 
-                // בדיקת קטגוריה (הפרדה מוחלטת)
+                // 2. בדיקת קטגוריה (קשיחה)
                 const matchesCat = (this.selectedCategory === 'all') || (p.postType === this.selectedCategory);
                 
                 return matchesText && matchesCat;
@@ -575,7 +579,7 @@ let editModeId = null;
         },
 
         
-                        cancelEdit() {
+        cancelEdit() {
             // אם אנחנו בעריכה (editModeId לא ריק), נשאל את המשתמש
             if (editModeId) {
                 if (!confirm("לבטל את השינויים שביצעת בעריכה?")) return;
@@ -830,8 +834,7 @@ let editModeId = null;
         },
                 openFullEdit(p) {
             // 1. סגירת המודאל החכם
-            document.getElementById('search-input').addEventListener('input', () => UI.handleSearchInput());
-
+           
             // 2. הגדרת ה-ID של הפוסט לעריכה
             editModeId = p.id;
             
@@ -900,8 +903,9 @@ let editModeId = null;
         Data.loadPosts();
     });
 
-            document.getElementById('search-input').addEventListener('input', () => {
-        UI.applyFilters();
+    // שינוי חשוב: מאזין שמפעיל את ה-Debounce ולא את הפילטר הישיר
+    document.getElementById('search-input').addEventListener('input', () => {
+        UI.handleSearchInput();
     });
 
     // מאזין ללחיצה על כפתור "חזור" הפיזי של המכשיר
