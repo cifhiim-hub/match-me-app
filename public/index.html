@@ -525,9 +525,15 @@ let editModeId = null;
         resetForm() {
             document.querySelector('#v-post h2').innerText = "יצירת כרטיס חכם";
             document.getElementById('btn-submit').innerText = "פרסם עכשיו 🚀";
+            // השורה החדשה שמחזירה את כפתור הביטול למצב רגיל:
+            const cancelBtn = document.querySelector('#btn-cancel span');
+            if(cancelBtn) cancelBtn.innerText = "חזרה ללוח";
+            
             document.querySelectorAll('#v-post input').forEach(i => i.value = '');
             editModeId = null;
         },
+
+        
                         cancelEdit() {
             // אם אנחנו בעריכה (editModeId לא ריק), נשאל את המשתמש
             if (editModeId) {
@@ -535,7 +541,7 @@ let editModeId = null;
             }
             this.resetForm();
             window.Router.go('feed');
-        },
+     },
 
                 // רשימת ערים לזיהוי חכם (Autocomplete)
         ISRAEL_CITIES: ['תל אביב', 'ירושלים', 'חיפה', 'ראשון לציון', 'פתח תקווה', 'אשדוד', 'נתניה', 'בני ברק', 'באר שבע', 'חולון', 'רמת גן', 'אשקלון', 'רחובות', 'בת ים', 'בית שמש', 'כפר סבא', 'הרצליה', 'חדרה', 'מודיעין', 'רעננה', 'רמלה', 'לוד', 'הוד השרון', 'גבעתיים'],
@@ -799,7 +805,10 @@ let editModeId = null;
             UI.togglePostType(p.postType || 'biz');
             document.querySelector('#v-post h2').innerText = "עריכת כרטיס";
             document.getElementById('btn-submit').innerText = "שמור שינויים ✨";
-            
+            // הוסף כאן (שורה 808):
+const cancelBtn = document.querySelector('#btn-cancel span');
+if (cancelBtn) cancelBtn.innerText = "ביטול עריכה";
+
             // 5. מעבר למסך העריכה
             Router.go('post');
         },
