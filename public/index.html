@@ -322,26 +322,45 @@ let editModeId = null;
     // --- UI MANAGER ---
           // --- UI MANAGER ---
     window.UI = {
+        window.UI = {
         currentType: 'biz',
-        selectedCategory: 'all', 
+        selectedCategory: 'all',
+        searchTimeout: null, // משתנה שינהל את ההשהיה
 
         filterByCategory(cat) {
             this.selectedCategory = cat;
+            
+            // עדכון ויזואלי של הכפתורים
             document.querySelectorAll('#v-feed button').forEach(btn => {
                 btn.className = "bg-white/5 border border-white/10 px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap hover:bg-white/10";
             });
-            if(event && event.target) {
-                event.target.className = "bg-indigo-600 text-white px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap shadow-lg shadow-indigo-500/30";
+            
+            // צביעת הכפתור הנבחר
+            if(event && event.currentTarget) {
+                event.currentTarget.className = "bg-indigo-600 text-white px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap shadow-lg shadow-indigo-500/30";
             }
             this.applyFilters();
+        },
+
+        // פונקציה חדשה שמונעת מהחיפוש לקפוץ כל רגע
+        handleSearchInput() {
+            clearTimeout(this.searchTimeout);
+            this.searchTimeout = setTimeout(() => {
+                this.applyFilters();
+            }, 400); // יחכה 400 מילישניות מהלחיצה האחרונה לפני שיסנן
         },
 
         applyFilters() {
             const searchTerm = document.getElementById('search-input').value.toLowerCase().trim();
             const filtered = allPosts.filter(p => {
-                const matchesText = (p.title && p.title.toLowerCase().includes(searchTerm)) || 
+                // בדיקת חיפוש טקסטואלי
+                const matchesText = !searchTerm || 
+                                   (p.title && p.title.toLowerCase().includes(searchTerm)) || 
                                    (p.location && p.location.toLowerCase().includes(searchTerm));
-                const matchesCat = this.selectedCategory === 'all' || p.postType === this.selectedCategory;
+                
+                // בדיקת קטגוריה (הפרדה מוחלטת)
+                const matchesCat = (this.selectedCategory === 'all') || (p.postType === this.selectedCategory);
+                
                 return matchesText && matchesCat;
             });
             Data.renderList(filtered);
@@ -811,8 +830,8 @@ let editModeId = null;
         },
                 openFullEdit(p) {
             // 1. סגירת המודאל החכם
-            document.getElementById('edit-prompt-modal').classList.add('hidden');
-            
+            document.getElementById('search-input').addEventListener('input', () => UI.handleSearchInput());
+
             // 2. הגדרת ה-ID של הפוסט לעריכה
             editModeId = p.id;
             
