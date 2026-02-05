@@ -320,7 +320,8 @@
 let editModeId = null;
 
     // --- UI MANAGER ---
-      window.UI = {
+          // --- UI MANAGER ---
+    window.UI = {
         currentType: 'biz',
         selectedCategory: 'all', 
 
@@ -360,18 +361,6 @@ let editModeId = null;
             document.getElementById('tab-content-inbox').classList.toggle('hidden', isPosts);
             document.getElementById('subtab-posts').className = isPosts ? 'text-sm font-bold pb-2 text-indigo-400 border-b-2 border-indigo-400' : 'text-sm font-bold pb-2 text-slate-500 border-b-2 border-transparent';
             document.getElementById('subtab-inbox').className = !isPosts ? 'text-sm font-bold pb-2 text-indigo-400 border-b-2 border-indigo-400' : 'text-sm font-bold pb-2 text-slate-500 border-b-2 border-transparent';
-            if(!isPosts) Data.loadMyInbox();
-        }
-    };
-
-        switchProfileTab(tab) {
-            const isPosts = tab === 'posts';
-            document.getElementById('tab-content-posts').className = isPosts ? 'block' : 'hidden';
-            document.getElementById('tab-content-inbox').className = !isPosts ? 'block' : 'hidden';
-            
-            document.getElementById('subtab-posts').className = isPosts ? 'text-sm font-bold pb-2 text-indigo-400 border-b-2 border-indigo-400' : 'text-sm font-bold pb-2 text-slate-500 border-b-2 border-transparent';
-            document.getElementById('subtab-inbox').className = !isPosts ? 'text-sm font-bold pb-2 text-indigo-400 border-b-2 border-indigo-400' : 'text-sm font-bold pb-2 text-slate-500 border-b-2 border-transparent';
-            
             if(!isPosts) Data.loadMyInbox();
         }
     };
@@ -892,10 +881,15 @@ let editModeId = null;
         Data.loadPosts();
     });
 
-    document.getElementById('search-input').addEventListener('input', () => UI.applyFilters());
-
-        Data.renderList(filtered); 
+        document.getElementById('search-input').addEventListener('input', () => {
+        const searchTerm = document.getElementById('search-input').value.toLowerCase().trim();
+        const filtered = allPosts.filter(p => {
+            return (p.title && p.title.toLowerCase().includes(searchTerm)) || 
+                   (p.location && p.location.toLowerCase().includes(searchTerm));
+        });
+        Data.renderList(filtered);
     });
+
     // מאזין ללחיצה על כפתור "חזור" הפיזי של המכשיר
     window.addEventListener('popstate', (event) => {
         // אם מודאל הצ'אט או הפרטים פתוח - נסגור אותם קודם
