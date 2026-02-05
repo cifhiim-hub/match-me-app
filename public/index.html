@@ -546,7 +546,6 @@ let editModeId = null;
 
 
 
-        // טעינת ההיסטוריה שלי
         async loadMyHistory() {
             if(!currentUser) return;
             const q = query(collection(db, "smart_posts"), where("owner", "==", currentUser.uid));
@@ -559,16 +558,29 @@ let editModeId = null;
             }
             
             container.innerHTML = snap.docs.map(d => {
-                const p = d.data();
-                return `<div class="bg-slate-800 p-4 rounded-xl flex justify-between items-center border border-white/5">
-                    <div>
-                        <div class="font-bold text-sm text-white">${p.title}</div>
-                        <div class="text-[10px] text-slate-400">${p.postType==='biz'?'משרה':'כרטיס עובד'} • ${new Date(p.createdAt?.seconds * 1000).toLocaleDateString()}</div>
+                const p = { id: d.id, ...d.data() };
+                return `
+                <div class="bg-slate-800 p-4 rounded-xl border border-white/5 flex flex-col gap-3">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <div class="font-bold text-sm text-white">${p.title}</div>
+                            <div class="text-[10px] text-slate-400">${p.postType==='biz'?'משרה':'כרטיס עובד'} • ${new Date(p.createdAt?.seconds * 1000).toLocaleDateString()}</div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick='Data.editPost(${JSON.stringify(p).replace(/'/g, "&#39;")})' 
+                                    class="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center border border-blue-500/30">
+                                <i class="fa-solid fa-pen text-xs"></i>
+                            </button>
+                            <button onclick="Data.deleteItem('smart_posts', '${d.id}')" 
+                                    class="w-8 h-8 rounded-lg bg-red-500/20 text-red-400 flex items-center justify-center border border-red-500/30">
+                                <i class="fa-solid fa-trash text-xs"></i>
+                            </button>
+                        </div>
                     </div>
-                    <button onclick="Data.deleteItem('smart_posts', '${d.id}')" class="w-8 h-8 rounded-full bg-red-500/10 text-red-400 flex items-center justify-center hover:bg-red-500/20"><i class="fa-solid fa-trash text-xs"></i></button>
                 </div>`;
             }).join('');
         },
+
 
         // טעינת ה-INBOX שלי
         async loadMyInbox() {
