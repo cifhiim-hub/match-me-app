@@ -881,13 +881,8 @@ let editModeId = null;
         Data.loadPosts();
     });
 
-        document.getElementById('search-input').addEventListener('input', () => {
-        const searchTerm = document.getElementById('search-input').value.toLowerCase().trim();
-        const filtered = allPosts.filter(p => {
-            return (p.title && p.title.toLowerCase().includes(searchTerm)) || 
-                   (p.location && p.location.toLowerCase().includes(searchTerm));
-        });
-        Data.renderList(filtered);
+            document.getElementById('search-input').addEventListener('input', () => {
+        UI.applyFilters();
     });
 
     // מאזין ללחיצה על כפתור "חזור" הפיזי של המכשיר
