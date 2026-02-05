@@ -805,9 +805,9 @@ let editModeId = null;
             UI.togglePostType(p.postType || 'biz');
             document.querySelector('#v-post h2').innerText = "עריכת כרטיס";
             document.getElementById('btn-submit').innerText = "שמור שינויים ✨";
-            // הוסף כאן (שורה 808):
-const cancelBtn = document.querySelector('#btn-cancel span');
-if (cancelBtn) cancelBtn.innerText = "ביטול עריכה";
+                        // שורות לעדכון (808-810):
+            const cancelBtn = document.querySelector('#btn-cancel span');
+            if (cancelBtn) cancelBtn.innerText = "ביטול עריכה";
 
             // 5. מעבר למסך העריכה
             Router.go('post');
