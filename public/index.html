@@ -320,17 +320,51 @@
 let editModeId = null;
 
     // --- UI MANAGER ---
-    window.UI = {
+        window.UI = {
         currentType: 'biz',
+        selectedCategory: 'all', // שומר את הבחירה (משרות/עובדים)
+
+        filterByCategory(cat) {
+            this.selectedCategory = cat;
+            // צביעת הכפתור הנבחר בפיד
+            document.querySelectorAll('#v-feed button').forEach(btn => {
+                btn.className = "bg-white/5 border border-white/10 px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap hover:bg-white/10";
+            });
+            if(event && event.target) {
+                event.target.className = "bg-indigo-600 text-white px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap shadow-lg shadow-indigo-500/30";
+            }
+            this.applyFilters();
+        },
+
+        applyFilters() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase().trim();
+            const filtered = allPosts.filter(p => {
+                const matchesText = (p.title && p.title.toLowerCase().includes(searchTerm)) || 
+                                   (p.location && p.location.toLowerCase().includes(searchTerm));
+                const matchesCat = this.selectedCategory === 'all' || p.postType === this.selectedCategory;
+                return matchesText && matchesCat;
+            });
+            Data.renderList(filtered);
+        },
+
         togglePostType(type) {
             this.currentType = type;
             const isBiz = type === 'biz';
-            
-            document.getElementById('tab-biz').className = isBiz ? 'flex-1 py-3 rounded-xl font-bold tab-active transition-all' : 'flex-1 py-3 rounded-xl font-bold tab-inactive transition-all';
-            document.getElementById('tab-user').className = !isBiz ? 'flex-1 py-3 rounded-xl font-bold tab-active bg-green-600' : 'flex-1 py-3 rounded-xl font-bold tab-inactive transition-all';
-            
-            document.getElementById('p-title').placeholder = isBiz ? "כותרת המשרה (למשל: נהג חלוקה)" : "מי אני? (למשל: נהג ג' פנוי לעבודה)";
+            document.getElementById('tab-biz').className = isBiz ? 'flex-1 py-3 text-sm font-bold border-b-2 border-indigo-500 text-indigo-400' : 'flex-1 py-3 text-sm font-medium text-gray-500';
+            document.getElementById('tab-user').className = !isBiz ? 'flex-1 py-3 text-sm font-bold border-b-2 border-indigo-500 text-indigo-400' : 'flex-1 py-3 text-sm font-medium text-gray-500';
+            document.getElementById('p-title').placeholder = isBiz ? "כותרת המשרה (למשל: נהג משאית)" : "תיאור קצר (למשל: נהג מנוסה מחפש עבודה)";
         },
+
+        switchProfileTab(tab) {
+            const isPosts = tab === 'posts';
+            document.getElementById('tab-content-posts').classList.toggle('hidden', !isPosts);
+            document.getElementById('tab-content-inbox').classList.toggle('hidden', isPosts);
+            document.getElementById('subtab-posts').className = isPosts ? 'pb-2 border-b-2 border-indigo-500 text-white font-bold' : 'pb-2 text-gray-500';
+            document.getElementById('subtab-inbox').className = !isPosts ? 'pb-2 border-b-2 border-indigo-500 text-white font-bold' : 'pb-2 text-gray-500';
+            if(!isPosts) Data.loadMyInbox();
+        }
+    };
+
         switchProfileTab(tab) {
             const isPosts = tab === 'posts';
             document.getElementById('tab-content-posts').className = isPosts ? 'block' : 'hidden';
@@ -859,12 +893,8 @@ let editModeId = null;
         Data.loadPosts();
     });
 
-    document.getElementById('search-input').addEventListener('input', (e) => {
-        const val = e.target.value.toLowerCase().trim();
-        const filtered = allPosts.filter(p => 
-            (p.title && p.title.toLowerCase().includes(val)) || 
-            (p.location && p.location.toLowerCase().includes(val))
-        );
+    document.getElementById('search-input').addEventListener('input', () => UI.applyFilters());
+
         Data.renderList(filtered); 
     });
     // מאזין ללחיצה על כפתור "חזור" הפיזי של המכשיר
