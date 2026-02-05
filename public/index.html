@@ -761,6 +761,29 @@ let editModeId = null;
                 }
             }
         },
+                openFullEdit(p) {
+            // 1. סגירת המודאל החכם
+            document.getElementById('edit-prompt-modal').classList.add('hidden');
+            
+            // 2. הגדרת ה-ID של הפוסט לעריכה
+            editModeId = p.id;
+            
+            // 3. מילוי השדות במסך ה-Post
+            document.getElementById('p-title').value = p.title || '';
+            document.getElementById('p-location').value = p.location || '';
+            document.getElementById('p-phone').value = p.phone || '';
+            document.getElementById('p-salary-max').value = p.maxSalary || '';
+            document.getElementById('p-must-have').value = p.mustHave || '';
+            
+            // 4. עדכון הכותרות והכפתורים
+            UI.togglePostType(p.postType || 'biz');
+            document.querySelector('#v-post h2').innerText = "עריכת כרטיס";
+            document.getElementById('btn-submit').innerText = "שמור שינויים ✨";
+            
+            // 5. מעבר למסך העריכה
+            Router.go('post');
+        },
+
         async deleteItem(col, id) {
             if(confirm("למחוק את הפריט לצמיתות?")) {
                 await deleteDoc(doc(db, col, id));
