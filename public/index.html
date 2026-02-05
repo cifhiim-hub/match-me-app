@@ -209,7 +209,8 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, collection, addDoc, getDocs, query, orderBy, serverTimestamp, deleteDoc, doc, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+   import { getFirestore, collection, addDoc, getDocs, query, orderBy, serverTimestamp, deleteDoc, doc, where, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+ "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     // --- CONFIGURATION ---
     const firebaseConfig = {
@@ -225,6 +226,7 @@
     const db = getFirestore(app);
     let currentUser = null;
     let allPosts = [];
+let editModeId = null;
 
     // --- UI MANAGER ---
     window.UI = {
@@ -392,45 +394,75 @@
         }
     };
 
-    window.Data = {
-        // פרסום
+    window.Data = {    
         async submitPost() {
-            if (!currentUser) return alert("חובה להתחבר כדי לפרסם");
-            
+            if (!currentUser) return alert("חובה להתחבר");
             const btn = document.getElementById('btn-submit');
-            const originalText = btn.innerText;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> מעבד...';
-            btn.disabled = true;
-            
-            const post = {
+            const postData = {
                 title: document.getElementById('p-title').value,
                 location: document.getElementById('p-location').value,
                 phone: document.getElementById('p-phone').value,
                 maxSalary: document.getElementById('p-salary-max').value,
                 mustHave: document.getElementById('p-must-have').value,
                 postType: UI.currentType,
-                owner: currentUser.uid,
-                createdAt: serverTimestamp()
+                updatedAt: serverTimestamp()
             };
-
-            if(!post.title || !post.phone) {
-                alert("חסר כותרת או טלפון");
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-                return;
-            }
-
             try {
-                await addDoc(collection(db, "smart_posts"), post);
-                alert("המודעה פורסמה בהצלחה!");
+                if (editModeId) {
+                    await updateDoc(doc(db, "smart_posts", editModeId), postData);
+                    alert("עודכן בהצלחה! ✅");
+                    editModeId = null;
+                } else {
+                    postData.owner = currentUser.uid;
+                    postData.createdAt = serverTimestamp();
+                    await addDoc(collection(db, "smart_posts"), postData);
+                    alert("פורסם! 🚀");
+                }
+                this.resetForm();
                 Router.go('feed');
-                document.querySelectorAll('#v-post input').forEach(i => i.value = '');
-            } catch (e) {
-                alert("שגיאה: " + e.message);
-            } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
+            } catch (e) { alert("שגיאה: " + e.message); }
+        },
+
+        resetForm() {
+            document.querySelector('#v-post h2').innerText = "יצירת כרטיס חכם";
+            document.getElementById('btn-submit').innerText = "פרסם עכשיו 🚀";
+            document.querySelectorAll('#v-post input').forEach(i => i.value = '');
+            editModeId = null;
+        },
+
+        async editPost(p) {
+            const note = prompt("משהו ספציפי לתקן? (למשל: 'שכר 60', 'בירושלים')\nאו לחץ 'אישור' לעריכה ידנית מלאה:");
+            if (note === null) return;
+            if (note === "") { this.openFullEdit(p); return; }
+            let up = {}; let found = false;
+            const cities = ['ירושלים', 'תל אביב', 'חיפה', 'נתניה', 'ראשון לציון', 'אשקלון', 'פתח תקווה'];
+            const city = cities.find(c => note.includes(c));
+            if (city) { up.location = city; found = true; }
+            const num = note.match(/\d+/);
+            if (num && (note.includes("שכר") || note.includes("₪") || note.includes("שח"))) { up.maxSalary = num[0]; found = true; }
+            if (found) {
+                await updateDoc(doc(db, "smart_posts", p.id), up);
+                alert("מעדכן... בוצע! ✅");
+                this.loadPosts();
+            } else { this.openFullEdit(p); }
+        },
+
+        openFullEdit(p) {
+            editModeId = p.id;
+            Router.go('post');
+            document.querySelector('#v-post h2').innerText = "עריכת מודעה";
+            document.getElementById('btn-submit').innerText = "שמור שינויים ✅";
+            document.getElementById('p-title').value = p.title;
+            document.getElementById('p-location').value = p.location;
+            document.getElementById('p-phone').value = p.phone;
+            document.getElementById('p-salary-max').value = p.maxSalary;
+            document.getElementById('p-must-have').value = p.mustHave;
+            UI.togglePostType(p.postType);
+            window.scrollTo(0, 0);
+        },
+
+        showDetails(p) {
+            alert(`📌 ${p.title}\n📍 ${p.location}\n💰 שכר: ${p.maxSalary} ₪\n⚠️ דרישות: ${p.mustHave || 'אין'}\n📞 ${p.phone}`);
         },
 
         // שמירת ליד (פנייה)
