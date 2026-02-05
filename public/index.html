@@ -464,24 +464,32 @@ let editModeId = null;
     };
 
     // --- DATA & LOGIC ---
-    window.Router = {
-        go(viewId) {
+       window.Router = {
+        go(viewId, isBack = false) {
+            // הסתרת כל המסכים
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-            document.getElementById('v-'+viewId).classList.add('active');
+            const target = document.getElementById('v-' + viewId);
+            if (target) target.classList.add('active');
             
-            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('text-indigo-400', 'active', 'text-slate-500'));
-            document.querySelectorAll('.nav-btn').forEach(el => el.classList.add('text-slate-500'));
-            
-            if(viewId === 'feed') {
-                document.querySelector('[onclick="Router.go(\'feed\')"]').classList.add('text-indigo-400', 'active');
-                document.querySelector('[onclick="Router.go(\'feed\')"]').classList.remove('text-slate-500');
-                Data.loadPosts();
-            } else if(viewId === 'profile') {
-                document.querySelector('[onclick="Router.go(\'profile\')"]').classList.add('text-indigo-400', 'active');
-                document.querySelector('[onclick="Router.go(\'profile\')"]').classList.remove('text-slate-500');
-            } else {
-                 document.querySelector('[onclick="Router.go(\'post\')"]').classList.remove('text-slate-500');
+            // עדכון היסטוריית הדפדפן - זה מונע מהאתר להיסגר בלחיצה על "חזור"
+            if (!isBack) {
+                history.pushState({ view: viewId }, '', '#' + viewId);
             }
+
+            // עדכון עיצוב כפתורי התפריט התחתון
+            document.querySelectorAll('.nav-btn').forEach(el => {
+                el.classList.remove('text-indigo-400', 'active');
+                el.classList.add('text-slate-500');
+            });
+            
+            const activeBtn = document.querySelector(`[onclick="Router.go('${viewId}')"]`);
+            if (activeBtn) {
+                activeBtn.classList.add('text-indigo-400', 'active');
+                activeBtn.classList.remove('text-slate-500');
+            }
+
+            // טעינת פוסטים מחדש אם חזרנו לפיד
+            if(viewId === 'feed') Data.loadPosts();
         }
     };
 
@@ -520,11 +528,14 @@ let editModeId = null;
             document.querySelectorAll('#v-post input').forEach(i => i.value = '');
             editModeId = null;
         },
-                cancelEdit() {
+                        cancelEdit() {
+            // אם אנחנו בעריכה (editModeId לא ריק), נשאל את המשתמש
+            if (editModeId) {
+                if (!confirm("לבטל את השינויים שביצעת בעריכה?")) return;
+            }
             this.resetForm();
-            Router.go('feed');
+            window.Router.go('feed');
         },
-
 
                 // רשימת ערים לזיהוי חכם (Autocomplete)
         ISRAEL_CITIES: ['תל אביב', 'ירושלים', 'חיפה', 'ראשון לציון', 'פתח תקווה', 'אשדוד', 'נתניה', 'בני ברק', 'באר שבע', 'חולון', 'רמת גן', 'אשקלון', 'רחובות', 'בת ים', 'בית שמש', 'כפר סבא', 'הרצליה', 'חדרה', 'מודיעין', 'רעננה', 'רמלה', 'לוד', 'הוד השרון', 'גבעתיים'],
@@ -846,6 +857,28 @@ let editModeId = null;
             (p.location && p.location.toLowerCase().includes(val))
         );
         Data.renderList(filtered); 
+    });
+    // מאזין ללחיצה על כפתור "חזור" הפיזי של המכשיר
+    window.addEventListener('popstate', (event) => {
+        // אם מודאל הצ'אט או הפרטים פתוח - נסגור אותם קודם
+        const chat = document.getElementById('chat-modal');
+        const details = document.getElementById('details-modal');
+
+        if (chat && !chat.classList.contains('hidden')) { ChatBot.close(); return; }
+        if (details && !details.classList.contains('hidden')) { details.classList.add('hidden'); return; }
+
+        // אם אין מודאל פתוח, ננווט למסך הקודם בהיסטוריה
+        if (event.state && event.state.view) {
+            window.Router.go(event.state.view, true);
+        } else {
+            window.Router.go('feed', true);
+        }
+    });
+
+    // הגדרת מצב התחלתי בטעינת הדף
+    window.addEventListener('load', () => {
+        const hash = location.hash.replace('#', '') || 'feed';
+        history.replaceState({ view: hash }, '', '#' + hash);
     });
 
 </script>
