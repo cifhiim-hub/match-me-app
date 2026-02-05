@@ -165,8 +165,12 @@
                     </div>
 
                     <button onclick="Data.submitPost()" id="btn-submit" class="btn-main w-full mt-4 text-lg">פרסם עכשיו 🚀</button>
+            <button onclick="Data.cancelEdit()" id="btn-cancel" class="w-full mt-2 py-3 text-slate-500 font-bold text-sm hover:text-white transition-all flex items-center justify-center gap-2">
+    <i class="fa-solid fa-rotate-left"></i> 
+    <span>חזרה ללוח</span>
+</button>
                 </div>
-            </div>
+          </div>
         </section>
 
         <section id="v-profile" class="view-section">
@@ -516,6 +520,11 @@ let editModeId = null;
             document.querySelectorAll('#v-post input').forEach(i => i.value = '');
             editModeId = null;
         },
+                cancelEdit() {
+            this.resetForm();
+            Router.go('feed');
+        },
+
 
                 // רשימת ערים לזיהוי חכם (Autocomplete)
         ISRAEL_CITIES: ['תל אביב', 'ירושלים', 'חיפה', 'ראשון לציון', 'פתח תקווה', 'אשדוד', 'נתניה', 'בני ברק', 'באר שבע', 'חולון', 'רמת גן', 'אשקלון', 'רחובות', 'בת ים', 'בית שמש', 'כפר סבא', 'הרצליה', 'חדרה', 'מודיעין', 'רעננה', 'רמלה', 'לוד', 'הוד השרון', 'גבעתיים'],
