@@ -491,8 +491,8 @@
                                     class="flex-1 bg-white/5 hover:bg-white/10 py-3 rounded-xl text-sm font-bold border border-white/10 transition-all flex items-center justify-center gap-2 group-hover:border-${isUser?'green':'indigo'}-500/30">
                                 <i class="fa-solid fa-comments ${color}"></i> דבר עם הסוכן
                             </button>
-                            ${currentUser && currentUser.uid === "SP6I6ONclvMqpVuGKK5fENNtNOX2" ? `
-    <button onclick="Data.adminDelete('${p.id}')" style="background:rgba(239,68,68,0.1); color:#ef4444; border:1px solid rgba(239,68,68,0.2); border-radius:12px; padding:10px; margin-right:8px;">
+                            ${auth.currentUser && auth.currentUser.uid === "SP6I6ONclvMqpVuGKK5fENNtNOX2" ? `
+    <button onclick="Data.adminDelete('${p.id}')" style="background:rgba(239,68,68,0.2) !important; color:#ff4d4d !important; border:1px solid #ff4d4d !important; border-radius:12px; padding:10px; margin-right:8px; display:inline-block !important; visibility:visible !important; opacity:1 !important;">
         <i class="fa-solid fa-trash-can"></i>
     </button>
 ` : ''}
