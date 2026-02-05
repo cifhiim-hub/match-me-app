@@ -111,9 +111,9 @@
             </div>
             
             <div class="flex gap-2 mb-6 overflow-x-auto pb-2 no-scrollbar" id="category-filters">
-                <button onclick="Data.filterByCategory(event, 'all')" class="bg-indigo-600 text-white px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap shadow-lg shadow-indigo-500/30">✨ הכל</button>
-                <button onclick="Data.filterByCategory(event, 'biz')" class="bg-white/5 border border-white/10 px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap hover:bg-white/10">💼 משרות</button>
-                <button onclick="Data.filterByCategory(event, 'user')" class="bg-white/5 border border-white/10 px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap hover:bg-white/10">🙋‍♂️ עובדים</button>
+                <button onclick="UI.filterByCategory(event, 'all')" class="bg-indigo-600 text-white px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap shadow-lg shadow-indigo-500/30">✨ הכל</button>
+                <button onclick="UI.filterByCategory(event, 'biz')" class="bg-white/5 border border-white/10 px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap hover:bg-white/10">💼 משרות</button>
+                <button onclick="UI.filterByCategory(event, 'user')" class="bg-white/5 border border-white/10 px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap hover:bg-white/10">🙋‍♂️ עובדים</button>
             </div>
             
             <div id="feed-list" class="space-y-4 pb-20">
@@ -357,15 +357,19 @@
         applyFilters() {
             const searchTerm = document.getElementById('search-input').value.toLowerCase().trim();
             const filtered = allPosts.filter(p => {
-                // 1. בדיקת טקסט
+                
+                // 1. בדיקת קטגוריה קשיחה (הפרדה מוחלטת)
+                // אם הקטגוריה היא לא 'all', והסוג של הפוסט שונה מהקטגוריה שנבחרה - זרוק אותו מיד
+                if (this.selectedCategory !== 'all' && p.postType !== this.selectedCategory) {
+                    return false;
+                }
+
+                // 2. בדיקת טקסט (חיפוש)
                 const matchesText = !searchTerm || 
                                    (p.title && p.title.toLowerCase().includes(searchTerm)) || 
                                    (p.location && p.location.toLowerCase().includes(searchTerm));
                 
-                // 2. בדיקת קטגוריה (קשיחה)
-                const matchesCat = (this.selectedCategory === 'all') || (p.postType === this.selectedCategory);
-                
-                return matchesText && matchesCat;
+                return matchesText;
             });
             Data.renderList(filtered);
         },
